@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/addNewStudent"
+        android:orderInCategory="100"
+        android:title="@string/addNewStaff"
+        android:icon="@mipmap/ic_add_white_48dp"
+        app:showAsAction="ifRoom"/>
+
+    <item
+        android:id="@+id/viewStudentAttendance"
+        android:orderInCategory="100"
+        android:title="@string/viewAttendance"
+        android:icon="@drawable/ic_event_white_48dp"
+        app:showAsAction="ifRoom"/>
+</menu>

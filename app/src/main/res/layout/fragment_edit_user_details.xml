@@ -1,0 +1,70 @@
+<LinearLayout
+    android:id="@+id/scrollViewChild"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/dialogHeader"
+    android:orientation="vertical"
+    android:paddingTop="5dp">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/dob"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/dateOfBirth"
+            android:inputType="date"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryDark"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/email"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryDark"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/phoneNo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/phoneNo"
+            android:inputType="phone"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryDark"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <EditText
+        android:id="@+id/address"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dialogItemPadding"
+        android:background="@drawable/login_credentials_bg"
+        android:gravity="top"
+        android:hint="@string/address"
+        android:minHeight="100dp"
+        android:padding="15dp"
+        android:textColor="@color/colorPrimaryDark"/>
+
+</LinearLayout>

@@ -1,0 +1,81 @@
+<LinearLayout
+    android:id="@+id/scrollViewChild"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/dialogHeader"
+    android:orientation="vertical">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/staffName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/fullName"
+            android:inputType="textPersonName"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryDark"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/staffCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/staffId"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryDark"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/classTeacherContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/designation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/designation"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryDark"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/qualification"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/qualification"
+            android:maxLines="1"
+            android:textColor="@color/colorPrimaryDark"/>
+
+    </android.support.design.widget.TextInputLayout>
+
+    <Switch
+        android:id="@+id/isAdmin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/switchMargin"
+        android:padding="@dimen/switchPadding"
+        android:text="@string/admin"
+        />
+</LinearLayout>

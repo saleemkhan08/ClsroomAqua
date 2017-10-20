@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/myLeaves"
+        android:orderInCategory="100"
+        android:title="@string/myLeaves"
+        android:icon="@mipmap/staff_white"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/requestedLeaves"
+        android:orderInCategory="100"
+        android:title="@string/requested"
+        android:icon="@mipmap/staff_white"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/staffLeaves"
+        android:orderInCategory="100"
+        android:title="@string/staffLeaves"
+        android:icon="@mipmap/staff_white"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/studentLeaves"
+        android:orderInCategory="100"
+        android:title="@string/studentsLeaves"
+        android:icon="@mipmap/student_white"
+        app:showAsAction="never"/>
+</menu>

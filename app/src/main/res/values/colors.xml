@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#192331</color>
+    <color name="colorPrimaryDark">#101720</color>
+    <color name="colorAccent">#87c03f</color>
+    <color name="white">#fff</color>
+    <color name="grey">#ddd</color>
+    <color name="gray">#ddd</color>
+    <color name="background">#b6b6b6</color>
+    <color name="transparentWhite">#99ffffff</color>
+    <color name="dark_grey">#ccc</color>
+    <color name="black_overlay">#55000000</color>
+    <color name="very_dark_grey">#999</color>
+    <color name="red">#d75a4a</color>
+    <color name="redFaded">#f77a6a</color>
+    <color name="colorSelection">#0ca8a4</color>
+    <color name="colorAccentFaded">#A7e05f</color>
+
+    <array name="progressColors">
+        <item>@color/colorPrimary</item>
+        <item>@color/colorPrimary</item>
+        <item>@color/colorAccent</item>
+        <item>@color/colorAccent</item>
+    </array>
+</resources>

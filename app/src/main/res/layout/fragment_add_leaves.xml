@@ -1,0 +1,85 @@
+<LinearLayout
+    android:id="@+id/scrollViewChild"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_below="@+id/dialogHeader"
+    android:orientation="vertical"
+    android:paddingTop="5dp">
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/reason"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/reasonForLeave"
+            android:textColor="@color/colorPrimaryDark"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/fromDate"
+            android:inputType="date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/fromDate"
+            android:textColor="@color/colorPrimaryDark"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <android.support.design.widget.TextInputLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dialogItemPadding"
+        android:padding="@dimen/dialogItemPadding">
+
+        <EditText
+            android:id="@+id/toDate"
+            android:inputType="date"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/toDate"
+            android:textColor="@color/colorPrimaryDark"/>
+    </android.support.design.widget.TextInputLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/dialogItemPadding"
+        android:layout_marginBottom="@dimen/dialogItemPadding">
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/classTeacherContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/dialogItemPadding">
+
+            <EditText
+                android:id="@+id/approver"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/approver"
+                android:maxLines="1"
+                android:textColor="@color/colorPrimaryDark"/>
+
+        </android.support.design.widget.TextInputLayout>
+
+        <Spinner
+            android:id="@+id/approverSpinner"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_below="@+id/classTeacherContainer"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="-16dp"
+            />
+    </RelativeLayout>
+</LinearLayout>

@@ -1,0 +1,321 @@
+<resources>
+    <string name="app_name">Cl\'sroom</string>
+    <string name="authenticationFailed">Authentication failed…</string>
+    <string name="please_try_again">Please Try again!</string>
+    <string name="noInternet">No Internet…</string>
+    <string name="signing_in">Signing in…</string>
+    <string name="title_activity_main">Main Activity</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="title_activity_login">Login Activity</string>
+    <string name="userId">User ID</string>
+    <string name="password">Password</string>
+    <string name="login">Login</string>
+    <string name="notes_management">Notes Management</string>
+    <string name="attendance_management">Student Management</string>
+    <string name="time_table_management">Staff Management</string>
+    <string name="title_activity_admin_main">AdminMainActivity</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="title_activity_staff_main">StaffMainActivity</string>
+    <string name="title_activity_student_main">StudentMainActivity</string>
+    <string name="staff">Staff</string>
+    <string name="classes">Classes</string>
+    <string name="standards">Standards</string>
+    <string name="logout">Logout</string>
+    <string name="subjects">Subjects</string>
+    <string name="timeTable">Time Table</string>
+    <string name="calender">Calender</string>
+    <string name="attendance">Attendance</string>
+    <string name="leaves">Leaves</string>
+    <string name="assignments">Assignments</string>
+    <string name="results">Results</string>
+    <string name="students">Students</string>
+    <string name="courses">Courses</string>
+    <string name="accounts">Account</string>
+    <string name="timetables">Time Tables</string>
+    <string name="notifications">Notifications</string>
+    <string name="timetable">Time table</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="section_format">Hello World from section: %1$d</string>
+    <string name="noStudentsFound">No Students Found</string>
+    <string name="noStaffFound">No Staff Found</string>
+    <string name="admin">Admin</string>
+    <string name="studentCount">Student Count</string>
+    <string name="classTeacher">Class Teacher</string>
+    <string name="delete">Delete</string>
+    <string name="addNewStaff">Add New Staff</string>
+    <string name="viewAttendance">View Attendance</string>
+    <string name="addClasses">Add Classes</string>
+    <string name="className">Class Name</string>
+    <string name="save">Save</string>
+    <string name="classCode">Class Code</string>
+    <string name="please_enter_class_name">Please Enter Class Name</string>
+    <string name="please_enter_class_code">Please Enter Class Code</string>
+    <string name="saved">Saved</string>
+    <string name="edit">Edit</string>
+    <string name="deleted">Deleted</string>
+    <string name="noClassesFound">No Classes Found</string>
+    <string name="name">Name</string>
+    <string name="fullName">Full Name</string>
+    <string name="staffId">Staff Id</string>
+    <string name="designation">Designation</string>
+    <string name="qualification">Qualification</string>
+    <string name="editClass">Edit Class</string>
+    <string name="addClass">Add Class</string>
+    <string name="please_enter_staff_name">Please Enter Staff Name</string>
+    <string name="please_enter_staff_id">Please Enter Staff ID</string>
+    <string name="please_enter_staff_qualification">Please Enter Staff Qualification</string>
+    <string name="please_enter_staff_designation">Please Enter Staff Designation</string>
+    <string name="editStaff">Edit Staff</string>
+    <string name="numberOfStudent">Number of Student</string>
+    <string name="classText">Class</string>
+    <string name="addStudents">Add Students</string>
+    <string name="add">Add</string>
+    <string name="please_select_class">Please Select Class</string>
+    <string name="please_enter_no_of_students">Please Enter Number Of Students</string>
+    <string name="added">Added…</string>
+    <string name="title_activity_profile">ProfileActivity</string>
+    <string name="large_text">
+        "Material is the metaphor.\n\n"
+
+        "A material metaphor is the unifying theory of a rationalized space and a system of motion."
+        "The material is grounded in tactile reality, inspired by the study of paper and ink, yet "
+        "technologically advanced and open to imagination and magic.\n"
+        "Surfaces and edges of the material provide visual cues that are grounded in reality. The "
+        "use of familiar tactile attributes helps users quickly understand affordances. Yet the "
+        "flexibility of the material creates new affordances that supercede those in the physical "
+        "world, without breaking the rules of physics.\n"
+        "The fundamentals of light, surface, and movement are key to conveying how objects move, "
+        "interact, and exist in space and in relation to each other. Realistic lighting shows "
+        "seams, divides space, and indicates moving parts.\n\n"
+
+        "Bold, graphic, intentional.\n\n"
+
+        "The foundational elements of print based design typography, grids, space, scale, color, "
+        "and use of imagery guide visual treatments. These elements do far more than please the "
+        "eye. They create hierarchy, meaning, and focus. Deliberate color choices, edge to edge "
+        "imagery, large scale typography, and intentional white space create a bold and graphic "
+        "interface that immerse the user in the experience.\n"
+        "An emphasis on user actions makes core functionality immediately apparent and provides "
+        "waypoints for the user.\n\n"
+
+        "Motion provides meaning.\n\n"
+
+        "Motion respects and reinforces the user as the prime mover. Primary user actions are "
+        "inflection points that initiate motion, transforming the whole design.\n"
+        "All action takes place in a single environment. Objects are presented to the user without "
+        "breaking the continuity of experience even as they transform and reorganize.\n"
+        "Motion is meaningful and appropriate, serving to focus attention and maintain continuity. "
+        "Feedback is subtle yet clear. Transitions are efﬁcient yet coherent.\n\n"
+
+        "3D world.\n\n"
+
+        "The material environment is a 3D space, which means all objects have x, y, and z "
+        "dimensions. The z-axis is perpendicularly aligned to the plane of the display, with the "
+        "positive z-axis extending towards the viewer. Every sheet of material occupies a single "
+        "position along the z-axis and has a standard 1dp thickness.\n"
+        "On the web, the z-axis is used for layering and not for perspective. The 3D world is "
+        "emulated by manipulating the y-axis.\n\n"
+
+        "Light and shadow.\n\n"
+
+        "Within the material environment, virtual lights illuminate the scene. Key lights create "
+        "directional shadows, while ambient light creates soft shadows from all angles.\n"
+        "Shadows in the material environment are cast by these two light sources. In Android "
+        "development, shadows occur when light sources are blocked by sheets of material at "
+        "various positions along the z-axis. On the web, shadows are depicted by manipulating the "
+        "y-axis only. The following example shows the card with a height of 6dp.\n\n"
+
+        "Resting elevation.\n\n"
+
+        "All material objects, regardless of size, have a resting elevation, or default elevation "
+        "that does not change. If an object changes elevation, it should return to its resting "
+        "elevation as soon as possible.\n\n"
+
+        "Component elevations.\n\n"
+
+        "The resting elevation for a component type is consistent across apps (e.g., FAB elevation "
+        "does not vary from 6dp in one app to 16dp in another app).\n"
+        "Components may have different resting elevations across platforms, depending on the depth "
+        "of the environment (e.g., TV has a greater depth than mobile or desktop).\n\n"
+
+        "Responsive elevation and dynamic elevation offsets.\n\n"
+
+        "Some component types have responsive elevation, meaning they change elevation in response "
+        "to user input (e.g., normal, focused, and pressed) or system events. These elevation "
+        "changes are consistently implemented using dynamic elevation offsets.\n"
+        "Dynamic elevation offsets are the goal elevation that a component moves towards, relative "
+        "to the component’s resting state. They ensure that elevation changes are consistent "
+        "across actions and component types. For example, all components that lift on press have "
+        "the same elevation change relative to their resting elevation.\n"
+        "Once the input event is completed or cancelled, the component will return to its resting "
+        "elevation.\n\n"
+
+        "Avoiding elevation interference.\n\n"
+
+        "Components with responsive elevations may encounter other components as they move between "
+        "their resting elevations and dynamic elevation offsets. Because material cannot pass "
+        "through other material, components avoid interfering with one another any number of ways, "
+        "whether on a per component basis or using the entire app layout.\n"
+        "On a component level, components can move or be removed before they cause interference. "
+        "For example, a floating action button (FAB) can disappear or move off screen before a "
+        "user picks up a card, or it can move if a snackbar appears.\n"
+        "On the layout level, design your app layout to minimize opportunities for interference. "
+        "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
+        "when a user tries to pick up one of cards.\n\n"
+    </string>
+    <string name="profilePicture">Profile Picture</string>
+    <string name="selectAll">Select All</string>
+    <string name="deSelectAll">Deselect All</string>
+    <string name="noAbsentees">No Absentees..</string>
+    <string name="pleaseSelectClassTeacher">Please Select Class Teacher…</string>
+    <string name="deleting">Deleting…</string>
+    <string name="saving">Saving…</string>
+    <string name="couldntUpdateStudentCount">Couldn\'t Update Student Count</string>
+    <string name="adding">Adding…</string>
+    <string name="couldntAddStudents">Couldn\'t Add Students</string>
+    <string name="loading">Loading…</string>
+    <string name="couldntLoadTheList">Couldn\'t Load The List..</string>
+    <string name="loginFailed">Login Failed!</string>
+    <string name="validUserIdErrMsg">Please Enter a valid user ID</string>
+    <string name="validPasswordErrMsg">Please Enter a valid password</string>
+    <string name="getStarted">Get Started</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="noLeavesFound">No Leaves Found</string>
+    <string name="requested">Requested Leaves</string>
+    <string name="staffLeaves">Staff Leaves</string>
+    <string name="studentsLeaves">Students Leaves</string>
+    <string name="myLeaves">My Leaves</string>
+    <string name="dialogTitle">Dialog Title</string>
+    <string name="submit">Submit</string>
+    <string name="subTitle">Sub Title</string>
+    <string name="absentees">Absentees</string>
+    <string name="selectStudent">Select Student</string>
+    <string name="selectStaff">Select Staff</string>
+    <string name="reasonForLeave">Reason For Leave</string>
+    <string name="fromDate">From Date (dd-mm-yyyy)</string>
+    <string name="toDate">To Date (dd-mm-yyyy)</string>
+    <string name="approver">Approver</string>
+    <string name="applyLeave">Apply Leave</string>
+    <string name="pleaseEnterAValidReason">Please Enter A Valid Reason</string>
+    <string name="pleaseEnterAToValidDate">Please Enter A Valid To Date</string>
+    <string name="works">Works</string>
+    <string name="pleaseEnterAValidFromDate">Please Enter A Valid From Date</string>
+    <string name="submitted">Submitted..</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="selectMonth">Select Month</string>
+    <string name="select">Select</string>
+    <string name="leaveDetails">Leave Details</string>
+    <string name="reason">Reason</string>
+    <string name="noSubjectsFound">No Subjects Found…</string>
+    <string name="subjectName">Subject Name</string>
+    <string name="teacher">Teacher</string>
+    <string name="addAnother">Add Another</string>
+    <string name="addSubject">Add Subject</string>
+    <string name="editSubject">Edit Subject</string>
+    <string name="please_enter_a_valid_subject_name">Please enter a valid Subject Name</string>
+    <string name="subjectCode">Subject Code</string>
+    <string name="noTimeTableFound">No Time Table Found</string>
+    <string name="startTime">Start Time</string>
+    <string name="endTime">End Time</string>
+    <string name="addPeriod">Add Period</string>
+    <string name="please_enter_a_valid_start_time">Pleas Enter a Valid Start Time</string>
+    <string name="please_enter_a_valid_end_time">Pleas Enter a Valid End Time</string>
+    <string name="time_table_cannot_be_set_before_adding_staff">Time Table cannot be set before adding Staff</string>
+    <string name="time_table_cannot_be_set_before_adding_subjects">Time Table cannot be set before adding Subjects</string>
+    <string name="subjects_cannot_be_added_before_adding_staff">Subjects cannot be added before adding Staff</string>
+    <string name="editPeriod">Edit Period</string>
+    <string name="add_result">Add Result</string>
+    <string name="editResult">Edit Result</string>
+    <string name="noNotesFound">No notes found</string>
+    <string name="notes">Notes</string>
+    <string name="title">Notes Title</string>
+    <string name="notesDescription">Notes Description</string>
+    <string name="addNotes">Add Notes</string>
+    <string name="reviewer">Reviewer</string>
+    <string name="something_went_wrong">Please Check Your Internet Connection…</string>
+    <string name="please_enter_notes_title">Please Enter Notes Title</string>
+    <string name="please_enter_description">Please enter the description</string>
+    <string name="notesWillBeUploadedInBackground">Notes Will Be Uploaded in Background</string>
+    <string name="uploaded">Uploaded</string>
+    <string name="uploading">Uploading…</string>
+    <string name="title_activity_notes">NotesActivity</string>
+    <string name="editNotes">Edit Notes</string>
+    <string name="profile">Profile</string>
+    <string name="profile_settings">Profile Settings</string>
+    <string name="dateOfBirth">Date of Birth</string>
+    <string name="email">Email</string>
+    <string name="phoneNo">Phone No.</string>
+    <string name="editName">Edit Name</string>
+    <string name="please_enter_a_valid_name">Please enter a valid name</string>
+    <string name="address">Address</string>
+    <string name="please_enter_a_valid_date_of_birth">Please enter a valid date of birth</string>
+    <string name="please_enter_a_valid_email">Please enter a valid email</string>
+    <string name="please_enter_a_valid_phone_no">Please enter a valid phone number</string>
+    <string name="please_enter_a_valid_address">Please enter a valid address</string>
+    <string name="notes_will_be_displayed_after_review">Notes will be displayed after review..</string>
+    <string name="unreviewed">Un-Reviewed</string>
+    <string name="pendingNotes">Pending Notes</string>
+    <string name="pending">Pending</string>
+    <string name="reviewedNotes">Reviewed Notes</string>
+    <string name="approve">Approve</string>
+    <string name="reject">Reject</string>
+    <string name="noNewNotificationsFound">Notifications not found.</string>
+    <string name="message">Message</string>
+    <string name="notificationMessage">Message</string>
+    <string name="send">Send</string>
+    <string name="please_enter_a_valid_message">Please enter a valid messgae</string>
+    <string name="your_notes_with_title">Your notes with title</string>
+    <string name="has_been_rejected">has been rejected</string>
+    <string name="uploaded_at">uploaded at</string>
+    <string name="reviewerComment">Review Comment</string>
+    <string name="please_enter_a_valid_reviewer_comment">Please enter a valid review comment</string>
+    <string name="Rejected">Rejected</string>
+    <string name="has_been_approved">has been approved</string>
+    <string name="has_submitted_notes_with_title">has submitted notes with title</string>
+    <string name="has_submitted_following_notes_for_review">has submitted following notes for review</string>
+    <string name="following_notes_has_been_rejected">Following notes has been rejected</string>
+    <string name="following_notes_has_been_approved">Following notes has been approved</string>
+    <string name="changePassword">Change Password</string>
+    <string name="currentPassword">Current Password</string>
+    <string name="newPassword">New Password</string>
+    <string name="confirmPassword">Confirm Password</string>
+    <string name="invalid_password">Invalid Password</string>
+    <string name="password_must_contain_at_least_6_char">New password must contain at least 6 characters</string>
+    <string name="new_password_did_not_match_with_confirm_password">New password did not match with confirm password</string>
+    <string name="wrong_current_password">Worng Current Password</string>
+    <string name="has_applied_for_leave_on_following_days">has applied for leave on following days</string>
+    <string name="has_approved_following_leaves">has approved following leaves</string>
+    <string name="has_rejected_follwoing_leaves">has rejected following leaves</string>
+    <string name="please_enter_the_notification_message">Please enter the notification message</string>
+    <string name="sending_notification">Sending notification</string>
+    <string name="notification_couldnt_be_sent">Notification Couldn\'t be sent</string>
+    <string name="leaveStatus">Leave Status</string>
+    <string name="has_cancelled_the_following_leave">has cancelled the following leave</string>
+    <string name="deleteAll">Delete All</string>
+    <string name="requested_leaves">Requested Leaves</string>
+    <string name="approvalPending">Approval Pending</string>
+    <string name="rejected">Rejected</string>
+    <string name="approved">Approved</string>
+    <string name="requested_leave_from">Requested leave from</string>
+    <string name="status">Status</string>
+    <string name="classTxt">Class</string>
+    <string name="submitting">Submitting…</string>
+    <string name="date">Date</string>
+    <string name="student_list_is_empty">Student List is Empty…</string>
+    <string name="staff_list_is_empty">Staff List is Empty…</string>
+    <string name="please_select_an_approver">Please Select an Approver</string>
+    <string name="you_cannot_select_yourself_as_an_approver">You cannot select yourself as an approver…</string>
+    <string name="forgotPassword">Forgot Password?</string>
+    <string name="you_have_not_updated_your_mail_id_or_your_mail_id_is_invalid">You haven\'t updated your mail Id or your mail Id is invalid.\nPlease contact your admin to reset the password.</string>
+    <string name="please_wait">Please Wait…</string>
+    <string name="password_has_been_reset_and_sent_to_your_registered_mail_id">Password has been reset and sent to your registered mail ID.</string>
+    <string name="please_contact_your_admin_to_reset_the_password">Please contact your admin to reset the password.</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+</resources>

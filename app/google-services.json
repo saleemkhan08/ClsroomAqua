@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "329739682816",
+    "firebase_url": "https://clsroom-aqua.firebaseio.com",
+    "project_id": "clsroom-aqua",
+    "storage_bucket": "clsroom-aqua.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:329739682816:android:482b246ddbca3a25",
+        "android_client_info": {
+          "package_name": "com.clsroom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "329739682816-p9nie5qs218rbd62dha2vv2kmo4pjoav.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.clsroom",
+            "certificate_hash": "18af356f0fdb118ecb220a3bc2807581636b6db8"
+          }
+        },
+        {
+          "client_id": "329739682816-hk5eiaql5k3so1717fjcj98bch68aeqb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeuwPhPdeFjJBAk8aRKBido3qTWUBn5dk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "329739682816-hk5eiaql5k3so1717fjcj98bch68aeqb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
