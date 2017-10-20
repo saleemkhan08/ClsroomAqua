@@ -2,7 +2,9 @@ package com.clsroom.fragments;
 
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clsroom.R;
+
+import static com.clsroom.LoginActivity.LOGIN_STATUS;
 
 public class LoginPlaceholderFragment extends Fragment
 {
@@ -33,7 +37,7 @@ public class LoginPlaceholderFragment extends Fragment
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.fragment_login, container, false);
-        final TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+        final TextView textView = rootView.findViewById(R.id.section_label);
         textView.setTypeface(Typeface.createFromAsset(getActivity().getAssets(), "Gabriola.ttf"));
         int pageNum = getArguments().getInt(ARG_SECTION_NUMBER);
         ImageView bgImg = (ImageView) rootView.findViewById(R.id.background_image);
@@ -51,6 +55,12 @@ public class LoginPlaceholderFragment extends Fragment
                 bgImg.setImageResource(R.mipmap.teacher);
                 textView.setText(R.string.time_table_management);
                 break;
+        }
+
+        if (PreferenceManager.getDefaultSharedPreferences(getActivity()).getBoolean(LOGIN_STATUS, false))
+        {
+            Log.d("TextVisibilityIssue", "Hiding");
+            textView.setVisibility(View.GONE);
         }
         return rootView;
     }

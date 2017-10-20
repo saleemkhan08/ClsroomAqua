@@ -12,20 +12,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.squareup.otto.Subscribe;
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.adapters.StudentsAdapter;
 import com.clsroom.dialogs.AddStudentsDialogFragment;
 import com.clsroom.dialogs.ViewStudentAttendanceDialogFragment;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Students;
@@ -34,6 +26,14 @@ import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.otto.Subscribe;
 
 import java.util.Calendar;
 import java.util.LinkedHashSet;
@@ -72,6 +72,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
     private DatabaseReference mStudentsDbRef;
     private DatabaseReference mClassesDbRef;
     private LinkedHashSet<Students> studentsSet;
+    private FragmentLauncher launcher;
 
     public StudentsListFragment()
     {
@@ -83,13 +84,14 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
     {
         Log.d(TAG, "onCreateView2");
         ButterKnife.bind(this, parentView);
+        Otto.register(this);
+        setLauncher();
+
         mRootRef = FirebaseDatabase.getInstance().getReference();
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
+
+        if (launcher != null)
         {
-            ((MainActivity) activity).updateEventsListener(this);
-            ((MainActivity) getActivity()).setToolBarTitle(getString(R.string.students));
-            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_STUDENTS_MENU);
+            launcher.setToolBarTitle(R.string.students);
         }
     }
 
@@ -98,7 +100,18 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
     {
         super.onStart();
         Log.d(TAG, "onStart");
-        Otto.register(this);
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            if (NavigationDrawerUtil.isAdmin)
+            {
+                Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_ADMIN);
+            }
+            else
+            {
+                Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_TEACHERS);
+            }
+        }
     }
 
     @Override
@@ -121,10 +134,10 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
 
 
     @Override
-    public void onStop()
+    public void onDestroy()
     {
-        super.onStop();
-        Log.d(TAG, "onStop");
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
         Otto.unregister(this);
     }
 
@@ -133,7 +146,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
         Log.d(TAG, "setUpRecyclerView");
         mStudentsDbRef = mRootRef.child(Students.STUDENTS).child(mCurrentClass.getCode());
         mClassesDbRef = mRootRef.child(Classes.CLASSES).child(mCurrentClass.getCode());
-        mAdapter = StudentsAdapter.getInstance(mStudentsDbRef);
+        mAdapter = StudentsAdapter.getInstance(mStudentsDbRef, launcher);
         mStudentsListRecyclerView.setAdapter(mAdapter);
         mStudentsListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mStudentsListRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -196,6 +209,8 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
             public void onCancelled(DatabaseError databaseError)
             {
                 Log.d(TAG, "databaseError : " + databaseError);
+                mProgress.setVisibility(View.GONE);
+                mErrorMsg.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -221,7 +236,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
         onBackPressed();
         StudentAttendanceListFragment fragment = StudentAttendanceListFragment
                 .getInstance(mAdapter.mUnSelectedStudents, mCurrentClass.getCode());
-        ((MainActivity) getActivity()).showFragment(fragment, true, StudentAttendanceListFragment.TAG);
+        launcher.showFragment(fragment, true, StudentAttendanceListFragment.TAG);
     }
 
     @Override
@@ -231,7 +246,14 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
         {
             StudentsAdapter.isSelectionEnabled = false;
             mAdapter.notifyDataSetChanged();
-            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_STUDENTS_MENU);
+            if (NavigationDrawerUtil.isAdmin)
+            {
+                Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_ADMIN);
+            }
+            else
+            {
+                Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_TEACHERS);
+            }
             mSaveAttendanceFab.setVisibility(View.GONE);
             mTakeAttendanceFab.setVisibility(View.VISIBLE);
             return false;
@@ -331,5 +353,15 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
         mCurrentClass = (Classes) tab.getTag();
         mProgress.setVisibility(View.VISIBLE);
         setUpRecyclerView();
+    }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
+            launcher.setFragment(this);
+        }
     }
 }

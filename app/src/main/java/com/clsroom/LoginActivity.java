@@ -38,7 +38,7 @@ import butterknife.OnClick;
 
 import static com.clsroom.dialogs.LoginDialogFragment.FIREBASE_USER_ID;
 
-public class LoginActivity extends AppCompatActivity implements OnDismissListener, OnCompleteListener<AuthResult>, FirebaseAuth.AuthStateListener
+public class LoginActivity extends AppCompatActivity implements OnDismissListener, OnCompleteListener<AuthResult>
 {
     public static final String LOGIN_STATUS = "loginStatus";
     public static final String LOGIN_USER_ID = "loginUserId";
@@ -57,6 +57,7 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
     private FirebaseAuth mAuth;
     private LoginDialogFragment mFragment;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -64,7 +65,6 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
         setContentView(R.layout.activity_login);
         ButterKnife.bind(this);
         mAuth = FirebaseAuth.getInstance();
-        mAuth.addAuthStateListener(this);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         LoginSectionsPagerAdapter sectionsPagerAdapter = new LoginSectionsPagerAdapter(getSupportFragmentManager());
 
@@ -74,8 +74,9 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
         ViewPager viewPager = (ViewPager) findViewById(R.id.container);
         viewPager.setAdapter(sectionsPagerAdapter);
 
-        Log.d("UnknownLogin", "onCreate : currentUser : " + mAuth.getCurrentUser()
+        Log.d("UnknownLogin", "LoginActivity onCreate : currentUser : " + mAuth.getCurrentUser()
                 + "LOGIN_STATUS : " + mSharedPreferences.getBoolean(LOGIN_STATUS, false));
+        checkLogin();
     }
 
     @Override
@@ -87,9 +88,9 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
     }
 
     @Override
-    protected void onStop()
+    protected void onDestroy()
     {
-        super.onStop();
+        super.onDestroy();
         hideProgressDialog();
         Otto.unregister(this);
         mIsRunning = false;
@@ -192,7 +193,6 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
 
     private void launchMainActivity()
     {
-        Log.d(TAG, "Launching MainActivity : through Handler");
         new Handler().postDelayed(new Runnable()
         {
             @Override
@@ -216,11 +216,10 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
         ToastMsg.show(R.string.loginFailed);
     }
 
-    @Override
-    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
+    public void checkLogin()
     {
         Log.d("UnknownLogin", "mAuth.getCurrentUser");
-        if (mSharedPreferences.getBoolean(LOGIN_STATUS, false) && mAuth.getCurrentUser() != null)
+        if (mSharedPreferences.getBoolean(LOGIN_STATUS, false))
         {
             mLoginButtonContainer.setVisibility(View.GONE);
             mPageIndicatorView.setVisibility(View.GONE);

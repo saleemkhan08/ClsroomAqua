@@ -1,16 +1,15 @@
 package com.clsroom.adapters;
 
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.dialogs.NotificationDialogFragment;
 import com.clsroom.fragments.AddOrEditNotesFragment;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.listeners.ImageClickListener;
 import com.clsroom.listeners.OnDismissListener;
 import com.clsroom.model.Notes;
@@ -39,30 +38,29 @@ import java.util.ArrayList;
 
 import static com.clsroom.utils.ActionBarUtil.SHOW_INDEPENDENT_NOTES_MENU;
 
-
 public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder>
 {
     private static final String TAG = "NotesAdapter";
-    private AppCompatActivity mActivity;
+    private FragmentLauncher launcher;
     private Query mNotesDbRef;
     private NotesClassifier mNotesClassifier;
 
-    public static NotesAdapter getInstance(NotesClassifier classifier, DatabaseReference reference, AppCompatActivity activity)
+    public static NotesAdapter getInstance(NotesClassifier classifier, DatabaseReference reference, FragmentLauncher launcher)
     {
         Query ref = reference.orderByChild(Notes.DATE);
         NotesAdapter fragment = new NotesAdapter(Notes.class,
-                R.layout.notes_row, NotesViewHolder.class, ref, activity);
+                R.layout.notes_row, NotesViewHolder.class, ref, launcher);
         fragment.mNotesDbRef = ref;
         fragment.mNotesClassifier = classifier;
         return fragment;
     }
 
     private NotesAdapter(Class<Notes> modelClass, int modelLayout, Class<NotesViewHolder> viewHolderClass,
-                         Query ref, AppCompatActivity activity)
+                         Query ref, FragmentLauncher launcher)
     {
         super(modelClass, modelLayout, viewHolderClass, ref);
         Log.d(TAG, "TimeTableAdapter Constructor");
-        mActivity = activity;
+        this.launcher = launcher;
     }
 
     @Override
@@ -140,12 +138,12 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
             public void onImageClick(int position)
             {
                 GenericDraweeHierarchyBuilder hierarchyBuilder = GenericDraweeHierarchyBuilder
-                        .newInstance(mActivity.getResources())
+                        .newInstance(launcher.getActivity().getResources())
                         .setFailureImage(R.mipmap.broken_image)
                         .setProgressBarImage(new ProgressBarDrawable())
                         .setPlaceholderImage(R.mipmap.notebook_placeholder);
 
-                new ImageViewer.Builder(mActivity, list)
+                new ImageViewer.Builder(launcher.getActivity(), list)
                         .setStartPosition(position)
                         .setCustomDraweeHierarchyBuilder(hierarchyBuilder)
                         .show();
@@ -200,7 +198,7 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
     private void showNotificationDialog(Notes model, OnDismissListener listener)
     {
         NotificationDialogFragment.getInstance(model, listener)
-                .show(mActivity.getSupportFragmentManager(),
+                .show(launcher.getSupportFragmentManager(),
                         NotificationDialogFragment.TAG);
     }
 
@@ -231,7 +229,7 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
             @Override
             public void onClick(View v)
             {
-                PopupMenu popup = new PopupMenu(mActivity, v);
+                PopupMenu popup = new PopupMenu(launcher.getActivity(), v);
                 popup.getMenuInflater()
                         .inflate(R.menu.classes_options, popup.getMenu());
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
@@ -281,7 +279,7 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
 
     private void editClasses(Notes notes)
     {
-        ((MainActivity) mActivity).showFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
+        launcher.showFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
                 true, AddOrEditNotesFragment.TAG);
     }
 }

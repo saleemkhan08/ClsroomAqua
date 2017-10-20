@@ -10,19 +10,19 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.clsroom.R;
+import com.clsroom.adapters.NotificationsAdapter;
+import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
+import com.clsroom.model.Notifications;
+import com.clsroom.utils.ActionBarUtil;
+import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.Otto;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.clsroom.MainActivity;
-import com.clsroom.R;
-import com.clsroom.adapters.NotificationsAdapter;
-import com.clsroom.listeners.EventsListener;
-import com.clsroom.model.Notifications;
-import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
-import com.clsroom.utils.Otto;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -42,6 +42,7 @@ public class NotificationListFragment extends Fragment implements EventsListener
     View mErrorMsg;
 
     private DatabaseReference mRootRef;
+    private FragmentLauncher launcher;
 
     public NotificationListFragment()
     {
@@ -53,29 +54,33 @@ public class NotificationListFragment extends Fragment implements EventsListener
     {
         View parentView = inflater.inflate(R.layout.fragment_notifications_list, container, false);
         ButterKnife.bind(this, parentView);
+        setLauncher();
+
         mRootRef = FirebaseDatabase.getInstance().getReference();
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.notifications);
+        }
+        setUpRecyclerView();
         return parentView;
     }
 
     @Override
-    public void onResume()
+    public void onStart()
     {
-        super.onResume();
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
+        super.onStart();
+        if (launcher != null)
         {
-            ((MainActivity) activity).setToolBarTitle(getString(R.string.notifications));
-            ((MainActivity) activity).updateEventsListener(this);
+            launcher.updateEventsListener(this);
             Otto.post(ActionBarUtil.NO_MENU);
         }
-        setUpRecyclerView();
     }
 
     private void setUpRecyclerView()
     {
         DatabaseReference notificationsDbRef = mRootRef.child(Notifications.NOTIFICATIONS)
                 .child(NavigationDrawerUtil.mCurrentUser.getUserId());
-        NotificationsAdapter adapter = NotificationsAdapter.getInstance(notificationsDbRef, getActivity());
+        NotificationsAdapter adapter = NotificationsAdapter.getInstance(notificationsDbRef, launcher);
         notificationListRecyclerView.setAdapter(adapter);
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         notificationListRecyclerView.setLayoutManager(manager);
@@ -100,6 +105,8 @@ public class NotificationListFragment extends Fragment implements EventsListener
             public void onCancelled(DatabaseError databaseError)
             {
                 Log.d(TAG, "databaseError : " + databaseError);
+                mProgress.setVisibility(View.GONE);
+                mErrorMsg.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -120,5 +127,14 @@ public class NotificationListFragment extends Fragment implements EventsListener
     public String getTagName()
     {
         return NavigationDrawerUtil.NOTIFICATIONS_FRAGMENT;
+    }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
+        }
     }
 }

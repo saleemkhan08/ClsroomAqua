@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -17,15 +16,10 @@ import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.TextView;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.squareup.otto.Subscribe;
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.adapters.StaffAttendanceAdapter;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.ClassAttendance;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Staff;
@@ -34,6 +28,11 @@ import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -64,6 +63,7 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
     private DatabaseReference mAttendanceRef;
     private String mAttendanceDate;
     private String mTakenDate;
+    private FragmentLauncher launcher;
 
     public StaffAttendanceListFragment()
     {
@@ -75,6 +75,9 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
     {
         View parentView = inflater.inflate(R.layout.fragment_attendance_list, container, false);
         ButterKnife.bind(this, parentView);
+        Otto.register(this);
+        setLauncher();
+
         Calendar calendar = Calendar.getInstance();
         int currentYear = calendar.get(Calendar.YEAR);
         int currentMonth = calendar.get(Calendar.MONTH);
@@ -90,6 +93,12 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
                 .child(ClassAttendance.ATTENDANCE)
                 .child(Staff.STAFF);
         setUpRecyclerView();
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.attendance);
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.NO_MENU);
+        }
         return parentView;
     }
 
@@ -102,27 +111,17 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
     public void onStart()
     {
         super.onStart();
-        Otto.register(this);
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
+        if (launcher != null)
         {
-            ((MainActivity) activity).setToolBarTitle(getString(R.string.attendance));
-            ((MainActivity) activity).updateEventsListener(this);
+            launcher.updateEventsListener(this);
             Otto.post(ActionBarUtil.NO_MENU);
         }
     }
 
-
     @Override
-    public void onStop()
+    public void onDestroy()
     {
-        super.onStop();
+        super.onDestroy();
         Otto.unregister(this);
     }
 
@@ -138,7 +137,7 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
     private void setUpRecyclerView()
     {
         Log.d(TAG, "setUpRecyclerView : " + mStaffList);
-        StaffAttendanceAdapter adapter = new StaffAttendanceAdapter(mStaffList, (AppCompatActivity) getActivity());
+        StaffAttendanceAdapter adapter = new StaffAttendanceAdapter(mStaffList);
         mAttendanceListRecyclerView.setAdapter(adapter);
         mAttendanceListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
@@ -211,5 +210,14 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
     {
         mDateTextView.setText(getFormattedDate(year, month, day));
         mAttendanceDate = "" + year + month + day;
+    }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
+        }
     }
 }

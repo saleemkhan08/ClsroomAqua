@@ -1,15 +1,22 @@
 package com.clsroom.adapters;
 
+import android.os.Build;
+import android.transition.Fade;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
 
 import com.clsroom.R;
+import com.clsroom.fragments.ProfileFragment;
+import com.clsroom.fragments.StudentsListFragment;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Students;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ImageUtil;
+import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.StudentViewHolder;
+import com.clsroom.views.DetailsTransition;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
@@ -17,7 +24,7 @@ import com.squareup.otto.Subscribe;
 
 import java.util.LinkedHashSet;
 
-import static com.clsroom.utils.ActionBarUtil.SHOW_INDEPENDENT_STUDENTS_MENU;
+import static com.clsroom.utils.ActionBarUtil.SHOW_STUDENTS_MENU_FOR_ADMIN;
 
 public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentViewHolder>
 {
@@ -25,13 +32,16 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
     public static boolean isSelectionEnabled;
     public LinkedHashSet<Students> mSelectedStudents;
     public LinkedHashSet<Students> mUnSelectedStudents;
+    private FragmentLauncher launcher;
     private boolean isSelectAll;
 
-    public static StudentsAdapter getInstance(DatabaseReference reference)
+    public static StudentsAdapter getInstance(DatabaseReference reference, FragmentLauncher launcher)
     {
         Log.d(TAG, "StudentsAdapter getInstance: reference : " + reference);
-        return new StudentsAdapter(Students.class,
+        StudentsAdapter adapter = new StudentsAdapter(Students.class,
                 R.layout.student_list_row, StudentViewHolder.class, reference);
+        adapter.launcher = launcher;
+        return adapter;
     }
 
     private StudentsAdapter(Class<Students> modelClass, int modelLayout, Class<StudentViewHolder> viewHolderClass,
@@ -72,21 +82,38 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "onClick");
-            }
-        });
+                ProfileFragment fragment2 = ProfileFragment.getInstance(model);
+                StudentsListFragment fragment1 = (StudentsListFragment) launcher.getFragment();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                {
+                    fragment2.setSharedElementEnterTransition(new DetailsTransition());
+                    fragment2.setSharedElementReturnTransition(new DetailsTransition());
+                    fragment2.setEnterTransition(new Fade());
+                    fragment1.setExitTransition(new Fade());
 
-        viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener()
-        {
-            @Override
-            public boolean onLongClick(View view)
-            {
-                Log.d(TAG, this + ", onLongClick, isSelectionEnabled : " + isSelectionEnabled);
-                Otto.post(ActionBarUtil.SHOW_MULTIPLE_STUDENT_MENU);
-                enableSelection();
-                return true;
+                    viewHolder.mImageView.setTransitionName(model.getUserId());
+                    launcher.showFragment(fragment2, true, ProfileFragment.TAG, viewHolder.mImageView, "profileImage");
+                }
+                else
+                {
+                    launcher.showFragment(fragment2, true, ProfileFragment.TAG);
+                }
             }
         });
+        if (NavigationDrawerUtil.isAdmin)
+        {
+            viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener()
+            {
+                @Override
+                public boolean onLongClick(View view)
+                {
+                    Log.d(TAG, this + ", onLongClick, isSelectionEnabled : " + isSelectionEnabled);
+                    Otto.post(ActionBarUtil.SHOW_MULTIPLE_STUDENT_MENU);
+                    enableSelection();
+                    return true;
+                }
+            });
+        }
     }
 
     private void updateSelection(boolean isChecked, Students model)
@@ -115,7 +142,7 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
     public void reload(String str)
     {
         Log.d(TAG, "reload : " + str);
-        if (str.equals(SHOW_INDEPENDENT_STUDENTS_MENU))
+        if (str.equals(SHOW_STUDENTS_MENU_FOR_ADMIN))
         {
             notifyDataSetChanged();
             Otto.unregister(this);

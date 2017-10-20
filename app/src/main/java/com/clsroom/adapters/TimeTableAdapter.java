@@ -1,7 +1,6 @@
 package com.clsroom.adapters;
 
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.util.Log;
 import android.view.MenuItem;
@@ -10,6 +9,7 @@ import android.widget.CompoundButton;
 
 import com.clsroom.R;
 import com.clsroom.dialogs.AddOrEditPeriodDialogFragment;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Progress;
 import com.clsroom.model.TimeTable;
 import com.clsroom.model.ToastMsg;
@@ -32,28 +32,28 @@ import static com.clsroom.utils.ActionBarUtil.SHOW_INDEPENDENT_TIME_TABLE_MENU;
 public class TimeTableAdapter extends FirebaseRecyclerAdapter<TimeTable, TimeTableViewHolder>
 {
     private static final String TAG = "TimeTableAdapter";
-    private AppCompatActivity mActivity;
+    private FragmentLauncher launcher;
     public static boolean isSelectionEnabled;
     public ArrayList<String> mSelectedPeriods;
     public Query mTimeTableRef;
 
     private boolean isSelectAll;
 
-    public static TimeTableAdapter getInstance(DatabaseReference reference, AppCompatActivity activity)
+    public static TimeTableAdapter getInstance(DatabaseReference reference, FragmentLauncher launcher)
     {
         Log.d(TAG, "TimeTableAdapter getInstance: reference : " + reference);
         TimeTableAdapter fragment = new TimeTableAdapter(TimeTable.class,
-                R.layout.time_table_row, TimeTableViewHolder.class, reference, activity);
+                R.layout.time_table_row, TimeTableViewHolder.class, reference, launcher);
         fragment.mTimeTableRef = reference.orderByChild(TimeTable.START_TIME);
         return fragment;
     }
 
     private TimeTableAdapter(Class<TimeTable> modelClass, int modelLayout, Class<TimeTableViewHolder> viewHolderClass,
-                             Query ref, AppCompatActivity activity)
+                             Query ref, FragmentLauncher launcher)
     {
         super(modelClass, modelLayout, viewHolderClass, ref);
         Log.d(TAG, "TimeTableAdapter Constructor");
-        mActivity = activity;
+        this.launcher = launcher;
     }
 
     @Override
@@ -144,7 +144,7 @@ public class TimeTableAdapter extends FirebaseRecyclerAdapter<TimeTable, TimeTab
             @Override
             public void onClick(View v)
             {
-                PopupMenu popup = new PopupMenu(mActivity, v);
+                PopupMenu popup = new PopupMenu(launcher.getActivity(), v);
                 popup.getMenuInflater()
                         .inflate(R.menu.classes_options, popup.getMenu());
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
@@ -198,6 +198,6 @@ public class TimeTableAdapter extends FirebaseRecyclerAdapter<TimeTable, TimeTab
     private void editClasses(TimeTable timeTable)
     {
         AddOrEditPeriodDialogFragment fragment = AddOrEditPeriodDialogFragment.getInstance(timeTable);
-        fragment.show(mActivity.getSupportFragmentManager(), AddOrEditPeriodDialogFragment.TAG);
+        fragment.show(launcher.getSupportFragmentManager(), AddOrEditPeriodDialogFragment.TAG);
     }
 }

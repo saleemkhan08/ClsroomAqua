@@ -3,24 +3,17 @@ package com.clsroom.fragments;
 import android.app.Activity;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.squareup.otto.Subscribe;
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.adapters.TimeTableAdapter;
 import com.clsroom.dialogs.AddOrEditPeriodDialogFragment;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Subjects;
@@ -30,6 +23,12 @@ import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.otto.Subscribe;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -67,6 +66,7 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     private String mCurrentWeekDayCode;
     private DatabaseReference mSubjectDbRef;
     private boolean areSubjectsAvailable;
+    private FragmentLauncher launcher;
 
     public TimeTableFragment()
     {
@@ -78,13 +78,19 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     {
         Log.d(TAG, "onCreateView2");
         ButterKnife.bind(this, parentView);
+        Otto.register(this);
+        setLauncher();
+
         mHandler = new Handler();
         weekDays = getResources().getStringArray(R.array.weekdays);
         weekDaysKey = getResources().getStringArray(R.array.weekdays_key);
         mCurrentWeekDayCode = weekDaysKey[0];
         mCurrentTimeTable = new TimeTable();
         addWeekDays();
-        ((MainActivity) getActivity()).setToolBarTitle(getString(R.string.timeTable));
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.timeTable);
+        }
         mRootRef = FirebaseDatabase.getInstance().getReference();
     }
 
@@ -129,7 +135,11 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     {
         super.onStart();
         Log.d(TAG, "onStart");
-        Otto.register(this);
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_TIME_TABLE_MENU);
+        }
     }
 
     @Override
@@ -139,25 +149,12 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
         return R.layout.fragment_time_table;
     }
 
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        Log.d(TAG, "onResume");
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
-        {
-            ((MainActivity) activity).updateEventsListener(this);
-            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_TIME_TABLE_MENU);
-        }
-    }
-
 
     @Override
-    public void onStop()
+    public void onDestroy()
     {
-        super.onStop();
-        Log.d(TAG, "onStop");
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
         Otto.unregister(this);
     }
 
@@ -165,7 +162,7 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     {
         Log.d(TAG, "setUpRecyclerView");
         mTimeTableDbRef = mRootRef.child(TimeTable.TIME_TABLE).child(mCurrentClass.getCode()).child(mCurrentWeekDayCode);
-        mAdapter = TimeTableAdapter.getInstance(mTimeTableDbRef, (AppCompatActivity) getActivity());
+        mAdapter = TimeTableAdapter.getInstance(mTimeTableDbRef, launcher);
         mTimeTableRecyclerView.setAdapter(mAdapter);
         mTimeTableRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mTimeTableRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -212,6 +209,8 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
             public void onCancelled(DatabaseError databaseError)
             {
                 Log.d(TAG, "databaseError : " + databaseError);
+                mProgress.setVisibility(View.GONE);
+                mErrorMsg.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -330,5 +329,14 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     {
         super.handleStaff();
         mFabContainer.setVisibility(View.GONE);
+    }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
+        }
     }
 }

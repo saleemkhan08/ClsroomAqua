@@ -18,6 +18,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/reasonForLeave"
+            android:inputType="text"
+            android:imeOptions="actionNext"
             android:textColor="@color/colorPrimaryDark"/>
     </android.support.design.widget.TextInputLayout>
 
@@ -33,6 +35,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/fromDate"
+            android:imeOptions="actionNext"
             android:textColor="@color/colorPrimaryDark"/>
     </android.support.design.widget.TextInputLayout>
 
@@ -48,6 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/toDate"
+            android:imeOptions="actionDone"
             android:textColor="@color/colorPrimaryDark"/>
     </android.support.design.widget.TextInputLayout>
 

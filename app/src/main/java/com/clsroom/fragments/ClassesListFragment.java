@@ -12,21 +12,21 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.adapters.ClassesAdapter;
 import com.clsroom.dialogs.AddOrEditClassDialogFragment;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -35,6 +35,7 @@ import butterknife.ButterKnife;
 public class ClassesListFragment extends Fragment implements View.OnClickListener, EventsListener
 {
     private static final String TAG = "ClassesListFragment";
+    private FragmentLauncher launcher;
 
     @Bind(R.id.classesListRecyclerView)
     RecyclerView mClassesListRecyclerView;
@@ -60,29 +61,36 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
     {
         View parentView = inflater.inflate(R.layout.fragment_classes_list, container, false);
         ButterKnife.bind(this, parentView);
+        setLauncher();
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mFabContainer.setOnClickListener(this);
+
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.classes);
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.NO_MENU);
+        }
+        setUpRecyclerView();
+
         return parentView;
     }
 
     @Override
-    public void onResume()
+    public void onStart()
     {
-        super.onResume();
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
+        super.onStart();
+        if (launcher != null)
         {
-            ((MainActivity) activity).setToolBarTitle(getString(R.string.classes));
-            ((MainActivity) activity).updateEventsListener(this);
+            launcher.updateEventsListener(this);
             Otto.post(ActionBarUtil.NO_MENU);
         }
-        setUpRecyclerView();
     }
 
     private void setUpRecyclerView()
     {
         DatabaseReference classesDbRef = mRootRef.child(Classes.CLASSES);
-        ClassesAdapter adapter = ClassesAdapter.getInstance(classesDbRef, getActivity());
+        ClassesAdapter adapter = ClassesAdapter.getInstance(classesDbRef, launcher);
         Log.d(TAG, "mAdapter : " + adapter);
         mClassesListRecyclerView.setAdapter(adapter);
         mClassesListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -129,6 +137,8 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
             public void onCancelled(DatabaseError databaseError)
             {
                 Log.d(TAG, "databaseError : " + databaseError);
+                mProgress.setVisibility(View.GONE);
+                mErrorMsg.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -163,5 +173,14 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
     public String getTagName()
     {
         return NavigationDrawerUtil.CLASSES_LIST_FRAGMENT;
+    }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
+        }
     }
 }

@@ -2,24 +2,18 @@ package com.clsroom.fragments;
 
 import android.app.Activity;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.squareup.otto.Subscribe;
 import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.adapters.NotesAdapter;
 import com.clsroom.adapters.TimeTableAdapter;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Notes;
 import com.clsroom.model.NotesClassifier;
@@ -28,6 +22,12 @@ import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.otto.Subscribe;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -62,6 +62,7 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
     private NotesClassifier mCurrentNotesClassifier;
     private boolean areSubjectsAvailable;
     private NotesAdapter mAdapter;
+    private FragmentLauncher launcher;
 
     public NotesFragment()
     {
@@ -73,8 +74,13 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
     {
         Log.d(TAG, "onCreateView2");
         ButterKnife.bind(this, parentView);
+        Otto.register(this);
         mCurrentNotesClassifier = new NotesClassifier();
-        ((MainActivity) getActivity()).setToolBarTitle(getString(R.string.notes));
+        setLauncher();
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.notes);
+        }
         mRootRef = FirebaseDatabase.getInstance().getReference();
     }
 
@@ -114,8 +120,11 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
     public void onStart()
     {
         super.onStart();
-        Otto.register(this);
         Log.d(TAG, "onStart");
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+        }
     }
 
     @Override
@@ -126,23 +135,10 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
     }
 
     @Override
-    public void onResume()
+    public void onDestroy()
     {
-        super.onResume();
-        Log.d(TAG, "onResume");
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
-        {
-            ((MainActivity) activity).updateEventsListener(this);
-        }
-    }
-
-
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-        Log.d(TAG, "onStop");
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
         Otto.unregister(this);
     }
 
@@ -168,7 +164,7 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
             mNotesDbRef = mRootRef.child(Notes.NOTES).child(Notes.REVIEW).child(mCurrentClass.getCode()).child(mCurrentSubjectCode);
         }
 
-        mAdapter = NotesAdapter.getInstance(mCurrentNotesClassifier, mNotesDbRef, (AppCompatActivity) getActivity());
+        mAdapter = NotesAdapter.getInstance(mCurrentNotesClassifier, mNotesDbRef, launcher);
         mNotesRecyclerView.setAdapter(mAdapter);
         mNotesRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mNotesRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -214,6 +210,8 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
             public void onCancelled(DatabaseError databaseError)
             {
                 Log.d(TAG, "databaseError : " + databaseError);
+                mProgress.setVisibility(View.GONE);
+                mErrorMsg.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -224,7 +222,7 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
         Activity activity = getActivity();
         if (activity instanceof MainActivity)
         {
-            ((MainActivity) activity).showFragment(AddOrEditNotesFragment.getInstance(mCurrentNotesClassifier),
+            launcher.showFragment(AddOrEditNotesFragment.getInstance(mCurrentNotesClassifier),
                     true, AddOrEditNotesFragment.TAG);
         }
     }
@@ -314,6 +312,15 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
                 setUpRecyclerView();
                 break;
 
+        }
+    }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
         }
     }
 }

@@ -15,18 +15,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
-import com.prolificinteractive.materialcalendarview.CalendarDay;
-import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
-import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
-import com.squareup.otto.Subscribe;
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.dialogs.AddLeavesDialogFragment;
 import com.clsroom.dialogs.LeavesDetailDialogFragment;
@@ -35,6 +23,7 @@ import com.clsroom.dialogs.RequestedLeavesDialogFragment;
 import com.clsroom.dialogs.SelectStaffDialogFragment;
 import com.clsroom.dialogs.SelectStudentDialogFragment;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Leaves;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Staff;
@@ -47,6 +36,17 @@ import com.clsroom.utils.LeavesDecorator;
 import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+import com.prolificinteractive.materialcalendarview.OnMonthChangedListener;
+import com.squareup.otto.Subscribe;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -58,7 +58,6 @@ import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.clsroom.R.string.leaves;
 import static com.clsroom.model.Leaves.MY_LEAVES;
 import static com.clsroom.model.Leaves.getCalendar;
 
@@ -98,6 +97,7 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     private Query currentLeavesQuery;
 
     private Calendar currentCalendar;
+    private FragmentLauncher launcher;
 
     public LeavesFragment()
     {
@@ -116,7 +116,6 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
                              Bundle savedInstanceState)
     {
         View parentView = commonFlow(inflater, container);
-
         mLeavesCalender.setOnMonthChangedListener(this);
         LinearLayout titleContainer = (LinearLayout) mLeavesCalender.getChildAt(0);
         titleContainer.setBackgroundResource(R.color.grey);
@@ -206,27 +205,17 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     {
         View parentView = inflater.inflate(R.layout.fragment_leaves, container, false);
         ButterKnife.bind(this, parentView);
-
+        Otto.register(this);
+        setLauncher();
         mLeavesRootRef = FirebaseDatabase.getInstance().getReference().child(Leaves.LEAVES);
 
         mLeavesCalender.setOnDateChangedListener(this);
         mLeavesCalender.setPagingEnabled(false);
         mLeavesCalender.setAllowClickDaysOutsideCurrentMonth(false);
 
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
+        if (launcher != null)
         {
-            ((MainActivity) activity).setToolBarTitle(getString(leaves));
-            ((MainActivity) activity).updateEventsListener(this);
-            if (NavigationDrawerUtil.isStudent)
-            {
-                Otto.post(ActionBarUtil.NO_MENU);
-                userDetails.setVisibility(View.GONE);
-            }
-            else
-            {
-                Otto.post(ActionBarUtil.SHOW_ADMIN_LEAVES_MENU);
-            }
+            launcher.setToolBarTitle(R.string.leaves);
         }
 
         return parentView;
@@ -382,13 +371,22 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     public void onStart()
     {
         super.onStart();
-        Otto.register(this);
+        launcher.updateEventsListener(this);
+        if (NavigationDrawerUtil.isStudent)
+        {
+            Otto.post(ActionBarUtil.NO_MENU);
+            userDetails.setVisibility(View.GONE);
+        }
+        else
+        {
+            Otto.post(ActionBarUtil.SHOW_ADMIN_LEAVES_MENU);
+        }
     }
 
     @Override
-    public void onStop()
+    public void onDestroy()
     {
-        super.onStop();
+        super.onDestroy();
         Otto.unregister(this);
     }
 
@@ -476,5 +474,14 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     public void onMonthChanged(MaterialCalendarView widget, CalendarDay date)
     {
         onDateSet(null, date.getYear(), date.getMonth(), date.getDay());
+    }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
+        }
     }
 }

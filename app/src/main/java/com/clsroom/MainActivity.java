@@ -15,10 +15,12 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Snack;
 import com.clsroom.model.ToastMsg;
@@ -27,7 +29,7 @@ import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.squareup.otto.Subscribe;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements FragmentLauncher
 {
     private static final String TAG = "MainActivity";
 
@@ -35,6 +37,7 @@ public class MainActivity extends AppCompatActivity
     private NavigationDrawerUtil mNavigationDrawerUtil;
     private Toolbar mToolbar;
     private ActionBarUtil mActionBarUtil;
+    private Fragment mCurrentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -57,6 +60,7 @@ public class MainActivity extends AppCompatActivity
                 this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
+        Log.d("DualMainActivity", "OnCreate");
         mNavigationDrawerUtil = new NavigationDrawerUtil(this);
         Otto.register(this);
     }
@@ -92,19 +96,40 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    @Override
     public void updateEventsListener(EventsListener listener)
     {
         mNavigationDrawerUtil.updateCurrentFragment(listener);
     }
 
-    public void setToolBarTitle(String title)
+    @Override
+    public AppCompatActivity getActivity()
     {
-        mToolbar.setTitle(title);
+        return this;
     }
 
+    @Override
     public void showFragment(Fragment fragment, boolean addToBackStack, String tag)
     {
         mNavigationDrawerUtil.loadFragment(fragment, addToBackStack, tag);
+    }
+
+    @Override
+    public Fragment getFragment()
+    {
+        return mCurrentFragment;
+    }
+
+    @Override
+    public void setFragment(Fragment fragment)
+    {
+        mCurrentFragment = fragment;
+    }
+
+    @Override
+    public void showFragment(Fragment fragment, boolean addToBackStack, String tag, ImageView sharedImageView, String transitionName)
+    {
+        mNavigationDrawerUtil.loadFragment(fragment, addToBackStack, tag, sharedImageView, transitionName);
     }
 
     @Subscribe
@@ -178,5 +203,11 @@ public class MainActivity extends AppCompatActivity
         {
             mProgressDialog.dismiss();
         }
+    }
+
+    @Override
+    public void setToolBarTitle(int resId)
+    {
+        mToolbar.setTitle(resId);
     }
 }

@@ -4,14 +4,13 @@ import android.app.Activity;
 import android.view.Menu;
 import android.view.MenuInflater;
 
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.squareup.otto.Subscribe;
 
 public class ActionBarUtil
 {
     public static final String NO_MENU = "showClassesMenu";
-    public static final String SHOW_INDEPENDENT_STUDENTS_MENU = "showIndependentStudentsMenu";
+    public static final String SHOW_STUDENTS_MENU_FOR_ADMIN = "showIndependentStudentsMenu";
     public static final String SHOW_MULTIPLE_STUDENT_MENU = "showMultipleStudentMenu";
     public static final String SHOW_INDEPENDENT_SUBJECT_MENU = "showIndependentSubjectMenu";
     public static final String SHOW_MULTIPLE_SUBJECT_MENU = "showMultipleSubjectMenu";
@@ -25,16 +24,15 @@ public class ActionBarUtil
     public static final String SHOW_NOTIFICATIONS_MENU = "showNotificationsMenu";
     public static final String SHOW_SELECTED_NOTIFICATIONS_MENU = "showSelectedNotificationsMenu";
     public static final String SHOW_PROFILE_MENU = "showProfileMenu";
-    Activity mActivity;
-    MenuInflater mMenuInflater;
-    Menu mMenu;
+    public static final String SHOW_STUDENTS_MENU_FOR_TEACHERS = "showStudentsMenuForTeachers";
+    private MenuInflater mMenuInflater;
+    private Menu mMenu;
     public static final String SHOW_MULTIPLE_STAFF_MENU = "showMultipleStaffMenu";
     public static final String SHOW_INDEPENDENT_STAFF_MENU = "showIndependentStaffMenu";
 
-    public ActionBarUtil(MainActivity activity, Menu menu)
+    public ActionBarUtil(Activity activity, Menu menu)
     {
-        mActivity = activity;
-        mMenuInflater = mActivity.getMenuInflater();
+        mMenuInflater = activity.getMenuInflater();
         mMenu = menu;
         Otto.register(this);
     }
@@ -53,8 +51,11 @@ public class ActionBarUtil
             case SHOW_MULTIPLE_STUDENT_MENU:
                 loadNewMenu(R.menu.multiple_student_menu);
                 break;
-            case SHOW_INDEPENDENT_STUDENTS_MENU:
-                loadNewMenu(R.menu.independent_student_menu);
+            case SHOW_STUDENTS_MENU_FOR_ADMIN:
+                loadNewMenu(R.menu.student_menu_for_admin);
+                break;
+            case SHOW_STUDENTS_MENU_FOR_TEACHERS:
+                loadNewMenu(R.menu.student_menu_for_teachers);
                 break;
             case SHOW_MULTIPLE_SUBJECT_MENU:
                 loadNewMenu(R.menu.multiple_subject_menu);

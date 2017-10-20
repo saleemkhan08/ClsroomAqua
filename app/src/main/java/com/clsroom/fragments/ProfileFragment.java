@@ -13,12 +13,12 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.dialogs.ChangePasswordDialogFragment;
 import com.clsroom.dialogs.EditNameDialogFragment;
 import com.clsroom.dialogs.EditUserDetailsDialogFragment;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Staff;
 import com.clsroom.model.Students;
@@ -26,6 +26,7 @@ import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ImageUtil;
+import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -49,6 +50,16 @@ import static com.clsroom.utils.NavigationDrawerUtil.PROFILE_FRAGMENT;
 public class ProfileFragment extends Fragment implements EventsListener, ValueEventListener
 {
     private static final int PICK_PROFILE_IMAGE = 55;
+    public static final String TAG = "ProfileFragment";
+
+    @Bind(R.id.editName)
+    View editName;
+
+    @Bind(R.id.uploadProfileImg)
+    View editImage;
+
+    @Bind(R.id.fabContainer)
+    View editDetails;
 
     @Bind(R.id.profilePicture)
     ImageView mProfileImgView;
@@ -73,6 +84,7 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
 
     private User mCurrentUser;
     private DatabaseReference mUserDbRef;
+    private FragmentLauncher launcher;
 
 
     public static ProfileFragment getInstance(User user)
@@ -92,7 +104,11 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     {
         View parentView = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, parentView);
+        Otto.register(this);
+
+        setLauncher();
         if (mCurrentUser instanceof Students)
+
         {
             Students student = (Students) mCurrentUser;
             mUserDbRef = FirebaseDatabase.getInstance().getReference()
@@ -100,20 +116,28 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
                     .child(student.getUserId());
         }
         else
+
         {
             mUserDbRef = FirebaseDatabase.getInstance().getReference()
                     .child(User.STAFF).child(mCurrentUser.getUserId());
         }
 
         mUserDbRef.addValueEventListener(this);
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
+
+        if (launcher != null)
+
         {
-            ((MainActivity) activity).setToolBarTitle(getString(R.string.profile));
-            ((MainActivity) activity).updateEventsListener(this);
+            launcher.setToolBarTitle(R.string.profile);
+            launcher.updateEventsListener(this);
             Otto.post(ActionBarUtil.SHOW_PROFILE_MENU);
         }
-        Otto.register(this);
+
+        if (!mCurrentUser.equals(NavigationDrawerUtil.mCurrentUser))
+        {
+            editDetails.setVisibility(View.GONE);
+            editImage.setVisibility(View.GONE);
+            editName.setVisibility(View.GONE);
+        }
         return parentView;
     }
 
@@ -285,9 +309,30 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     }
 
     @Override
-    public void onStop()
+    public void onStart()
     {
-        super.onStop();
+        super.onStart();
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.SHOW_PROFILE_MENU);
+        }
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
         Otto.unregister(this);
     }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
+        }
+    }
 }
+

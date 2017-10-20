@@ -24,4 +24,5 @@ public class LoginSectionsPagerAdapter extends FragmentPagerAdapter
     {
         return 3;
     }
+
 }

@@ -53,6 +53,7 @@
         android:layout_below="@+id/subjectsTab"
         android:gravity="center"
         android:padding="10dp"
+        android:visibility="gone"
         android:text="@string/noNotesFound"
         android:textAppearance="?android:textAppearanceLarge"
         android:textColor="@android:color/darker_gray"

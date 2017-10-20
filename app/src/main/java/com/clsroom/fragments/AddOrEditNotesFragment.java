@@ -28,12 +28,12 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.adapters.EditGalleryAdapter;
 import com.clsroom.adapters.StaffFirebaseListAdapter;
 import com.clsroom.dialogs.NotificationDialogFragment;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.listeners.OnDismissListener;
 import com.clsroom.model.Notes;
 import com.clsroom.model.NotesClassifier;
@@ -71,6 +71,7 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
 {
     public static final String TAG = "AddOrEditNotesFragment";
     public static final int PICK_IMAGE_MULTIPLE_GALLERY = 125;
+    private FragmentLauncher launcher;
 
     @Bind(R.id.notesApproverSpinner)
     Spinner mNotesApproverSpinner;
@@ -113,6 +114,9 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
     {
         View parentView = inflater.inflate(R.layout.fragment_add_notes, container, false);
         ButterKnife.bind(this, parentView);
+        setLauncher();
+        Otto.register(this);
+
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mImageList = new ArrayList<>();
         mAdapter = new EditGalleryAdapter(mImageList, notes);
@@ -131,23 +135,18 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
                 .child(mCurrentNotesClassifier.getSubjectId());
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-
-        Activity activity = getActivity();
-
-        if (activity instanceof MainActivity)
+        if (launcher != null)
         {
             if (mCurrentNotesClassifier.isEdit())
             {
-                ((MainActivity) activity).setToolBarTitle(getString(R.string.editNotes));
+                launcher.setToolBarTitle(R.string.editNotes);
                 mNotesTitle.setText(notes.getNotesTitle());
                 mNotesDescription.setText(notes.getNotesDescription());
             }
             else
             {
-                ((MainActivity) activity).setToolBarTitle(getString(R.string.addNotes));
+                launcher.setToolBarTitle(R.string.addNotes);
             }
-            ((MainActivity) activity).updateEventsListener(this);
-            Otto.post(ActionBarUtil.NO_MENU);
         }
 
         mSubjectName.setText(mCurrentNotesClassifier.getClassName() + " - " + mCurrentNotesClassifier.getSubjectName());
@@ -156,11 +155,22 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
         return parentView;
     }
 
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if(activity instanceof FragmentLauncher){
+            launcher = (FragmentLauncher) activity;
+        }
+    }
+
+
+
     @Override
     public void onStart()
     {
         super.onStart();
-        Otto.register(this);
+        launcher.updateEventsListener(this);
+        Otto.post(ActionBarUtil.NO_MENU);
     }
 
     private void setUpStaffSpinner()
@@ -319,9 +329,9 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
     }
 
     @Override
-    public void onStop()
+    public void onDestroy()
     {
-        super.onStop();
+        super.onDestroy();
         Otto.unregister(this);
     }
 

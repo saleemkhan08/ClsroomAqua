@@ -68,6 +68,7 @@
                 android:hint="@string/title"
                 android:inputType="textPersonName"
                 android:maxLines="1"
+                android:imeOptions="actionNext"
                 android:padding="15dp"
                 android:textColor="@color/colorPrimaryDark"/>
 
@@ -80,6 +81,8 @@
                 android:gravity="top"
                 android:hint="@string/notesDescription"
                 android:minHeight="100dp"
+                android:inputType="text"
+                android:imeOptions="actionDone"
                 android:padding="15dp"
                 android:textColor="@color/colorPrimaryDark"/>
 

@@ -22,10 +22,11 @@
                 <com.clsroom.views.SquareImageView
                     android:id="@+id/profilePicture"
                     android:layout_width="250dp"
+                    android:transitionName="profileImage"
                     android:layout_height="250dp"
                     android:layout_gravity="center"
                     android:layout_marginTop="30dp"
-                    android:src="@mipmap/notes"/>
+                    />
 
                 <ImageView
                     android:id="@+id/uploadProfileImg"
@@ -51,7 +52,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
-                    android:text="Saleem Khan"
                     android:layout_centerInParent="true"
                     android:textAppearance="?android:textAppearanceLarge"
                     android:textStyle="bold"/>
@@ -75,7 +75,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Class 10"/>
+                />
 
             <android.support.v7.widget.CardView
                 android:layout_width="match_parent"
@@ -109,7 +109,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="6"
-                            android:text="dob"/>
+                            />
 
                     </LinearLayout>
 
@@ -143,7 +143,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="6"
-                            android:text="email"/>
+                            />
 
 
                     </LinearLayout>
@@ -177,7 +177,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="6"
-                            android:text="phoneNo"/>
+                            />
 
 
                     </LinearLayout>

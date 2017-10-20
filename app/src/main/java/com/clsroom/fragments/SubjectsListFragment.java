@@ -3,24 +3,17 @@ package com.clsroom.fragments;
 import android.app.Activity;
 import android.os.Handler;
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.squareup.otto.Subscribe;
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.adapters.SubjectsAdapter;
 import com.clsroom.dialogs.AddOrEditSubjectsDialogFragment;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Subjects;
@@ -29,6 +22,12 @@ import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.otto.Subscribe;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -59,6 +58,7 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     private SubjectsAdapter mAdapter;
     private DatabaseReference mSubjectsDbRef;
     private Handler mHandler;
+    private FragmentLauncher launcher;
 
     public SubjectsListFragment()
     {
@@ -70,8 +70,14 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     {
         Log.d(TAG, "onCreateView2");
         ButterKnife.bind(this, parentView);
+        Otto.register(this);
+        setLauncher();
         mHandler = new Handler();
-        ((MainActivity) getActivity()).setToolBarTitle(getString(R.string.subjects));
+
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.subjects);
+        }
         mRootRef = FirebaseDatabase.getInstance().getReference();
     }
 
@@ -81,7 +87,11 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     {
         super.onStart();
         Log.d(TAG, "onStart");
-        Otto.register(this);
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_SUBJECT_MENU);
+        }
     }
 
     @Override
@@ -92,24 +102,10 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     }
 
     @Override
-    public void onResume()
+    public void onDestroy()
     {
-        super.onResume();
-        Log.d(TAG, "onResume");
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
-        {
-            ((MainActivity) activity).updateEventsListener(this);
-            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_SUBJECT_MENU);
-        }
-    }
-
-
-    @Override
-    public void onStop()
-    {
-        super.onStop();
-        Log.d(TAG, "onStop");
+        super.onDestroy();
+        Log.d(TAG, "onDestroy");
         Otto.unregister(this);
     }
 
@@ -117,7 +113,7 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     {
         Log.d(TAG, "setUpRecyclerView");
         mSubjectsDbRef = mRootRef.child(Subjects.SUBJECTS).child(mCurrentClass.getCode());
-        mAdapter = SubjectsAdapter.getInstance(mSubjectsDbRef, (AppCompatActivity) getActivity());
+        mAdapter = SubjectsAdapter.getInstance(mSubjectsDbRef, launcher);
         mSubjectsListRecyclerView.setAdapter(mAdapter);
         mSubjectsListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mSubjectsListRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -163,6 +159,8 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
             @Override
             public void onCancelled(DatabaseError databaseError)
             {
+                mProgress.setVisibility(View.GONE);
+                mErrorMsg.setVisibility(View.VISIBLE);
                 Log.d(TAG, "databaseError : " + databaseError);
             }
         });
@@ -247,5 +245,14 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     {
         super.handleStaff();
         mFabContainer.setVisibility(View.GONE);
+    }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
+        }
     }
 }

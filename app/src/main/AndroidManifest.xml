@@ -7,13 +7,8 @@
         android:allowBackup="true"
         android:icon="@mipmap/notes"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme" >
-        <activity
-            android:name=".MainActivityTest"
-            android:label="@string/app_name" >
-        </activity>
 
         <activity
             android:name=".LoginActivity"
@@ -31,8 +26,5 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
-        <activity android:name=".TestAuthActivity">
-        </activity>
     </application>
-
 </manifest>

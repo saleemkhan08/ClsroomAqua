@@ -16,8 +16,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/startTime"
-            android:inputType="textPersonName"
             android:maxLines="1"
+            android:inputType="time"
+            android:imeOptions="actionNext"
             android:textColor="@color/colorPrimaryDark"/>
     </android.support.design.widget.TextInputLayout>
 
@@ -32,6 +33,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/endTime"
+            android:inputType="time"
+            android:imeOptions="actionDone"
             android:maxLines="1"
             android:textColor="@color/colorPrimaryDark"/>
     </android.support.design.widget.TextInputLayout>

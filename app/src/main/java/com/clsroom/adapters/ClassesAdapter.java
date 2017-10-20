@@ -1,16 +1,14 @@
 package com.clsroom.adapters;
 
-import android.app.Activity;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.clsroom.R;
 import com.clsroom.dialogs.AddOrEditClassDialogFragment;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Progress;
 import com.clsroom.model.ToastMsg;
@@ -23,24 +21,22 @@ import com.google.firebase.database.Query;
 
 public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesViewHolder>
 {
-    private AppCompatActivity mActivity;
+    private FragmentLauncher launcher;
     private DatabaseReference mClassesDbRef;
-    private Handler handler;
 
-    public static ClassesAdapter getInstance(DatabaseReference reference, Activity activity)
+    public static ClassesAdapter getInstance(DatabaseReference reference, FragmentLauncher launcher)
     {
         ClassesAdapter adapter = new ClassesAdapter(Classes.class,
-                R.layout.class_list_row, ClassesViewHolder.class, reference.orderByChild(Classes.CODE), (AppCompatActivity) activity);
+                R.layout.class_list_row, ClassesViewHolder.class, reference.orderByChild(Classes.CODE), launcher);
         adapter.mClassesDbRef = reference;
         return adapter;
     }
 
     private ClassesAdapter(Class<Classes> modelClass, int modelLayout, Class<ClassesViewHolder> viewHolderClass,
-                           Query ref, AppCompatActivity activity)
+                           Query ref, FragmentLauncher launcher)
     {
         super(modelClass, modelLayout, viewHolderClass, ref);
-        mActivity = activity;
-        handler = new Handler();
+        this.launcher = launcher;
     }
 
     @Override
@@ -67,7 +63,7 @@ public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesView
             @Override
             public void onClick(View v)
             {
-                PopupMenu popup = new PopupMenu(mActivity, v);
+                PopupMenu popup = new PopupMenu(launcher.getActivity(), v);
                 popup.getMenuInflater()
                         .inflate(R.menu.classes_options, popup.getMenu());
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
@@ -114,16 +110,16 @@ public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesView
 
     private void editClasses(Classes classes)
     {
-        FragmentManager manager = mActivity.getSupportFragmentManager();
+        FragmentManager manager = launcher.getSupportFragmentManager();
         AddOrEditClassDialogFragment fragment = AddOrEditClassDialogFragment.getInstance(classes);
         fragment.show(manager, AddOrEditClassDialogFragment.TAG);
     }
 
     private String getString(int resId)
     {
-        if (mActivity != null)
+        if (launcher != null)
         {
-            return mActivity.getString(resId);
+            return launcher.getString(resId);
         }
         return "";
     }

@@ -1,9 +1,10 @@
 package com.clsroom.adapters;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.PopupMenu;
+import android.transition.Fade;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,6 +12,9 @@ import android.widget.CompoundButton;
 
 import com.clsroom.R;
 import com.clsroom.dialogs.AddOrEditStaffDialogFragment;
+import com.clsroom.fragments.ProfileFragment;
+import com.clsroom.fragments.StaffListFragment;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Staff;
 import com.clsroom.model.ToastMsg;
@@ -18,6 +22,7 @@ import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.StaffViewHolder;
+import com.clsroom.views.DetailsTransition;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -32,26 +37,26 @@ import static com.clsroom.utils.ActionBarUtil.SHOW_INDEPENDENT_STAFF_MENU;
 public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder>
 {
     private static final String TAG = "StaffAdapter";
-    private AppCompatActivity mActivity;
+    private FragmentLauncher launcher;
     private DatabaseReference mStaffDbReference;
     public static boolean isSelectionEnabled;
     private LinkedHashSet<Staff> mSelectedStaff;
     public LinkedHashSet<Staff> mUnSelectedStaff;
     private boolean isSelectAll;
 
-    public static StaffAdapter getInstance(DatabaseReference reference, AppCompatActivity activity)
+    public static StaffAdapter getInstance(DatabaseReference reference, FragmentLauncher launcher)
     {
         StaffAdapter adapter = new StaffAdapter(Staff.class,
-                R.layout.staff_list_row, StaffViewHolder.class, reference.orderByChild(Staff.USER_ID), activity);
+                R.layout.staff_list_row, StaffViewHolder.class, reference.orderByChild(Staff.USER_ID), launcher);
         adapter.mStaffDbReference = reference;
         return adapter;
     }
 
     private StaffAdapter(Class<Staff> modelClass, int modelLayout, Class<StaffViewHolder> viewHolderClass,
-                         Query ref, AppCompatActivity activity)
+                         Query ref, FragmentLauncher launcher)
     {
         super(modelClass, modelLayout, viewHolderClass, ref);
-        mActivity = activity;
+        this.launcher = launcher;
     }
 
     @Override
@@ -94,7 +99,22 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
             @Override
             public void onClick(View view)
             {
-                Log.d(TAG, "onClick");
+                ProfileFragment fragment2 = ProfileFragment.getInstance(model);
+                StaffListFragment fragment1 = (StaffListFragment) launcher.getFragment();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+                {
+                    fragment2.setSharedElementEnterTransition(new DetailsTransition());
+                    fragment2.setSharedElementReturnTransition(new DetailsTransition());
+                    fragment2.setEnterTransition(new Fade());
+                    fragment1.setExitTransition(new Fade());
+
+                    viewHolder.mImageView.setTransitionName(model.getUserId());
+                    launcher.showFragment(fragment2, true, ProfileFragment.TAG, viewHolder.mImageView, "profileImage");
+                }
+                else
+                {
+                    launcher.showFragment(fragment2, true, ProfileFragment.TAG);
+                }
             }
         });
 
@@ -119,7 +139,7 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
             @Override
             public void onClick(View v)
             {
-                PopupMenu popup = new PopupMenu(mActivity, v);
+                PopupMenu popup = new PopupMenu(launcher.getActivity(), v);
                 popup.getMenuInflater()
                         .inflate(R.menu.classes_options, popup.getMenu());
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
@@ -166,7 +186,7 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
 
     private void editClasses(Staff staff)
     {
-        FragmentManager manager = mActivity.getSupportFragmentManager();
+        FragmentManager manager = launcher.getSupportFragmentManager();
         AddOrEditStaffDialogFragment fragment = AddOrEditStaffDialogFragment.getInstance(staff);
         fragment.show(manager, AddOrEditStaffDialogFragment.TAG);
     }

@@ -1,13 +1,12 @@
 package com.clsroom.adapters;
 
-import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.fragments.LeavesFragment;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Notifications;
 import com.clsroom.model.Progress;
 import com.clsroom.model.ToastMsg;
@@ -27,16 +26,16 @@ public class NotificationsAdapter extends FirebaseRecyclerAdapter<Notifications,
 {
     private static final String TAG = "NotificationsAdapter";
     private DatabaseReference mNotificationRef;
-    Activity mActivity;
+    private FragmentLauncher launcher;
 
-    public static NotificationsAdapter getInstance(DatabaseReference reference, Activity activity)
+    public static NotificationsAdapter getInstance(DatabaseReference reference, FragmentLauncher launcher)
     {
         Log.d(TAG, "SubjectsAdapter getInstance: reference : " + reference);
 
         NotificationsAdapter fragment = new NotificationsAdapter(Notifications.class,
                 R.layout.notification_list_row, NotificationViewHolder.class, reference.orderByChild("dateTime"));
         fragment.mNotificationRef = reference;
-        fragment.mActivity = activity;
+        fragment.launcher = launcher;
         return fragment;
     }
 
@@ -70,7 +69,7 @@ public class NotificationsAdapter extends FirebaseRecyclerAdapter<Notifications,
                         model.getSenderId() : NavigationDrawerUtil.mCurrentUser.getUserId();
                 if (leaveId != null && leaveRefType != null)
                 {
-                    ((MainActivity) mActivity).showFragment(LeavesFragment
+                    launcher.showFragment(LeavesFragment
                                     .getInstance(leaveId, userId, leaveRefType),
                             true, LeavesFragment.TAG);
                 }

@@ -5,7 +5,6 @@ import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,24 +13,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-import com.squareup.otto.Subscribe;
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.adapters.StaffAdapter;
 import com.clsroom.dialogs.AddOrEditStaffDialogFragment;
 import com.clsroom.dialogs.ViewStaffAttendanceDialogFragment;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Staff;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.NavigationDrawerUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.squareup.otto.Subscribe;
 
 import java.util.Calendar;
 import java.util.LinkedHashSet;
@@ -67,7 +66,7 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
     private StaffAdapter mAdapter;
     private DatePickerDialog mDatePickerDialog;
     private LinkedHashSet<Staff> staffSet;
-
+    private FragmentLauncher launcher;
 
     public StaffListFragment()
     {
@@ -78,8 +77,22 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
                              Bundle savedInstanceState)
     {
         View parentView = inflater.inflate(R.layout.fragment_staff_list, container, false);
+        setLauncher();
+        Otto.register(this);
         ButterKnife.bind(this, parentView);
+
         mRootRef = FirebaseDatabase.getInstance().getReference();
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.staff);
+        }
+        setUpRecyclerView();
+        mDatePickerDialog = new DatePickerDialog(getActivity(), this,
+                Calendar.getInstance().get(Calendar.YEAR),
+                Calendar.getInstance().get(Calendar.MONTH),
+                Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
+
+
         return parentView;
     }
 
@@ -87,38 +100,24 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
     public void onStart()
     {
         super.onStart();
-        Otto.register(this);
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
+        if (launcher != null)
         {
-            ((MainActivity) activity).setToolBarTitle(getString(R.string.staff));
-            ((MainActivity) activity).updateEventsListener(this);
+            launcher.updateEventsListener(this);
             Otto.post(ActionBarUtil.SHOW_INDEPENDENT_STAFF_MENU);
         }
-        setUpRecyclerView();
-        mDatePickerDialog = new DatePickerDialog(getActivity(), this,
-                Calendar.getInstance().get(Calendar.YEAR),
-                Calendar.getInstance().get(Calendar.MONTH),
-                Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
     }
 
     @Override
-    public void onStop()
+    public void onDestroy()
     {
-        super.onStop();
+        super.onDestroy();
         Otto.unregister(this);
     }
 
     private void setUpRecyclerView()
     {
         DatabaseReference staffDbRef = mRootRef.child(Staff.STAFF);
-        mAdapter = StaffAdapter.getInstance(staffDbRef, (AppCompatActivity) getActivity());
+        mAdapter = StaffAdapter.getInstance(staffDbRef, launcher);
         mStaffListRecyclerView.setAdapter(mAdapter);
         mStaffListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mStaffListRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -180,6 +179,8 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
             public void onCancelled(DatabaseError databaseError)
             {
                 Log.d(TAG, "databaseError : " + databaseError);
+                mProgress.setVisibility(View.GONE);
+                mErrorMsg.setVisibility(View.VISIBLE);
             }
         });
     }
@@ -204,7 +205,7 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
     {
         onBackPressed();
         StaffAttendanceListFragment fragment = StaffAttendanceListFragment.getInstance(mAdapter.mUnSelectedStaff);
-        ((MainActivity) getActivity()).showFragment(fragment, true, StaffAttendanceListFragment.TAG);
+        launcher.showFragment(fragment, true, StaffAttendanceListFragment.TAG);
     }
 
     @Override
@@ -264,5 +265,15 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
         FragmentManager manager = getActivity().getSupportFragmentManager();
         ViewStaffAttendanceDialogFragment fragment = ViewStaffAttendanceDialogFragment.getInstance(year, month, day);
         fragment.show(manager, ViewStaffAttendanceDialogFragment.TAG);
+    }
+
+    private void setLauncher()
+    {
+        Activity activity = getActivity();
+        if (activity instanceof FragmentLauncher)
+        {
+            launcher = (FragmentLauncher) activity;
+            launcher.setFragment(this);
+        }
     }
 }

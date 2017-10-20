@@ -3,6 +3,7 @@ package com.clsroom.utils;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
@@ -12,7 +13,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,6 +32,7 @@ import com.clsroom.fragments.StudentsListFragment;
 import com.clsroom.fragments.SubjectsListFragment;
 import com.clsroom.fragments.TimeTableFragment;
 import com.clsroom.listeners.EventsListener;
+import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Staff;
 import com.clsroom.model.Students;
 import com.clsroom.model.User;
@@ -60,7 +61,7 @@ public class NavigationDrawerUtil implements NavigationView.OnNavigationItemSele
     private final View headerView;
     private int mCurrentMenu;
 
-    private AppCompatActivity mActivity;
+    private FragmentLauncher launcher;
     private DrawerLayout mDrawer;
     private SharedPreferences mSharedPrefs;
     private ProgressDialog mProgressDialog;
@@ -75,13 +76,13 @@ public class NavigationDrawerUtil implements NavigationView.OnNavigationItemSele
     public static User mCurrentUser;
     private boolean isMenuLoaded;
 
-    public NavigationDrawerUtil(AppCompatActivity activity)
+    public NavigationDrawerUtil(FragmentLauncher launcher)
     {
-        mActivity = activity;
-        mFragmentManager = mActivity.getSupportFragmentManager();
-        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(mActivity);
-        mDrawer = (DrawerLayout) mActivity.findViewById(R.id.drawer_layout);
-        mNavigationView = (NavigationView) mActivity.findViewById(R.id.nav_view);
+        this.launcher = launcher;
+        mFragmentManager = this.launcher.getSupportFragmentManager();
+        mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(launcher.getActivity());
+        mDrawer = (DrawerLayout) launcher.getActivity().findViewById(R.id.drawer_layout);
+        mNavigationView = (NavigationView) launcher.getActivity().findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         headerView = mNavigationView.getHeaderView(0);
         headerView.setOnClickListener(new View.OnClickListener()
@@ -194,7 +195,15 @@ public class NavigationDrawerUtil implements NavigationView.OnNavigationItemSele
             Log.d(TAG, "isPopped : " + isPopped);
             if (!isPopped)
             {
-                loadFragment(getFragment(tag), addToBackStack, tag);
+                if (tag.equals(PROFILE_FRAGMENT))
+                {
+                    loadFragment(ProfileFragment.getInstance(mCurrentUser), true,
+                            ProfileFragment.TAG + mCurrentUser.getUserId());
+                }
+                else
+                {
+                    loadFragment(getFragment(tag), addToBackStack, tag);
+                }
             }
             mCurrentFragment = tag;
         }
@@ -228,7 +237,7 @@ public class NavigationDrawerUtil implements NavigationView.OnNavigationItemSele
 
         if (mProgressDialog == null)
         {
-            mProgressDialog = new ProgressDialog(mActivity);
+            mProgressDialog = new ProgressDialog(launcher.getActivity());
             mProgressDialog.setCanceledOnTouchOutside(false);
             mProgressDialog.setMessage(msg);
             mProgressDialog.setIndeterminate(true);
@@ -257,8 +266,8 @@ public class NavigationDrawerUtil implements NavigationView.OnNavigationItemSele
             public void run()
             {
                 hideProgressDialog();
-                mActivity.startActivity(new Intent(mActivity, LoginActivity.class));
-                mActivity.finish();
+                launcher.getActivity().startActivity(new Intent(launcher.getActivity(), LoginActivity.class));
+                launcher.getActivity().finish();
             }
         }, 1000);
     }
@@ -307,7 +316,7 @@ public class NavigationDrawerUtil implements NavigationView.OnNavigationItemSele
         }
 
         mUserFullName.setText(mCurrentUser.getFullName());
-        ImageUtil.loadCircularImg(mActivity, mCurrentUser.getPhotoUrl(), mProfileImgView);
+        ImageUtil.loadCircularImg(launcher.getActivity(), mCurrentUser.getPhotoUrl(), mProfileImgView);
 
         if (!isMenuLoaded)
         {
@@ -346,5 +355,21 @@ public class NavigationDrawerUtil implements NavigationView.OnNavigationItemSele
     public static String getClassId()
     {
         return mCurrentUser.getUserId().substring(0, 3);
+    }
+
+    public void loadFragment(Fragment fragment, boolean addToBackStack, String tag, ImageView sharedImageView, String transitionName)
+    {
+        mListener = (EventsListener) fragment;
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        transaction.replace(R.id.content_main, (Fragment) mListener, tag);
+        if (addToBackStack)
+        {
+            transaction.addToBackStack(tag);
+        }
+        if (sharedImageView != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            transaction.addSharedElement(sharedImageView, transitionName);
+        }
+        transaction.commit();
     }
 }

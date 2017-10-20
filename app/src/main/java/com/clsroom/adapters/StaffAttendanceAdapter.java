@@ -1,6 +1,5 @@
 package com.clsroom.adapters;
 
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,12 +16,10 @@ import java.util.ArrayList;
 public class StaffAttendanceAdapter extends RecyclerView.Adapter<StudentViewHolder>
 {
     private static final String TAG = "StaffAttendanceAdapter";
-    private final AppCompatActivity mActivity;
     private ArrayList<Staff> mAbsentees;
 
-    public StaffAttendanceAdapter(ArrayList<Staff> list, AppCompatActivity activity)
+    public StaffAttendanceAdapter(ArrayList<Staff> list)
     {
-        mActivity = activity;
         mAbsentees = new ArrayList<>();
         mAbsentees.addAll(list);
         Log.d(TAG, "AttendanceAdapter : " + mAbsentees);

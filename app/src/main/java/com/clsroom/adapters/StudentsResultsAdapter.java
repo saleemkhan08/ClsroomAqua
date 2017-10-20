@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.clsroom.utils.ActionBarUtil.SHOW_INDEPENDENT_STUDENTS_MENU;
+import static com.clsroom.utils.ActionBarUtil.SHOW_STUDENTS_MENU_FOR_ADMIN;
 
 public class StudentsResultsAdapter extends FirebaseRecyclerAdapter<Students, StudentViewHolder>
 {
@@ -112,7 +112,7 @@ public class StudentsResultsAdapter extends FirebaseRecyclerAdapter<Students, St
     public void reload(String str)
     {
         Log.d(TAG, "reload : " + str);
-        if (str.equals(SHOW_INDEPENDENT_STUDENTS_MENU))
+        if (str.equals(SHOW_STUDENTS_MENU_FOR_ADMIN))
         {
             notifyDataSetChanged();
             Otto.unregister(this);
