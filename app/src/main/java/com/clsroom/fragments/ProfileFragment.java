@@ -2,8 +2,10 @@ package com.clsroom.fragments;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -20,13 +22,15 @@ import com.clsroom.dialogs.EditUserDetailsDialogFragment;
 import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
 import com.clsroom.model.Students;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
 import com.clsroom.utils.ActionBarUtil;
+import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.ImageUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -40,17 +44,20 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.otto.Subscribe;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static android.app.Activity.RESULT_OK;
-import static com.clsroom.utils.NavigationDrawerUtil.PROFILE_FRAGMENT;
+import static com.clsroom.utils.NavigationUtil.PROFILE_FRAGMENT;
 
 public class ProfileFragment extends Fragment implements EventsListener, ValueEventListener
 {
     private static final int PICK_PROFILE_IMAGE = 55;
-    public static final String TAG = "ProfileFragment";
+    public static final String TAG = NavigationUtil.PROFILE_FRAGMENT;
 
     @Bind(R.id.editName)
     View editName;
@@ -96,6 +103,7 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
 
     public ProfileFragment()
     {
+
     }
 
     @Override
@@ -105,7 +113,7 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
         View parentView = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, parentView);
         Otto.register(this);
-
+        Log.d("ProfileRelaunchIssue", "ProfileFragment : onCreate");
         setLauncher();
         if (mCurrentUser instanceof Students)
 
@@ -125,14 +133,11 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
         mUserDbRef.addValueEventListener(this);
 
         if (launcher != null)
-
         {
             launcher.setToolBarTitle(R.string.profile);
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.SHOW_PROFILE_MENU);
         }
 
-        if (!mCurrentUser.equals(NavigationDrawerUtil.mCurrentUser))
+        if (!mCurrentUser.equals(NavigationUtil.mCurrentUser))
         {
             editDetails.setVisibility(View.GONE);
             editImage.setVisibility(View.GONE);
@@ -168,6 +173,7 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     @Override
     public boolean onBackPressed()
     {
+        Log.d("ProfileRelaunchIssue", "ProfileFragment : onBackPressed");
         return true;
     }
 
@@ -186,7 +192,15 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     @OnClick(R.id.editName)
     public void editName()
     {
-        EditNameDialogFragment.getInstance(mUserDbRef, mCurrentUser.getFullName()).show(getFragmentManager(), EditNameDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            EditNameDialogFragment.getInstance(mUserDbRef, mCurrentUser.getFullName())
+                    .show(getFragmentManager(), EditNameDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -212,10 +226,17 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     @OnClick(R.id.uploadProfileImg)
     public void addImages(View view)
     {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_PROFILE_IMAGE);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            Intent intent = new Intent();
+            intent.setType("image/*");
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_PROFILE_IMAGE);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -253,28 +274,41 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
                     Log.d("UploadIssue", "userImageRef : " + userImageRef);
                     Log.d("UploadIssue", "mImageUri : " + mImageUri);
 
-                    userImageRef.putFile(mImageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
+                    Bitmap bmp = null;
+                    try
                     {
-                        @Override
-                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+                        bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), mImageUri);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 50, baos);
+                        byte[] imageBytes = baos.toByteArray();
+                        userImageRef.putBytes(imageBytes).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
                         {
-                            Log.d("UploadIssue", "onSuccess : " + taskSnapshot.getDownloadUrl());
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
+                            {
+                                Log.d("UploadIssue", "onSuccess : " + taskSnapshot.getDownloadUrl());
 
-                            mCurrentUser.setPhotoUrl(taskSnapshot.getDownloadUrl().toString());
-                            mUserDbRef.setValue(mCurrentUser);
-                            Progress.hide();
-                            ToastMsg.show(R.string.uploaded);
-                        }
-                    }).addOnFailureListener(new OnFailureListener()
-                    {
-                        @Override
-                        public void onFailure(@NonNull Exception e)
+                                mCurrentUser.setPhotoUrl(taskSnapshot.getDownloadUrl().toString());
+                                mUserDbRef.setValue(mCurrentUser);
+                                Progress.hide();
+                                ToastMsg.show(R.string.uploaded);
+                            }
+                        }).addOnFailureListener(new OnFailureListener()
                         {
-                            Log.d("UploadIssue", "onFailure");
-                            Progress.hide();
-                            ToastMsg.show(R.string.please_try_again);
-                        }
-                    });
+                            @Override
+                            public void onFailure(@NonNull Exception e)
+                            {
+                                Log.d("UploadIssue", "onFailure");
+                                Progress.hide();
+                                ToastMsg.show(R.string.please_try_again);
+                            }
+                        });
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                        ToastMsg.show(R.string.please_try_again);
+                    }
                 }
             }
         }
@@ -287,8 +321,15 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     @OnClick(R.id.fabContainer)
     public void editProfileInfo()
     {
-        EditUserDetailsDialogFragment.getInstance(mUserDbRef, mCurrentUser)
-                .show(getFragmentManager(), EditUserDetailsDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            EditUserDetailsDialogFragment.getInstance(mUserDbRef, mCurrentUser)
+                    .show(getFragmentManager(), EditUserDetailsDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Subscribe
@@ -304,14 +345,22 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
 
     private void showPasswordChangeDialog()
     {
-        ChangePasswordDialogFragment.getInstance(mUserDbRef, mCurrentUser.getPassword())
-                .show(getFragmentManager(), ChangePasswordDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            ChangePasswordDialogFragment.getInstance(mUserDbRef, mCurrentUser.getPassword())
+                    .show(getFragmentManager(), ChangePasswordDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
     public void onStart()
     {
         super.onStart();
+        Log.d("ProfileRelaunchIssue", "ProfileFragment : onStart");
         if (launcher != null)
         {
             launcher.updateEventsListener(this);
@@ -323,6 +372,7 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     public void onDestroy()
     {
         super.onDestroy();
+        Log.d("ProfileRelaunchIssue", "ProfileFragment : onDestroy");
         Otto.unregister(this);
     }
 

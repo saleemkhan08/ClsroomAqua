@@ -1,7 +1,6 @@
 package com.clsroom.adapters;
 
 import android.os.Build;
-import android.transition.Fade;
 import android.util.Log;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -13,7 +12,7 @@ import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Students;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ImageUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.StudentViewHolder;
 import com.clsroom.views.DetailsTransition;
@@ -82,14 +81,13 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
             @Override
             public void onClick(View view)
             {
+                Log.d("relaunchIssue", "studentAdapter : onClick");
                 ProfileFragment fragment2 = ProfileFragment.getInstance(model);
                 StudentsListFragment fragment1 = (StudentsListFragment) launcher.getFragment();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                 {
                     fragment2.setSharedElementEnterTransition(new DetailsTransition());
                     fragment2.setSharedElementReturnTransition(new DetailsTransition());
-                    fragment2.setEnterTransition(new Fade());
-                    fragment1.setExitTransition(new Fade());
 
                     viewHolder.mImageView.setTransitionName(model.getUserId());
                     launcher.showFragment(fragment2, true, ProfileFragment.TAG, viewHolder.mImageView, "profileImage");
@@ -100,7 +98,7 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
                 }
             }
         });
-        if (NavigationDrawerUtil.isAdmin)
+        if (NavigationUtil.isAdmin)
         {
             viewHolder.itemView.setOnLongClickListener(new View.OnLongClickListener()
             {

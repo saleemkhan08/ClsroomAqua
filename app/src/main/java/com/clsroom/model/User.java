@@ -11,6 +11,7 @@ public abstract class User
     public static final String PHOTO_URL = "photoUrl";
     public static final String PASSWORD = "password";
     public static final String NOT_SET = "Not Set..";
+    public static final String TOKEN = "token";
     private String userId;
     private String fullName;
     private String photoUrl;
@@ -18,6 +19,7 @@ public abstract class User
     private String address;
     private String email;
     private String phone;
+    private String token;
 
     public String getDob()
     {
@@ -167,5 +169,15 @@ public abstract class User
     public static boolean isStaff(String userId)
     {
         return userId.charAt(0) == 'a' || userId.charAt(0) == 's';
+    }
+
+    public String getToken()
+    {
+        return token;
+    }
+
+    public void setToken(String token)
+    {
+        this.token = token;
     }
 }

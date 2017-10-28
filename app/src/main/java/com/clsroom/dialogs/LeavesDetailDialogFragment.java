@@ -14,7 +14,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.clsroom.R;
 import com.clsroom.model.Leaves;
 import com.clsroom.model.Progress;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -68,7 +68,7 @@ public class LeavesDetailDialogFragment extends CustomDialogFragment implements 
         mLeavesRootDbRef = FirebaseDatabase.getInstance().getReference().child(Leaves.LEAVES);
         mMyLeavesDbRef = mLeavesRootDbRef.child(mUserId).child(MY_LEAVES).child(mDate);
         mMyLeavesDbRef.addListenerForSingleValueEvent(this);
-        if (mUserId.equals(NavigationDrawerUtil.mCurrentUser.getUserId()))
+        if (mUserId.equals(NavigationUtil.mCurrentUser.getUserId()))
         {
             setSubmitBtnTxt(R.string.delete);
             setSubmitBtnImg(R.mipmap.cancel_all_button);

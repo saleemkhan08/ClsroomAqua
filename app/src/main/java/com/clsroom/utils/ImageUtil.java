@@ -67,7 +67,7 @@ public class ImageUtil
         try
         {
             Glide.with(context).load(url)
-                    .asBitmap().placeholder(R.mipmap.notes)
+                    .asBitmap().placeholder(R.drawable.placeholder)
                     .centerCrop().into(imageView);
         }
         catch (Exception e)
@@ -81,7 +81,7 @@ public class ImageUtil
         try
         {
             Glide.with(context).load(url)
-                    .asBitmap().placeholder(R.mipmap.notes)
+                    .asBitmap().placeholder(R.drawable.placeholder)
                     .centerCrop().into(imageView);
         }
         catch (Exception e)
@@ -95,7 +95,7 @@ public class ImageUtil
         try
         {
             Glide.with(imageView.getContext()).load(url)
-                    .asBitmap().placeholder(R.mipmap.user_icon_accent)
+                    .asBitmap().placeholder(R.drawable.placeholder)
                     .centerCrop().into(imageView);
         }
         catch (Exception e)

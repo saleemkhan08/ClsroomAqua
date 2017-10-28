@@ -1,7 +1,6 @@
 package com.clsroom.adapters;
 
 import android.view.View;
-import android.widget.Toast;
 
 import com.clsroom.R;
 import com.clsroom.model.Staff;
@@ -46,7 +45,6 @@ public class SimpleStaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffView
             public void onClick(View view)
             {
                 Otto.post(model);
-                Toast.makeText(view.getContext(), "Test : "+model.getUserId(), Toast.LENGTH_SHORT).show();
             }
         });
 

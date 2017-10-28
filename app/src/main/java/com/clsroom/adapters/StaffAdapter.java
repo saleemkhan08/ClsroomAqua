@@ -4,7 +4,6 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.PopupMenu;
-import android.transition.Fade;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -16,9 +15,11 @@ import com.clsroom.fragments.ProfileFragment;
 import com.clsroom.fragments.StaffListFragment;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
+import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.StaffViewHolder;
@@ -105,8 +106,6 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
                 {
                     fragment2.setSharedElementEnterTransition(new DetailsTransition());
                     fragment2.setSharedElementReturnTransition(new DetailsTransition());
-                    fragment2.setEnterTransition(new Fade());
-                    fragment1.setExitTransition(new Fade());
 
                     viewHolder.mImageView.setTransitionName(model.getUserId());
                     launcher.showFragment(fragment2, true, ProfileFragment.TAG, viewHolder.mImageView, "profileImage");
@@ -186,9 +185,16 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
 
     private void editClasses(Staff staff)
     {
-        FragmentManager manager = launcher.getSupportFragmentManager();
-        AddOrEditStaffDialogFragment fragment = AddOrEditStaffDialogFragment.getInstance(staff);
-        fragment.show(manager, AddOrEditStaffDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(launcher.getActivity()))
+        {
+            FragmentManager manager = launcher.getSupportFragmentManager();
+            AddOrEditStaffDialogFragment fragment = AddOrEditStaffDialogFragment.getInstance(staff);
+            fragment.show(manager, AddOrEditStaffDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     private void updateSelection(boolean isChecked, Staff model)

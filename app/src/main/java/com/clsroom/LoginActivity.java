@@ -19,18 +19,19 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
-import com.squareup.otto.Subscribe;
 import com.clsroom.adapters.LoginSectionsPagerAdapter;
 import com.clsroom.dialogs.LoginDialogFragment;
 import com.clsroom.listeners.OnDismissListener;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Snack;
 import com.clsroom.model.ToastMsg;
+import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.Otto;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.squareup.otto.Subscribe;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -99,11 +100,18 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
     @OnClick(R.id.loginDialog)
     public void launchLoginDialog()
     {
-        FragmentManager manager = getSupportFragmentManager();
-        mFragment = LoginDialogFragment.getInstance();
-        mFragment.setOnDismissListener(this);
-        mFragment.show(manager, LoginDialogFragment.TAG);
-        mLoginButtonContainer.setVisibility(View.GONE);
+        if (ConnectivityUtil.isConnected(this))
+        {
+            FragmentManager manager = getSupportFragmentManager();
+            mFragment = LoginDialogFragment.getInstance();
+            mFragment.setOnDismissListener(this);
+            mFragment.show(manager, LoginDialogFragment.TAG);
+            mLoginButtonContainer.setVisibility(View.GONE);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Subscribe
@@ -166,7 +174,7 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
     }
 
     @Override
-    public void onDismiss()
+    public void onDismiss(String msg)
     {
         mLoginButtonContainer.setVisibility(View.VISIBLE);
     }

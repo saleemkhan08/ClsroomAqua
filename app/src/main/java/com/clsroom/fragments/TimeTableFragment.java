@@ -16,11 +16,13 @@ import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Subjects;
 import com.clsroom.model.TimeTable;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
 import com.google.firebase.database.DataSnapshot;
@@ -37,7 +39,7 @@ import butterknife.OnClick;
 
 public class TimeTableFragment extends ClassTabFragment implements EventsListener
 {
-    private static final String TAG = "TimeTableFragment";
+    private static final String TAG = NavigationUtil.TIME_TABLE_FRAGMENT;
     private String[] weekDays;
     private String[] weekDaysKey;
 
@@ -58,7 +60,6 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
 
 
     private DatabaseReference mRootRef;
-    private Classes mCurrentClass;
     private TimeTable mCurrentTimeTable;
     private TimeTableAdapter mAdapter;
     private DatabaseReference mTimeTableDbRef;
@@ -175,7 +176,7 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.GONE);
                 }
-                else if (dy < 0 && !mFabContainer.isShown() && NavigationDrawerUtil.isAdmin)
+                else if (dy < 0 && !mFabContainer.isShown() && NavigationUtil.isAdmin)
                 {
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.VISIBLE);
@@ -218,20 +219,28 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     @OnClick(R.id.addPeriod)
     public void addPeriod(View view)
     {
-        if (!areSubjectsAvailable)
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
-            ToastMsg.show(R.string.time_table_cannot_be_set_before_adding_subjects);
+            if (!areSubjectsAvailable)
+            {
+                ToastMsg.show(R.string.time_table_cannot_be_set_before_adding_subjects);
+            }
+            else
+            {
+
+                mCurrentTimeTable.setStartTime(null);
+                mCurrentTimeTable.setEndTime(null);
+                if (mCurrentTimeTable.getWeekdayCode() == null)
+                {
+                    mCurrentTimeTable.setWeekdayCode(weekDaysKey[0]);
+                }
+                AddOrEditPeriodDialogFragment.getInstance(mCurrentTimeTable)
+                        .show(getFragmentManager(), AddOrEditPeriodDialogFragment.TAG);
+            }
         }
         else
         {
-            mCurrentTimeTable.setStartTime(null);
-            mCurrentTimeTable.setEndTime(null);
-            if (mCurrentTimeTable.getWeekdayCode() == null)
-            {
-                mCurrentTimeTable.setWeekdayCode(weekDaysKey[0]);
-            }
-            AddOrEditPeriodDialogFragment.getInstance(mCurrentTimeTable)
-                    .show(getFragmentManager(), AddOrEditPeriodDialogFragment.TAG);
+            Snack.show(R.string.noInternet);
         }
     }
 
@@ -257,7 +266,7 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.TIME_TABLE_FRAGMENT;
+        return NavigationUtil.TIME_TABLE_FRAGMENT;
     }
 
     @Subscribe
@@ -290,9 +299,12 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     @Override
     public void onTabSelected(TabLayout.Tab tab)
     {
-        Log.d(TAG, "onTabSelected");
-        mCurrentClass = (Classes) tab.getTag();
+        if (mTabSelected)
+        {
+            mCurrentClass = (Classes) tab.getTag();
+        }
         mCurrentTimeTable.setClassCode(mCurrentClass.getCode());
+        Log.d("TabSelectionIssue", "TimeTableFragment > onTabSelected > mCurrentClass : " + mCurrentClass);
         updateSubjectsAvailability();
         setUpRecyclerView();
     }

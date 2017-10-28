@@ -2,6 +2,7 @@ package com.clsroom.adapters;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,10 +19,9 @@ import com.clsroom.model.NotesImage;
 import com.clsroom.model.Progress;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ImageUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.NotesViewHolder;
-import com.facebook.drawee.drawable.ProgressBarDrawable;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -47,7 +47,18 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
 
     public static NotesAdapter getInstance(NotesClassifier classifier, DatabaseReference reference, FragmentLauncher launcher)
     {
-        Query ref = reference.orderByChild(Notes.DATE);
+        Query ref = reference.orderByKey();
+        if (reference.toString().contains(Notes.REVIEW))
+        {
+            if (NavigationUtil.isStudent)
+            {
+                ref = reference.orderByChild(Notes.SUBMITTER_ID).startAt(NavigationUtil.userId).endAt(NavigationUtil.userId);
+            }
+        }
+        else
+        {
+            ref = reference.getRef().orderByChild(Notes.DATE_TIME);
+        }
         NotesAdapter fragment = new NotesAdapter(Notes.class,
                 R.layout.notes_row, NotesViewHolder.class, ref, launcher);
         fragment.mNotesDbRef = ref;
@@ -71,67 +82,7 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
         {
             list.add(image.url);
         }
-        if (mNotesClassifier.isReviewedNotesShown())
-        {
-            viewHolder.reviewButtonsContainer.setVisibility(View.GONE);
-        }
-        else
-        {
-            if (model.getNotesStatus() != null && model.getNotesStatus().equals(Notes.REJECTED))
-            {
-                viewHolder.rejectionText.setVisibility(View.VISIBLE);
-                viewHolder.reviewButtonsContainer.setVisibility(View.GONE);
-            }
-            else
-            {
-                viewHolder.rejectionText.setVisibility(View.GONE);
-                viewHolder.reviewButtonsContainer.setVisibility(View.VISIBLE);
-
-                viewHolder.rejectButton.setOnClickListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View view)
-                    {
-                        model.setNotesStatus(Notes.REJECTED);
-                        showNotificationDialog(model, new OnDismissListener()
-                        {
-                            @Override
-                            public void onDismiss()
-                            {
-                                updateRejectionStatus(model);
-                            }
-                        });
-
-                    }
-                });
-
-                viewHolder.approveBtn.setOnClickListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View view)
-                    {
-                        model.setNotesStatus(Notes.APPROVED);
-                        showNotificationDialog(model, new OnDismissListener()
-                        {
-                            @Override
-                            public void onDismiss()
-                            {
-                                FirebaseDatabase.getInstance().getReference().child(Notes.NOTES)
-                                        .child(mNotesClassifier.getClassId()).child(mNotesClassifier.getSubjectId())
-                                        .child(model.getDate()).setValue(model).addOnCompleteListener(new OnCompleteListener<Void>()
-                                {
-                                    @Override
-                                    public void onComplete(@NonNull Task<Void> task)
-                                    {
-                                        mNotesDbRef.getRef().child(model.getDate()).removeValue();
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        }
+        handleReviewOptions(viewHolder, model);
         viewHolder.setClickListener(new ImageClickListener()
         {
             @Override
@@ -139,9 +90,8 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
             {
                 GenericDraweeHierarchyBuilder hierarchyBuilder = GenericDraweeHierarchyBuilder
                         .newInstance(launcher.getActivity().getResources())
-                        .setFailureImage(R.mipmap.broken_image)
-                        .setProgressBarImage(new ProgressBarDrawable())
-                        .setPlaceholderImage(R.mipmap.notebook_placeholder);
+                        .setPlaceholderImage(R.mipmap.notes);
+
 
                 new ImageViewer.Builder(launcher.getActivity(), list)
                         .setStartPosition(position)
@@ -190,9 +140,104 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
         }
     }
 
+    private void handleReviewOptions(final NotesViewHolder viewHolder, final Notes model)
+    {
+        viewHolder.reviewComment.setVisibility(View.GONE);
+        if (mNotesClassifier.isReviewedNotesShown())
+        {
+            viewHolder.reviewButtonsContainer.setVisibility(View.GONE);
+        }
+        else
+        {
+            if (model.getNotesStatus() != null && model.getNotesStatus().equals(Notes.REJECTED))
+            {
+                if (NavigationUtil.isStudent)
+                {
+                    viewHolder.reviewComment.setText(model.getReviewComment());
+                    viewHolder.reviewButtonsContainer.setVisibility(View.GONE);
+                    viewHolder.reviewComment.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    viewHolder.rejectionText.setVisibility(View.VISIBLE);
+                    viewHolder.reviewButtonsContainer.setVisibility(View.GONE);
+                }
+            }
+            else
+            {
+                viewHolder.rejectionText.setVisibility(View.GONE);
+                if (NavigationUtil.isStudent)
+                {
+                    viewHolder.reviewButtonsContainer.setVisibility(View.GONE);
+                }
+                else
+                {
+                    viewHolder.reviewButtonsContainer.setVisibility(View.VISIBLE);
+
+                    viewHolder.rejectButton.setOnClickListener(new View.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(View view)
+                        {
+                            handleRejection(model);
+                        }
+                    });
+
+                    viewHolder.approveBtn.setOnClickListener(new View.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(View view)
+                        {
+                            handleAcceptance(model);
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    private void handleAcceptance(final Notes model)
+    {
+        model.setNotesStatus(Notes.APPROVED);
+        showNotificationDialog(model, new OnDismissListener()
+        {
+            @Override
+            public void onDismiss(String msg)
+            {
+                FirebaseDatabase.getInstance().getReference().child(Notes.NOTES)
+                        .child(mNotesClassifier.getClassId()).child(mNotesClassifier.getSubjectId())
+                        .child(model.dateTime()).setValue(model).addOnCompleteListener(new OnCompleteListener<Void>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        mNotesDbRef.getRef().child(model.dateTime()).removeValue();
+                    }
+                });
+            }
+        });
+    }
+
+    private void handleRejection(final Notes model)
+    {
+        model.setNotesStatus(Notes.REJECTED);
+        showNotificationDialog(model, new OnDismissListener()
+        {
+            @Override
+            public void onDismiss(String msg)
+            {
+                if (!TextUtils.isEmpty(msg))
+                {
+                    model.setReviewComment(msg);
+                    updateRejectionStatus(model);
+                }
+            }
+        });
+    }
+
     private void updateRejectionStatus(Notes notes)
     {
-        mNotesDbRef.getRef().child(notes.getDate()).setValue(notes);
+        mNotesDbRef.getRef().child(notes.dateTime()).setValue(notes);
     }
 
     private void showNotificationDialog(Notes model, OnDismissListener listener)
@@ -215,8 +260,8 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
 
     private void configureOptions(final NotesViewHolder holder, final Notes notes)
     {
-        if (NavigationDrawerUtil.mCurrentUser.getUserId()
-                .equals(notes.getSubmitterId()) || !NavigationDrawerUtil.isStudent)
+        if (NavigationUtil.mCurrentUser.getUserId()
+                .equals(notes.getSubmitterId()))
         {
             holder.optionsIconContainer.setVisibility(View.VISIBLE);
         }
@@ -239,7 +284,7 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
                         switch (item.getItemId())
                         {
                             case R.id.action_edit:
-                                editClasses(notes);
+                                editNotes(notes);
                                 break;
                             case R.id.action_delete:
                                 confirmDelete(notes);
@@ -259,12 +304,12 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
         StorageReference notesStorageRef = FirebaseStorage.getInstance().getReference()
                 .child(Notes.NOTES).child(mNotesClassifier.getClassId())
                 .child(mNotesClassifier.getSubjectId());
-        notesStorageRef.child(notes.getDate()).delete().addOnCompleteListener(new OnCompleteListener<Void>()
+        notesStorageRef.child(notes.dateTime()).delete().addOnCompleteListener(new OnCompleteListener<Void>()
         {
             @Override
             public void onComplete(@NonNull Task<Void> task)
             {
-                mNotesDbRef.getRef().child(notes.getDate()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>()
+                mNotesDbRef.getRef().child(notes.dateTime()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>()
                 {
                     @Override
                     public void onComplete(@NonNull Task<Void> task)
@@ -277,7 +322,7 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
         });
     }
 
-    private void editClasses(Notes notes)
+    private void editNotes(Notes notes)
     {
         launcher.showFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
                 true, AddOrEditNotesFragment.TAG);

@@ -1,5 +1,8 @@
 package com.clsroom.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -8,7 +11,7 @@ import java.util.Locale;
 import static com.clsroom.dialogs.MonthYearPickerDialog.MONTH_ARRAY;
 import static com.clsroom.model.Notes.AM_PM;
 
-public class Notifications
+public class Notifications implements Parcelable
 {
     public static final String NOTIFICATIONS = "notifications";
     private String message;
@@ -19,6 +22,15 @@ public class Notifications
     private String leaveId;
     private String notesId;
     private String leaveRefType;
+
+    public static final String MESSAGE = "message";
+    public static final String SENDER_NAME = "senderName";
+    public static final String SENDER_PHOTO_URL = "senderPhotoUrl";
+    public static final String SENDER_ID = "senderId";
+    public static final String DATE_TIME = "dateTime";
+    public static final String LEAVE_ID = "leaveId";
+    public static final String NOTES_ID = "notesId";
+    public static final String LEAVE_REF_TYPE = "leaveRefType";
 
     public String getMessage()
     {
@@ -129,4 +141,55 @@ public class Notifications
     {
         this.leaveRefType = leaveRefType;
     }
+
+
+    @Override
+    public int describeContents()
+    {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags)
+    {
+        dest.writeString(this.message);
+        dest.writeString(this.senderName);
+        dest.writeString(this.senderPhotoUrl);
+        dest.writeString(this.senderId);
+        dest.writeLong(this.dateTime);
+        dest.writeString(this.leaveId);
+        dest.writeString(this.notesId);
+        dest.writeString(this.leaveRefType);
+    }
+
+    public Notifications()
+    {
+    }
+
+    protected Notifications(Parcel in)
+    {
+        this.message = in.readString();
+        this.senderName = in.readString();
+        this.senderPhotoUrl = in.readString();
+        this.senderId = in.readString();
+        this.dateTime = in.readLong();
+        this.leaveId = in.readString();
+        this.notesId = in.readString();
+        this.leaveRefType = in.readString();
+    }
+
+    public static final Parcelable.Creator<Notifications> CREATOR = new Parcelable.Creator<Notifications>()
+    {
+        @Override
+        public Notifications createFromParcel(Parcel source)
+        {
+            return new Notifications(source);
+        }
+
+        @Override
+        public Notifications[] newArray(int size)
+        {
+            return new Notifications[size];
+        }
+    };
 }

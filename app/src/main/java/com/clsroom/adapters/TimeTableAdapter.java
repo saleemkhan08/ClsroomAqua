@@ -11,11 +11,13 @@ import com.clsroom.R;
 import com.clsroom.dialogs.AddOrEditPeriodDialogFragment;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.TimeTable;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
+import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.ImageUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.TimeTableViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -76,7 +78,7 @@ public class TimeTableAdapter extends FirebaseRecyclerAdapter<TimeTable, TimeTab
             }
         });
 
-        if (NavigationDrawerUtil.isAdmin)
+        if (NavigationUtil.isAdmin)
         {
             Log.d(TAG, this + " : isSelectionEnabled : " + isSelectionEnabled);
             viewHolder.mCheckBox.setVisibility(isSelectionEnabled ? View.VISIBLE : View.GONE);
@@ -197,7 +199,14 @@ public class TimeTableAdapter extends FirebaseRecyclerAdapter<TimeTable, TimeTab
 
     private void editClasses(TimeTable timeTable)
     {
-        AddOrEditPeriodDialogFragment fragment = AddOrEditPeriodDialogFragment.getInstance(timeTable);
-        fragment.show(launcher.getSupportFragmentManager(), AddOrEditPeriodDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(launcher.getActivity()))
+        {
+            AddOrEditPeriodDialogFragment fragment = AddOrEditPeriodDialogFragment.getInstance(timeTable);
+            fragment.show(launcher.getSupportFragmentManager(), AddOrEditPeriodDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 }

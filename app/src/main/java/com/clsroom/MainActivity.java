@@ -1,6 +1,7 @@
 package com.clsroom;
 
 import android.app.ProgressDialog;
+import android.content.IntentFilter;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,16 +26,18 @@ import com.clsroom.model.Progress;
 import com.clsroom.model.Snack;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.squareup.otto.Subscribe;
 
 public class MainActivity extends AppCompatActivity implements FragmentLauncher
 {
     private static final String TAG = "MainActivity";
+    public static final String NOTIFICATION_OBJECT = "notificationAction";
 
     private ProgressDialog mProgressDialog;
-    private NavigationDrawerUtil mNavigationDrawerUtil;
+    private NavigationUtil mNavigationUtil;
     private Toolbar mToolbar;
     private ActionBarUtil mActionBarUtil;
     private Fragment mCurrentFragment;
@@ -45,7 +48,8 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
-
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
         setSupportActionBar(mToolbar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
@@ -61,14 +65,15 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
         drawer.addDrawerListener(toggle);
         toggle.syncState();
         Log.d("DualMainActivity", "OnCreate");
-        mNavigationDrawerUtil = new NavigationDrawerUtil(this);
+        mNavigationUtil = new NavigationUtil(this);
         Otto.register(this);
     }
 
     @Override
     public void onBackPressed()
     {
-        if (mNavigationDrawerUtil.onBackPressed())
+        Log.d("ProfileRelaunchIssue", "MainActivity : onBackPressed");
+        if (mNavigationUtil.onBackPressed())
         {
             super.onBackPressed();
         }
@@ -92,14 +97,21 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
     {
-        Otto.post(item.getItemId());
+        if (ConnectivityUtil.isConnected(this))
+        {
+            Otto.post(item.getItemId());
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
         return true;
     }
 
     @Override
     public void updateEventsListener(EventsListener listener)
     {
-        mNavigationDrawerUtil.updateCurrentFragment(listener);
+        mNavigationUtil.updateCurrentFragment(listener);
     }
 
     @Override
@@ -111,7 +123,15 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
     @Override
     public void showFragment(Fragment fragment, boolean addToBackStack, String tag)
     {
-        mNavigationDrawerUtil.loadFragment(fragment, addToBackStack, tag);
+        Log.d("relaunchIssue", "MainAct : showFragment1");
+        if (ConnectivityUtil.isConnected(this))
+        {
+            mNavigationUtil.loadFragment(fragment, addToBackStack, tag);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -129,7 +149,15 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
     @Override
     public void showFragment(Fragment fragment, boolean addToBackStack, String tag, ImageView sharedImageView, String transitionName)
     {
-        mNavigationDrawerUtil.loadFragment(fragment, addToBackStack, tag, sharedImageView, transitionName);
+        Log.d("relaunchIssue", "MainAct : showFragment2");
+        if (ConnectivityUtil.isConnected(this))
+        {
+            mNavigationUtil.loadFragment(fragment, addToBackStack, tag, sharedImageView, transitionName);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Subscribe

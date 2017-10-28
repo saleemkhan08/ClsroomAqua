@@ -18,8 +18,10 @@ import com.clsroom.dialogs.AddOrEditClassDialogFragment;
 import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
+import com.clsroom.model.Snack;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
 import com.google.firebase.database.DataSnapshot;
@@ -34,7 +36,7 @@ import butterknife.ButterKnife;
 
 public class ClassesListFragment extends Fragment implements View.OnClickListener, EventsListener
 {
-    private static final String TAG = "ClassesListFragment";
+    private static final String TAG = NavigationUtil.CLASSES_LIST_FRAGMENT;
     private FragmentLauncher launcher;
 
     @Bind(R.id.classesListRecyclerView)
@@ -68,8 +70,6 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
         if (launcher != null)
         {
             launcher.setToolBarTitle(R.string.classes);
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.NO_MENU);
         }
         setUpRecyclerView();
 
@@ -104,7 +104,7 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.GONE);
                 }
-                else if (dy < 0 && !mFabContainer.isShown() && NavigationDrawerUtil.isAdmin)
+                else if (dy < 0 && !mFabContainer.isShown() && NavigationUtil.isAdmin)
                 {
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.VISIBLE);
@@ -146,15 +146,22 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
     @Override
     public void onClick(View view)
     {
-        FragmentManager manager = getActivity().getSupportFragmentManager();
-        AddOrEditClassDialogFragment fragment = (AddOrEditClassDialogFragment) manager
-                .findFragmentByTag(AddOrEditClassDialogFragment.TAG);
-
-        if (fragment == null)
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
-            fragment = new AddOrEditClassDialogFragment();
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            AddOrEditClassDialogFragment fragment = (AddOrEditClassDialogFragment) manager
+                    .findFragmentByTag(AddOrEditClassDialogFragment.TAG);
+
+            if (fragment == null)
+            {
+                fragment = new AddOrEditClassDialogFragment();
+            }
+            fragment.show(manager, AddOrEditClassDialogFragment.TAG);
         }
-        fragment.show(manager, AddOrEditClassDialogFragment.TAG);
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -172,7 +179,7 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.CLASSES_LIST_FRAGMENT;
+        return NavigationUtil.CLASSES_LIST_FRAGMENT;
     }
 
     private void setLauncher()

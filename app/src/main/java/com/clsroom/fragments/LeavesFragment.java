@@ -26,14 +26,16 @@ import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Leaves;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
 import com.clsroom.model.Students;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
 import com.clsroom.utils.ActionBarUtil;
+import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.LeavesDecorator;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
 import com.google.firebase.database.DataSnapshot;
@@ -64,7 +66,7 @@ import static com.clsroom.model.Leaves.getCalendar;
 public class LeavesFragment extends Fragment implements EventsListener, ValueEventListener,
         OnDateSelectedListener, DatePickerDialog.OnDateSetListener, OnMonthChangedListener
 {
-    public static final String TAG = "LeavesFragment";
+    public static final String TAG = NavigationUtil.LEAVES_LIST_FRAGMENT;
 
     @Bind(R.id.leavesList)
     MaterialCalendarView mLeavesCalender;
@@ -117,10 +119,17 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     {
         View parentView = commonFlow(inflater, container);
         mLeavesCalender.setOnMonthChangedListener(this);
+        //mLeavesCalender.setBackgroundResource(R.color.colorSelection);
+        mLeavesCalender.setPadding(0, 0, 0, 0);
         LinearLayout titleContainer = (LinearLayout) mLeavesCalender.getChildAt(0);
-        titleContainer.setBackgroundResource(R.color.grey);
+        ViewGroup.LayoutParams params = titleContainer.getLayoutParams();
+        titleContainer.setLayoutParams(params);
+        //titleContainer.setBackgroundResource(R.color.colorSelection);
+
         TextView title = (TextView) titleContainer.getChildAt(1);
+        //title.setTextColor(-1);
         title.setBackgroundResource(R.drawable.bg_drawable);
+
         title.setClickable(true);
         title.setOnClickListener(new View.OnClickListener()
         {
@@ -132,6 +141,7 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
         });
 
         calenderPager = (ViewGroup) mLeavesCalender.getChildAt(1);
+        calenderPager.setBackgroundResource(R.color.white);
 
         View prevButton = titleContainer.getChildAt(0);
         prevButton.setOnClickListener(new View.OnClickListener()
@@ -224,7 +234,7 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     private void normalFlow()
     {
         setCurrentMonth(Calendar.getInstance());
-        mCurrentUserId = NavigationDrawerUtil.mCurrentUser.getUserId();
+        mCurrentUserId = NavigationUtil.mCurrentUser.getUserId();
     }
 
     private void notificationFlow()
@@ -319,9 +329,16 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
 
     public void selectMonth()
     {
-        MonthYearPickerDialog pd = MonthYearPickerDialog.getInstance(currentCalendar);
-        pd.setListener(this);
-        pd.show(getFragmentManager(), "MonthYearPickerDialog");
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            MonthYearPickerDialog pd = MonthYearPickerDialog.getInstance(currentCalendar);
+            pd.setListener(this);
+            pd.show(getFragmentManager(), "MonthYearPickerDialog");
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -372,7 +389,7 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     {
         super.onStart();
         launcher.updateEventsListener(this);
-        if (NavigationDrawerUtil.isStudent)
+        if (NavigationUtil.isStudent)
         {
             Otto.post(ActionBarUtil.NO_MENU);
             userDetails.setVisibility(View.GONE);
@@ -413,25 +430,39 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     @OnClick(R.id.addLeaves)
     public void addLeaves(View view)
     {
-        AddLeavesDialogFragment.getInstance().show(getActivity()
-                .getSupportFragmentManager(), AddLeavesDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            AddLeavesDialogFragment.getInstance().show(getActivity()
+                    .getSupportFragmentManager(), AddLeavesDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
     public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected)
     {
         String key = Leaves.getFirstDateDbKey(mLeavesList, date);
-        if (key != null)
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
-            LeavesDetailDialogFragment.getInstance(mCurrentUserId, key)
-                    .show(getFragmentManager(), LeavesDetailDialogFragment.TAG);
+            if (key != null)
+            {
+                LeavesDetailDialogFragment.getInstance(mCurrentUserId, key)
+                        .show(getFragmentManager(), LeavesDetailDialogFragment.TAG);
+            }
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
         }
     }
 
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.LEAVES_LIST_FRAGMENT;
+        return NavigationUtil.LEAVES_LIST_FRAGMENT;
     }
 
     @Subscribe

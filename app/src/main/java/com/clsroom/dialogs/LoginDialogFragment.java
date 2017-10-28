@@ -15,18 +15,19 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.android.volley.VolleyError;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.FirebaseAuth;
 import com.clsroom.R;
 import com.clsroom.listeners.OnDismissListener;
 import com.clsroom.listeners.ResultListener;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
 import com.clsroom.utils.VolleyUtil;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -103,7 +104,7 @@ public class LoginDialogFragment extends DialogFragment
         }
         else
         {
-            ToastMsg.show(R.string.noInternet);
+            Snack.show(R.string.noInternet);
         }
     }
 
@@ -121,7 +122,7 @@ public class LoginDialogFragment extends DialogFragment
         Otto.unregister(this);
         if (mOnDismissListener != null)
         {
-            mOnDismissListener.onDismiss();
+            mOnDismissListener.onDismiss(null);
         }
     }
 
@@ -164,9 +165,16 @@ public class LoginDialogFragment extends DialogFragment
     @OnClick(R.id.forgotPassword)
     public void forgotPassword(View forgotPassword)
     {
-        Log.d("UnknownLogin", "forgotPassword");
-        closeTheKeyBoard();
-        checkUserId();
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            Log.d("UnknownLogin", "forgotPassword");
+            closeTheKeyBoard();
+            checkUserId();
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     private void checkUserId()

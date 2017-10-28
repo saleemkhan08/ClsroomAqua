@@ -72,4 +72,10 @@ public class Classes
     {
         return classTeacherId;
     }
+
+    @Override
+    public String toString()
+    {
+        return getName();
+    }
 }

@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.clsroom.MainActivity;
 import com.clsroom.R;
 import com.clsroom.adapters.NotesAdapter;
 import com.clsroom.adapters.TimeTableAdapter;
@@ -17,9 +16,11 @@ import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Notes;
 import com.clsroom.model.NotesClassifier;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Subjects;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
 import com.google.firebase.database.DataSnapshot;
@@ -36,7 +37,7 @@ import butterknife.OnClick;
 
 public class NotesFragment extends ClassTabFragment implements EventsListener
 {
-    private static final String TAG = "NotesFragment";
+    private static final String TAG = NavigationUtil.NOTES_FRAGMENT;
 
     @Bind(R.id.notesRecyclerView)
     RecyclerView mNotesRecyclerView;
@@ -55,7 +56,6 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
 
 
     private DatabaseReference mRootRef;
-    private Classes mCurrentClass;
     private DatabaseReference mNotesDbRef;
     private String mCurrentSubjectCode;
     private DatabaseReference mSubjectDbRef;
@@ -63,10 +63,12 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
     private boolean areSubjectsAvailable;
     private NotesAdapter mAdapter;
     private FragmentLauncher launcher;
+    private String notesId;
 
     public NotesFragment()
     {
         Log.d(TAG, "NotesFragment");
+        mCurrentNotesClassifier = new NotesClassifier();
     }
 
     @Override
@@ -75,7 +77,6 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
         Log.d(TAG, "onCreateView2");
         ButterKnife.bind(this, parentView);
         Otto.register(this);
-        mCurrentNotesClassifier = new NotesClassifier();
         setLauncher();
         if (launcher != null)
         {
@@ -94,7 +95,6 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
                 Subjects subject = (Subjects) tab.getTag();
                 mCurrentSubjectCode = subject.getSubjectCode();
                 mCurrentNotesClassifier.setSubjectId(mCurrentSubjectCode);
-                mCurrentNotesClassifier.setTeacherId(subject.getTeacherCode());
                 mCurrentNotesClassifier.setSubjectName(subject.getSubjectName());
                 if (mCurrentClass != null)
                 {
@@ -145,22 +145,14 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
     private void setUpRecyclerView()
     {
         Log.d(TAG, "setUpRecyclerView");
-
-
         if (mCurrentNotesClassifier.isReviewedNotesShown())
         {
-            if (!NavigationDrawerUtil.isStudent)
-            {
-                Otto.post(ActionBarUtil.SHOW_PENDING_NOTES_FRAGMENT_MENU);
-            }
+            Otto.post(ActionBarUtil.SHOW_PENDING_NOTES_FRAGMENT_MENU);
             mNotesDbRef = mRootRef.child(Notes.NOTES).child(mCurrentClass.getCode()).child(mCurrentSubjectCode);
         }
         else
         {
-            if (!NavigationDrawerUtil.isStudent)
-            {
-                Otto.post(ActionBarUtil.SHOW_NOTES_FRAGMENT_MENU);
-            }
+            Otto.post(ActionBarUtil.SHOW_NOTES_FRAGMENT_MENU);
             mNotesDbRef = mRootRef.child(Notes.NOTES).child(Notes.REVIEW).child(mCurrentClass.getCode()).child(mCurrentSubjectCode);
         }
 
@@ -219,11 +211,17 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
     @OnClick(R.id.addNotes)
     public void addNotes(View view)
     {
-        Activity activity = getActivity();
-        if (activity instanceof MainActivity)
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
-            launcher.showFragment(AddOrEditNotesFragment.getInstance(mCurrentNotesClassifier),
-                    true, AddOrEditNotesFragment.TAG);
+            if (launcher != null)
+            {
+                launcher.showFragment(AddOrEditNotesFragment.getInstance(mCurrentNotesClassifier),
+                        true, AddOrEditNotesFragment.TAG);
+            }
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
         }
     }
 
@@ -249,15 +247,19 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.NOTES_FRAGMENT;
+        return NavigationUtil.NOTES_FRAGMENT;
     }
 
     @Override
     public void onTabSelected(TabLayout.Tab tab)
     {
-        mCurrentClass = (Classes) tab.getTag();
+        if (mTabSelected)
+        {
+            mCurrentClass = (Classes) tab.getTag();
+        }
         mCurrentNotesClassifier.setClassId(mCurrentClass.getCode());
         mCurrentNotesClassifier.setClassName(mCurrentClass.getName());
+        Log.d("TabSelectionIssue", "NotesFragment > onTabSelected > mCurrentClass : " + mCurrentClass);
         updateSubjectsAvailability();
         setUpSubjectsTabsListener();
     }
@@ -322,5 +324,12 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
         {
             launcher = (FragmentLauncher) activity;
         }
+    }
+
+    public static NotesFragment getInstance(String notesId)
+    {
+        NotesFragment fragment = new NotesFragment();
+        fragment.notesId = notesId;
+        return fragment;
     }
 }

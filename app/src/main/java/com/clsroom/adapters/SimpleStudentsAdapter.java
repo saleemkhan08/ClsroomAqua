@@ -2,7 +2,6 @@ package com.clsroom.adapters;
 
 import android.util.Log;
 import android.view.View;
-import android.widget.Toast;
 
 import com.clsroom.R;
 import com.clsroom.model.Students;
@@ -45,7 +44,6 @@ public class SimpleStudentsAdapter extends FirebaseRecyclerAdapter<Students, Stu
             public void onClick(View view)
             {
                 Otto.post(model);
-                Toast.makeText(view.getContext(), model.getUserId(), Toast.LENGTH_SHORT).show();
             }
         });
     }

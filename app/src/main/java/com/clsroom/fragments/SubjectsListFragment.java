@@ -16,10 +16,12 @@ import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Subjects;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
 import com.google.firebase.database.DataSnapshot;
@@ -36,7 +38,7 @@ import butterknife.OnClick;
 
 public class SubjectsListFragment extends ClassTabFragment implements EventsListener
 {
-    private static final String TAG = "SubjectsListFragment";
+    private static final String TAG = NavigationUtil.SUBJECTS_FRAGMENT;
 
     @Bind(R.id.subjetcsListRecyclerView)
     RecyclerView mSubjectsListRecyclerView;
@@ -54,7 +56,6 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     View mAddSubjectsFab;
 
     private DatabaseReference mRootRef;
-    private Classes mCurrentClass;
     private SubjectsAdapter mAdapter;
     private DatabaseReference mSubjectsDbRef;
     private Handler mHandler;
@@ -126,7 +127,7 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.GONE);
                 }
-                else if (dy < 0 && !mFabContainer.isShown() && NavigationDrawerUtil.isAdmin)
+                else if (dy < 0 && !mFabContainer.isShown() && NavigationUtil.isAdmin)
                 {
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.VISIBLE);
@@ -169,8 +170,15 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     @OnClick(R.id.addSubjects)
     public void addSubjects(View view)
     {
-        AddOrEditSubjectsDialogFragment fragment = AddOrEditSubjectsDialogFragment.getInstance(mCurrentClass.getCode());
-        fragment.show(getFragmentManager(), AddOrEditSubjectsDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            AddOrEditSubjectsDialogFragment fragment = AddOrEditSubjectsDialogFragment.getInstance(mCurrentClass.getCode());
+            fragment.show(getFragmentManager(), AddOrEditSubjectsDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -195,7 +203,7 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.SUBJECTS_FRAGMENT;
+        return NavigationUtil.SUBJECTS_FRAGMENT;
     }
 
     @Subscribe
@@ -228,8 +236,11 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     @Override
     public void onTabSelected(TabLayout.Tab tab)
     {
-        Log.d(TAG, "onTabSelected");
-        mCurrentClass = (Classes) tab.getTag();
+        if (mTabSelected)
+        {
+            mCurrentClass = (Classes) tab.getTag();
+        }
+        Log.d("TabSelectionIssue", "SubjectListFragment > onTabSelected > mCurrentClass : " + mCurrentClass);
         setUpRecyclerView();
     }
 

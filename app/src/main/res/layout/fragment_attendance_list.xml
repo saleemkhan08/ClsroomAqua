@@ -8,6 +8,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:paddingBottom="60dp"
+        android:background="@color/grey"
         android:layout_below="@+id/attendanceDate"
         android:clipToPadding="false"
         />
@@ -59,8 +60,6 @@
         android:id="@+id/saveAttendance"
         android:text="@string/save"
         android:textColor="@color/white"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
         android:layout_alignParentBottom="true"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_height="wrap_content"/>

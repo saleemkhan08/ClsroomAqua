@@ -16,7 +16,7 @@ import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Notifications;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,7 +30,7 @@ import butterknife.ButterKnife;
 
 public class NotificationListFragment extends Fragment implements EventsListener
 {
-    private static final String TAG = "NotificationFragment";
+    private static final String TAG = NavigationUtil.NOTIFICATIONS_FRAGMENT;
 
     @Bind(R.id.notificationListRecyclerView)
     RecyclerView notificationListRecyclerView;
@@ -55,7 +55,7 @@ public class NotificationListFragment extends Fragment implements EventsListener
         View parentView = inflater.inflate(R.layout.fragment_notifications_list, container, false);
         ButterKnife.bind(this, parentView);
         setLauncher();
-
+        Log.d("NotificationListIssue", "onCreateView");
         mRootRef = FirebaseDatabase.getInstance().getReference();
         if (launcher != null)
         {
@@ -79,7 +79,8 @@ public class NotificationListFragment extends Fragment implements EventsListener
     private void setUpRecyclerView()
     {
         DatabaseReference notificationsDbRef = mRootRef.child(Notifications.NOTIFICATIONS)
-                .child(NavigationDrawerUtil.mCurrentUser.getUserId());
+                .child(NavigationUtil.mCurrentUser.getUserId());
+        Log.d("NotificationListIssue", "notificationsDbRef : " + notificationsDbRef);
         NotificationsAdapter adapter = NotificationsAdapter.getInstance(notificationsDbRef, launcher);
         notificationListRecyclerView.setAdapter(adapter);
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
@@ -90,6 +91,7 @@ public class NotificationListFragment extends Fragment implements EventsListener
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
+                Log.d("NotificationListIssue", "dataSnapshot : " + dataSnapshot);
                 mProgress.setVisibility(View.GONE);
                 if (dataSnapshot.getChildrenCount() <= 0)
                 {
@@ -104,7 +106,7 @@ public class NotificationListFragment extends Fragment implements EventsListener
             @Override
             public void onCancelled(DatabaseError databaseError)
             {
-                Log.d(TAG, "databaseError : " + databaseError);
+                Log.d("NotificationListIssue", "databaseError : " + databaseError);
                 mProgress.setVisibility(View.GONE);
                 mErrorMsg.setVisibility(View.VISIBLE);
             }
@@ -126,7 +128,7 @@ public class NotificationListFragment extends Fragment implements EventsListener
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.NOTIFICATIONS_FRAGMENT;
+        return NavigationUtil.NOTIFICATIONS_FRAGMENT;
     }
 
     private void setLauncher()

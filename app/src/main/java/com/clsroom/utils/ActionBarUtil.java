@@ -25,6 +25,7 @@ public class ActionBarUtil
     public static final String SHOW_SELECTED_NOTIFICATIONS_MENU = "showSelectedNotificationsMenu";
     public static final String SHOW_PROFILE_MENU = "showProfileMenu";
     public static final String SHOW_STUDENTS_MENU_FOR_TEACHERS = "showStudentsMenuForTeachers";
+    public static final String SHOW_SINGLE_NOTES_MENU = "showSingleNotesMenu";
     private MenuInflater mMenuInflater;
     private Menu mMenu;
     public static final String SHOW_MULTIPLE_STAFF_MENU = "showMultipleStaffMenu";
@@ -76,6 +77,9 @@ public class ActionBarUtil
                 break;
             case SHOW_PROFILE_MENU:
                 loadNewMenu(R.menu.menu_profile);
+                break;
+            case SHOW_SINGLE_NOTES_MENU:
+                loadNewMenu(R.menu.classes_options);
                 break;
             case NO_MENU:
             case SHOW_INDEPENDENT_SUBJECT_MENU:

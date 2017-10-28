@@ -18,7 +18,7 @@ import com.clsroom.model.Progress;
 import com.clsroom.model.Staff;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.DateTimeUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -99,7 +99,7 @@ public class AddLeavesDialogFragment extends CustomDialogFragment implements Ada
         leave.setStatus(Leaves.STATUS_APPLIED);
         leave.setApproverId(staff.getUserId());
         leave.requestedLeaveKey(DateTimeUtil.getKey());
-        leave.setRequesterId(NavigationDrawerUtil.mCurrentUser.getUserId());
+        leave.setRequesterId(NavigationUtil.mCurrentUser.getUserId());
 
         if (leave.validate())
         {

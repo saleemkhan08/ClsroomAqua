@@ -5,11 +5,12 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.GridLayoutManager;
@@ -26,7 +27,6 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.clsroom.R;
 import com.clsroom.adapters.EditGalleryAdapter;
@@ -39,16 +39,16 @@ import com.clsroom.model.Notes;
 import com.clsroom.model.NotesClassifier;
 import com.clsroom.model.NotesImage;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
+import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.DateTimeUtil;
 import com.clsroom.utils.ItemMovementCallbackHelper;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -59,6 +59,8 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import butterknife.Bind;
@@ -69,7 +71,7 @@ import static android.app.Activity.RESULT_OK;
 
 public class AddOrEditNotesFragment extends Fragment implements EventsListener, AdapterView.OnItemSelectedListener, View.OnTouchListener
 {
-    public static final String TAG = "AddOrEditNotesFragment";
+    public static final String TAG = NavigationUtil.ADD_OR_EDIT_NOTES_FRAGMENT;
     public static final int PICK_IMAGE_MULTIPLE_GALLERY = 125;
     private FragmentLauncher launcher;
 
@@ -112,6 +114,7 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState)
     {
+        Log.d("ClosingIssue", "onCreateView");
         View parentView = inflater.inflate(R.layout.fragment_add_notes, container, false);
         ButterKnife.bind(this, parentView);
         setLauncher();
@@ -131,7 +134,12 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
                 .child(Notes.NOTES).child(mCurrentNotesClassifier.getClassId())
                 .child(mCurrentNotesClassifier.getSubjectId());
 
-        mNotesDbRef = mRootRef.child(Notes.NOTES).child(Notes.REVIEW).child(mCurrentNotesClassifier.getClassId())
+        mNotesDbRef = (NavigationUtil.isStudent)
+
+                ? mRootRef.child(Notes.NOTES).child(Notes.REVIEW).child(mCurrentNotesClassifier.getClassId())
+                .child(mCurrentNotesClassifier.getSubjectId())
+
+                : mRootRef.child(Notes.NOTES).child(mCurrentNotesClassifier.getClassId())
                 .child(mCurrentNotesClassifier.getSubjectId());
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
@@ -148,64 +156,68 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
                 launcher.setToolBarTitle(R.string.addNotes);
             }
         }
-
-        mSubjectName.setText(mCurrentNotesClassifier.getClassName() + " - " + mCurrentNotesClassifier.getSubjectName());
         setUpStaffSpinner();
-
+        mSubjectName.setText(mCurrentNotesClassifier.getClassName() + " - " + mCurrentNotesClassifier.getSubjectName());
         return parentView;
     }
 
     private void setLauncher()
     {
         Activity activity = getActivity();
-        if(activity instanceof FragmentLauncher){
+        if (activity instanceof FragmentLauncher)
+        {
             launcher = (FragmentLauncher) activity;
         }
+        Log.d("ClosingIssue", "setLauncher : " + launcher);
     }
-
-
 
     @Override
     public void onStart()
     {
         super.onStart();
+        Log.d("ClosingIssue", "onStart");
         launcher.updateEventsListener(this);
         Otto.post(ActionBarUtil.NO_MENU);
     }
 
     private void setUpStaffSpinner()
     {
-        mStaffDbRef = mRootRef.child(Staff.STAFF);
-        mStaffAdapter = new StaffFirebaseListAdapter(getActivity(),
-                Staff.class, android.R.layout.simple_list_item_1, mStaffDbRef);
-        mNotesApproverSpinner.setAdapter(mStaffAdapter);
-        mNotesApproverSpinner.setOnItemSelectedListener(this);
-        mNotesApprover.setOnTouchListener(this);
-        updateStaffSpinnerSelection();
+        if (NavigationUtil.isStudent)
+        {
+            mStaffDbRef = mRootRef.child(Staff.STAFF);
+            if (mCurrentNotesClassifier.isEdit())
+            {
+                updateStaffSpinnerSelection();
+            }
+            else
+            {
+                mStaffAdapter = new StaffFirebaseListAdapter(getActivity(),
+                        Staff.class, android.R.layout.simple_list_item_1, mStaffDbRef);
+                mNotesApproverSpinner.setAdapter(mStaffAdapter);
+                mNotesApproverSpinner.setOnItemSelectedListener(this);
+                mNotesApprover.setOnTouchListener(this);
+            }
+        }
+        else
+        {
+            mNotesApprover.setEnabled(false);
+            Staff staff = (Staff) NavigationUtil.mCurrentUser;
+            mNotesApprover.setText(staff.getFullName());
+            mNotesApprover.setTag(staff);
+        }
     }
 
     private void updateStaffSpinnerSelection()
     {
-        mStaffDbRef.addListenerForSingleValueEvent(new ValueEventListener()
+        mStaffDbRef.child(notes.getReviewerId()).addListenerForSingleValueEvent(new ValueEventListener()
         {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot)
             {
-                mHandler.post(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        try
-                        {
-                            mNotesApproverSpinner.setSelection(findPosition());
-                        }
-                        catch (Exception e)
-                        {
-                            mNotesApproverSpinner.setSelection(0);
-                        }
-                    }
-                });
+                Staff staff = dataSnapshot.getValue(Staff.class);
+                mNotesApprover.setText(staff.getFullName());
+                mNotesApprover.setTag(staff);
+                mNotesApprover.setEnabled(false);
             }
 
             @Override
@@ -219,14 +231,19 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
     @OnClick(R.id.addImagesFabContainer)
     public void addImages(View view)
     {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        if (Build.VERSION.SDK_INT >= 18)
+        Log.d("ClosingIssue", "addImages");
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
+            Intent intent = new Intent();
+            intent.setType("image/*");
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_MULTIPLE_GALLERY);
         }
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_MULTIPLE_GALLERY);
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     private void updateImageList(ArrayList<Uri> currentList)
@@ -250,7 +267,7 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.NOTES_FRAGMENT;
+        return NavigationUtil.NOTES_FRAGMENT;
     }
 
     public static AddOrEditNotesFragment getInstance(NotesClassifier resultClassifier)
@@ -270,18 +287,6 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
         fragment.notes = notes;
         fragment.mHandler = new Handler();
         return fragment;
-    }
-
-    private int findPosition()
-    {
-        for (int i = 0; i < mStaffAdapter.getCount(); i++)
-        {
-            if ((mStaffAdapter.getItem(i).getUserId().equals(mCurrentNotesClassifier.getTeacherId())))
-            {
-                return i;
-            }
-        }
-        return 0;
     }
 
     @Override
@@ -363,7 +368,6 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
                     }
 
                 }
-                Toast.makeText(getActivity(), "currentList count : " + currentList.size(), Toast.LENGTH_SHORT).show();
                 updateImageList(currentList);
             }
         }
@@ -374,90 +378,109 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
     }
 
     @OnClick(R.id.saveNotes)
-    public void save()
+    public void submit()
     {
-        Staff staff = (Staff) mNotesApprover.getTag();
-        notes.setReviewerId(staff.getUserId());
-
-        if (notes.getDate() == null)
+        Log.d("ClosingIssue", "save");
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
-            notes.setDate(DateTimeUtil.getKey());
-        }
-
-        notes.setNotesDescription(mNotesDescription.getText().toString().trim());
-        notes.setNotesTitle(mNotesTitle.getText().toString().trim());
-
-        notes.setSubmitterId(NavigationDrawerUtil.mCurrentUser.getUserId());
-        notes.setSubmitterName(NavigationDrawerUtil.mCurrentUser.getFullName());
-        notes.setSubmitterPhotoUrl(NavigationDrawerUtil.mCurrentUser.getPhotoUrl());
-
-        if (TextUtils.isEmpty(notes.getNotesTitle()))
-        {
-            ToastMsg.show(R.string.please_enter_notes_title);
-        }
-        else if (TextUtils.isEmpty(notes.getNotesDescription()))
-        {
-            ToastMsg.show(R.string.please_enter_description);
-        }
-        else
-        {
-            Progress.show(R.string.uploading);
-            StorageReference ref = mNotesStorageRef.child(notes.getDate());
-            final int noOfUploadingPhoto = mImageList.size();
-            Log.d("fixImageOrderIssue", "mImageList : " + mImageList);
-            if (noOfUploadingPhoto > 0)
+            Staff staff = (Staff) mNotesApprover.getTag();
+            notes.setReviewerId(staff.getUserId());
+            notes.setClassSubId(mCurrentNotesClassifier.getClassId() + "_" + mCurrentNotesClassifier.getSubjectId());
+            if (notes.dateTime().equals("0"))
             {
-                for (Object image : mImageList)
-                {
-                    final String photoName = System.currentTimeMillis() + ".jpg";
-                    if (image instanceof Uri)
-                    {
-                        ref.child(photoName).putFile((Uri) image)
-                                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>()
-                                {
-                                    @Override
-                                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot)
-                                    {
-                                        try
-                                        {
-                                            Log.d("PhotoUploadFlow", "onSuccess");
-                                            updateProgressDialog(notes, taskSnapshot, photoName, noOfUploadingPhoto);
-                                        }
-                                        catch (Exception e)
-                                        {
-                                            Log.d("PhotoUploadFlow", "Exception " + e.getMessage());
-                                            Progress.hide();
-                                            ToastMsg.show(R.string.please_try_again);
-                                        }
-                                    }
-                                })
-                                .addOnFailureListener(new OnFailureListener()
-                                {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e)
-                                    {
-                                        Progress.hide();
-                                        ToastMsg.show(R.string.please_try_again);
-                                    }
-                                });
-                    }
-                    else if (image instanceof NotesImage)
-                    {
-                        updateProgressDialog(notes, (NotesImage) image, noOfUploadingPhoto);
-                    }
-                }
+                notes.dateTime(DateTimeUtil.getKey());
+            }
+
+            notes.setNotesDescription(mNotesDescription.getText().toString().trim());
+            notes.setNotesTitle(mNotesTitle.getText().toString().trim());
+
+            notes.setSubmitterId(NavigationUtil.mCurrentUser.getUserId());
+            notes.setSubmitterName(NavigationUtil.mCurrentUser.getFullName());
+            notes.setSubmitterPhotoUrl(NavigationUtil.mCurrentUser.getPhotoUrl());
+
+            if (TextUtils.isEmpty(notes.getNotesTitle()))
+            {
+                ToastMsg.show(R.string.please_enter_notes_title);
+            }
+            else if (TextUtils.isEmpty(notes.getNotesDescription()))
+            {
+                ToastMsg.show(R.string.please_enter_description);
             }
             else
             {
-                saveNotes(notes);
+                uploadImages();
             }
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
         }
     }
 
-    private void updateProgressDialog(Notes notes, UploadTask.TaskSnapshot taskSnapshot,
-                                      String photoName, int noOfPhotos)
+    private void uploadImages()
     {
-        Log.d("PhotoUploadFlow", "updateProgressDialog");
+        Progress.show(R.string.uploading);
+        StorageReference ref = mNotesStorageRef.child(notes.dateTime());
+        final int noOfUploadingPhoto = mImageList.size();
+
+        Log.d("ClosingIssue", "mImageList : " + mImageList);
+        if (noOfUploadingPhoto > 0)
+        {
+            for (Object image : mImageList)
+            {
+                final String photoName = System.currentTimeMillis() + ".jpg";
+                if (image instanceof Uri)
+                {
+                    Bitmap bmp = null;
+                    try
+                    {
+                        bmp = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), (Uri) image);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        bmp.compress(Bitmap.CompressFormat.JPEG, 80, baos);
+                        byte[] data = baos.toByteArray();
+
+                        ref.child(photoName).putBytes(data).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>()
+                        {
+                            @Override
+                            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task)
+                            {
+                                if (task.isSuccessful())
+                                {
+                                    Log.d("ClosingIssue", "onSuccess");
+                                    saveNotesDetailsForCurrentlyUploadedImages(notes, task.getResult(), photoName, noOfUploadingPhoto);
+                                }
+                                else
+                                {
+                                    Progress.hide();
+                                    ToastMsg.show(R.string.please_try_again);
+                                }
+                            }
+                        });
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                        ToastMsg.show(R.string.please_try_again);
+                    }
+                }
+                else if (image instanceof NotesImage)
+                {
+                    Log.d("ClosingIssue", "already uploaded image");
+                    saveNotesDetailsForAlreadyUploadedImages(notes, (NotesImage) image, noOfUploadingPhoto);
+                }
+            }
+        }
+        else
+        {
+            Log.d("ClosingIssue", "No images");
+            saveNotesDetails();
+        }
+    }
+
+    private void saveNotesDetailsForCurrentlyUploadedImages(Notes notes, UploadTask.TaskSnapshot taskSnapshot,
+                                                            String photoName, int noOfPhotos)
+    {
+        Log.d("ClosingIssue", "updateProgressDialog");
         Uri downloadUri = taskSnapshot.getDownloadUrl();
         if (downloadUri != null)
         {
@@ -471,13 +494,13 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
                 if (noOfPhotos == mGalleryImagesList.size())
                 {
                     notes.setNotesImages(mGalleryImagesList);
-                    saveNotes(notes);
+                    saveNotesDetails();
                 }
             }
         }
     }
 
-    private void updateProgressDialog(Notes notes, NotesImage notesImage, int noOfPhotos)
+    private void saveNotesDetailsForAlreadyUploadedImages(Notes notes, NotesImage notesImage, int noOfPhotos)
     {
         if (notesImage != null)
         {
@@ -485,44 +508,80 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
             if (noOfPhotos == mGalleryImagesList.size())
             {
                 notes.setNotesImages(mGalleryImagesList);
-                saveNotes(notes);
+                Log.d("ClosingIssue", "saveNotesDetailsForAlreadyUploadedImages");
+                saveNotesDetails();
             }
         }
-
     }
 
-    private void saveNotes(final Notes notes)
+    private void sendNotificationToReviewer()
     {
-        Log.d("fixImageOrderIssue", "notes.getNotesImages() : " + notes.getNotesImages());
-        mNotesDbRef.child(notes.getDate()).setValue(notes).addOnCompleteListener(new OnCompleteListener<Void>()
+        Log.d("ClosingIssue", "onComplete");
+        if (NavigationUtil.isStudent)
+        {
+            Log.d("ClosingIssue", "sending notification getNotesStatus : " + notes.getNotesStatus());
+            NotificationDialogFragment.getInstance(notes, new OnDismissListener()
+            {
+                @Override
+                public void onDismiss(String notificationMessage)
+                {
+                    showSuccessMessage();
+                }
+            }).show(getActivity().getSupportFragmentManager(),
+                    NotificationDialogFragment.TAG);
+        }
+    }
+
+    private void saveNotesDetails()
+    {
+        Log.d("ClosingIssue", "saveNotesDetails");
+        String status = notes.getNotesStatus();
+        if (mCurrentNotesClassifier.isEdit() && status != null && status.equals(Notes.REJECTED))
+        {
+            notes.setNotesStatus(Notes.RE_SUBMITTED);
+        }
+        else
+        {
+            notes.setNotesStatus(Notes.REVIEW);
+        }
+
+        if (NavigationUtil.isStudent)
+        {
+            FirebaseDatabase.getInstance().getReference().child(Notes.NOTES)
+                    .child(mCurrentNotesClassifier.getClassId()).child(mCurrentNotesClassifier.getSubjectId())
+                    .child(notes.dateTime()).removeValue();
+        }
+
+        mNotesDbRef.child(notes.dateTime()).setValue(notes).addOnCompleteListener(new OnCompleteListener<Void>()
         {
             @Override
             public void onComplete(@NonNull Task<Void> task)
             {
-                notes.setNotesStatus(Notes.REVIEW);
-                NotificationDialogFragment.getInstance(notes, new OnDismissListener()
+                if (task.isSuccessful())
                 {
-                    @Override
-                    public void onDismiss()
-                    {
-                        Progress.hide();
-                        ToastMsg.show(R.string.notes_will_be_displayed_after_review);
-                        getActivity().onBackPressed();
-                    }
-                }).show(getActivity().getSupportFragmentManager(),
-                        NotificationDialogFragment.TAG);
-
-
-            }
-        }).addOnFailureListener(new OnFailureListener()
-        {
-            @Override
-            public void onFailure(@NonNull Exception e)
-            {
-                Progress.hide();
-                ToastMsg.show(R.string.please_try_again);
+                    sendNotificationToReviewer();
+                }
+                else
+                {
+                    Progress.hide();
+                    ToastMsg.show(R.string.please_try_again);
+                }
             }
         });
     }
 
+    private void showSuccessMessage()
+    {
+        Log.d("ClosingIssue", "notesUploadSuccess");
+        Progress.hide();
+        if (NavigationUtil.isStudent)
+        {
+            ToastMsg.show(R.string.notes_will_be_displayed_after_review);
+        }
+        else
+        {
+            ToastMsg.show(R.string.notes_uploaded);
+        }
+        getActivity().onBackPressed();
+    }
 }

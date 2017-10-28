@@ -22,11 +22,13 @@ import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.ClassAttendance;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
 import com.clsroom.model.StaffAttendance;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -47,7 +49,7 @@ import static com.clsroom.LoginActivity.LOGIN_USER_ID;
 
 public class StaffAttendanceListFragment extends Fragment implements EventsListener, DatePickerDialog.OnDateSetListener
 {
-    public static final String TAG = "StaffAttendanceList";
+    public static final String TAG = NavigationUtil.STAFF_ATTENDANCE_LIST_FRAGMENT;
 
     @Bind(R.id.attendanceListRecyclerView)
     RecyclerView mAttendanceListRecyclerView;
@@ -96,8 +98,6 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
         if (launcher != null)
         {
             launcher.setToolBarTitle(R.string.attendance);
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.NO_MENU);
         }
         return parentView;
     }
@@ -154,32 +154,46 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
     @OnClick(R.id.editDate)
     public void editDate(View view)
     {
-        mDatePickerDialog.show();
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            mDatePickerDialog.show();
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @OnClick(R.id.saveAttendance)
     public void saveAttendance(View view)
     {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        StaffAttendance attendance = new StaffAttendance();
-        attendance.setListOfAbsentees(mStaffList);
-        attendance.setStaffId(preferences.getString(LOGIN_USER_ID, ""));
-        attendance.setTakenDate(mTakenDate);
-        Progress.show(R.string.saving);
-        Log.d("SavingP", "" + this);
-        mAttendanceRef.child(mAttendanceDate).setValue(attendance).addOnCompleteListener(new OnCompleteListener<Void>()
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
-            @Override
-            public void onComplete(@NonNull Task<Void> task)
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            StaffAttendance attendance = new StaffAttendance();
+            attendance.setListOfAbsentees(mStaffList);
+            attendance.setStaffId(preferences.getString(LOGIN_USER_ID, ""));
+            attendance.setTakenDate(mTakenDate);
+            Progress.show(R.string.saving);
+            Log.d("SavingP", "" + this);
+            mAttendanceRef.child(mAttendanceDate).setValue(attendance).addOnCompleteListener(new OnCompleteListener<Void>()
             {
-                Progress.hide();
-                if (task.isSuccessful())
+                @Override
+                public void onComplete(@NonNull Task<Void> task)
                 {
-                    ToastMsg.show(R.string.saved);
-                    getActivity().onBackPressed();
+                    Progress.hide();
+                    if (task.isSuccessful())
+                    {
+                        ToastMsg.show(R.string.saved);
+                        getActivity().onBackPressed();
+                    }
                 }
-            }
-        });
+            });
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -197,7 +211,7 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.ATTENDANCE_FRAGMENT;
+        return NavigationUtil.ATTENDANCE_FRAGMENT;
     }
 
     @Subscribe

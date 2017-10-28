@@ -15,7 +15,7 @@ import com.clsroom.R;
 import com.clsroom.adapters.RequestedLeavesAdapter;
 import com.clsroom.model.Leaves;
 import com.clsroom.model.ToastMsg;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 
 import butterknife.Bind;
@@ -53,7 +53,7 @@ public class RequestedLeavesDialogFragment extends CustomDialogFragment implemen
     {
         ButterKnife.bind(this, parentView);
         mRequestedLeavesDbRef = FirebaseDatabase.getInstance().getReference()
-                .child(Leaves.LEAVES).child(NavigationDrawerUtil.mCurrentUser.getUserId())
+                .child(Leaves.LEAVES).child(NavigationUtil.mCurrentUser.getUserId())
                 .child(Leaves.REQUESTED_LEAVES);
         mRequestedLeavesDbRef.addValueEventListener(this);
         Otto.register(this);

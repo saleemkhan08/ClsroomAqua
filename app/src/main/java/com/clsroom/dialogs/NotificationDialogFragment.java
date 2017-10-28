@@ -1,6 +1,7 @@
 package com.clsroom.dialogs;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
@@ -12,9 +13,11 @@ import com.clsroom.model.Leaves;
 import com.clsroom.model.Notes;
 import com.clsroom.model.Notifications;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.ToastMsg;
+import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.DateTimeUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
@@ -37,6 +40,7 @@ public class NotificationDialogFragment extends CustomDialogFragment
     Leaves leaves;
     private DatabaseReference notificationsRootRef;
     private Context mContext;
+    private String notification;
 
     public static NotificationDialogFragment getInstance(Notes notes, OnDismissListener listener)
     {
@@ -72,9 +76,9 @@ public class NotificationDialogFragment extends CustomDialogFragment
         fragment.notificationsRootRef = FirebaseDatabase.getInstance().getReference()
                 .child(Notifications.NOTIFICATIONS);
         fragment.mCurrentNotification = new Notifications();
-        fragment.mCurrentNotification.setSenderId(NavigationDrawerUtil.mCurrentUser.getUserId());
-        fragment.mCurrentNotification.setSenderName(NavigationDrawerUtil.mCurrentUser.getFullName());
-        fragment.mCurrentNotification.setSenderPhotoUrl(NavigationDrawerUtil.mCurrentUser.getPhotoUrl());
+        fragment.mCurrentNotification.setSenderId(NavigationUtil.mCurrentUser.getUserId());
+        fragment.mCurrentNotification.setSenderName(NavigationUtil.mCurrentUser.getFullName());
+        fragment.mCurrentNotification.setSenderPhotoUrl(NavigationUtil.mCurrentUser.getPhotoUrl());
         return fragment;
     }
 
@@ -91,7 +95,7 @@ public class NotificationDialogFragment extends CustomDialogFragment
         mContext = getActivity();
         if (notes != null)
         {
-            showNotesRelatedNotifications();
+            sendNotesRelatedNotifications();
         }
     }
 
@@ -105,7 +109,6 @@ public class NotificationDialogFragment extends CustomDialogFragment
     public void onStart()
     {
         super.onStart();
-        setDialogTitle(R.string.reviewerComment);
         setSubmitBtnTxt(R.string.send);
         setSubmitBtnImg(R.mipmap.submit);
     }
@@ -113,52 +116,61 @@ public class NotificationDialogFragment extends CustomDialogFragment
     @Override
     public void submit(View view)
     {
-
-        String message = mMessage.getText().toString();
-        if (TextUtils.isEmpty(message))
+        notification = mMessage.getText().toString().trim();
+        if (TextUtils.isEmpty(notification))
         {
             ToastMsg.show(R.string.please_enter_the_notification_message);
         }
         else
         {
-            mCurrentNotification.setMessage(message);
+            if (!(notes != null && notes.getNotesStatus().equals(Notes.REJECTED)))
+            {
+                mCurrentNotification.setMessage(notification);
+            }
             sendNotification();
         }
     }
 
     public void sendLeavesRelatedNotification(Context context)
     {
-        mContext = context;
-        mCurrentNotification.setNotesId(null);
-        switch (leaves.getStatus())
+        if (ConnectivityUtil.isConnected(context))
         {
-            case Leaves.STATUS_REJECTED:
-                mCurrentNotification.setMessage(getLeavesRejectionMsg());
-                mNotificationDbRef = notificationsRootRef.child(leaves.getRequesterId());
-                mCurrentNotification.setLeaveId(leaves.dbKeyDate());
-                mCurrentNotification.setLeaveRefType(Leaves.MY_LEAVES);
-                break;
+            mContext = context;
+            mCurrentNotification.setNotesId(null);
+            switch (leaves.getStatus())
+            {
+                case Leaves.STATUS_REJECTED:
+                    mCurrentNotification.setMessage(getLeavesRejectionMsg());
+                    mNotificationDbRef = notificationsRootRef.child(leaves.getRequesterId());
+                    mCurrentNotification.setLeaveId(leaves.dbKeyDate());
+                    mCurrentNotification.setLeaveRefType(Leaves.MY_LEAVES);
+                    break;
 
-            case Leaves.STATUS_APPROVED:
-                mCurrentNotification.setMessage(getLeavesApprovalMsg());
-                mNotificationDbRef = notificationsRootRef.child(leaves.getRequesterId());
-                mCurrentNotification.setLeaveId(leaves.dbKeyDate());
-                mCurrentNotification.setLeaveRefType(Leaves.MY_LEAVES);
-                break;
+                case Leaves.STATUS_APPROVED:
+                    mCurrentNotification.setMessage(getLeavesApprovalMsg());
+                    mNotificationDbRef = notificationsRootRef.child(leaves.getRequesterId());
+                    mCurrentNotification.setLeaveId(leaves.dbKeyDate());
+                    mCurrentNotification.setLeaveRefType(Leaves.MY_LEAVES);
+                    break;
 
-            case Leaves.STATUS_APPLIED:
-                mCurrentNotification.setMessage(getLeavesApplicationMsg());
-                mNotificationDbRef = notificationsRootRef.child(leaves.getApproverId());
-                mCurrentNotification.setLeaveId(leaves.dbKeyDate());
-                mCurrentNotification.setLeaveRefType(Leaves.REQUESTED_LEAVES);
-                break;
+                case Leaves.STATUS_APPLIED:
+                    mCurrentNotification.setMessage(getLeavesApplicationMsg());
+                    mNotificationDbRef = notificationsRootRef.child(leaves.getApproverId());
+                    mCurrentNotification.setLeaveId(leaves.dbKeyDate());
+                    mCurrentNotification.setLeaveRefType(Leaves.REQUESTED_LEAVES);
+                    break;
 
-            case Leaves.STATUS_CANCELLED:
-                mCurrentNotification.setMessage(getLeavesCancellationMsg());
-                mNotificationDbRef = notificationsRootRef.child(leaves.getApproverId());
-                break;
+                case Leaves.STATUS_CANCELLED:
+                    mCurrentNotification.setMessage(getLeavesCancellationMsg());
+                    mNotificationDbRef = notificationsRootRef.child(leaves.getApproverId());
+                    break;
+            }
+            sendNotification();
         }
-        sendNotification();
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     private String getLeavesCancellationMsg()
@@ -189,49 +201,69 @@ public class NotificationDialogFragment extends CustomDialogFragment
                 + " : " + leaves.getFromDate() + " to " + leaves.getToDate();
     }
 
-    private void showNotesRelatedNotifications()
+    private void sendNotesRelatedNotifications()
     {
         mCurrentNotification.setLeaveId(null);
-        //mCurrentNotification.setNotesId(notes.);
+        String notesId = "";
         switch (notes.getNotesStatus())
         {
             case Notes.REJECTED:
+                notesId = "P";
+                setDialogTitle(R.string.reviewerComment);
                 mCurrentNotification.setMessage(getNotesRejectionMsg(notes));
                 mNotificationDbRef = notificationsRootRef.child(notes.getSubmitterId());
                 break;
 
+            case Notes.RE_SUBMITTED:
+                notesId = "P";
+                setDialogTitle(R.string.notificationMessage);
+                mCurrentNotification.setMessage(getNotesReSubmitMsg(notes));
+                mNotificationDbRef = notificationsRootRef.child(notes.getReviewerId());
+                mMessage.setText(mCurrentNotification.getMessage());
+                break;
+
             case Notes.APPROVED:
+                notesId = "R";
+                setDialogTitle(R.string.notificationMessage);
                 mCurrentNotification.setMessage(getNotesApprovalMsg(notes));
                 mNotificationDbRef = notificationsRootRef.child(notes.getSubmitterId());
+                mMessage.setText(mCurrentNotification.getMessage());
                 break;
 
             case Notes.REVIEW:
+                notesId = "P";
+                setDialogTitle(R.string.notificationMessage);
                 mCurrentNotification.setMessage(getNotesReviewMsg(notes));
                 mNotificationDbRef = notificationsRootRef.child(notes.getReviewerId());
+                mMessage.setText(mCurrentNotification.getMessage());
                 break;
         }
-        mMessage.setText(mCurrentNotification.getMessage());
+        notesId += "_" + notes.getClassSubId() + "_" + notes.dateTime();
+        mCurrentNotification.setNotesId(notesId);
+    }
+
+    private String getNotesReSubmitMsg(Notes notes)
+    {
+        return notes.getSubmitterName() + " " + mContext.getString(R.string.has_re_submitted_following_notes_for_review)
+                + "\n\"" + notes.getNotesTitle() + "\"\n";
     }
 
     private String getNotesReviewMsg(Notes notes)
     {
         return notes.getSubmitterName() + " " + mContext.getString(R.string.has_submitted_following_notes_for_review)
-                + "\n\"" + notes.getNotesTitle() + "\"\n"
-                + mContext.getString(R.string.uploaded_at) + " : " + notes.displayDate();
+                + "\n\"" + notes.getNotesTitle() + "\"\n";
     }
 
     private String getNotesApprovalMsg(Notes notes)
     {
         return mContext.getString(R.string.following_notes_has_been_approved)
-                + "\n\"" + notes.getNotesTitle() + "\"\n"
-                + mContext.getString(R.string.uploaded_at) + " : " + notes.displayDate();
+                + "\n\"" + notes.getNotesTitle() + "\"\n";
     }
 
     String getNotesRejectionMsg(Notes notes)
     {
         return mContext.getString(R.string.following_notes_has_been_rejected)
-                + "\n\"" + notes.getNotesTitle() + "\"\n"
-                + mContext.getString(R.string.uploaded_at) + " : " + notes.displayDate();
+                + "\n\"" + notes.getNotesTitle() + "\"\n";
     }
 
     public void sendNotification()
@@ -245,20 +277,28 @@ public class NotificationDialogFragment extends CustomDialogFragment
             @Override
             public void onComplete(@NonNull Task<Void> task)
             {
-                if (NotificationDialogFragment.this.isVisible())
-                {
-                    dismiss();
-                }
                 Progress.hide();
                 if (task.isSuccessful())
                 {
-                    ToastMsg.show(R.string.saved);
+                    ToastMsg.show(R.string.sent);
                 }
                 else
                 {
                     ToastMsg.show(R.string.notification_couldnt_be_sent);
                 }
+
+                if (NotificationDialogFragment.this.isVisible())
+                {
+                    dismiss();
+                }
             }
         });
+    }
+
+    @Override
+    public void onDismiss(DialogInterface dialog)
+    {
+        super.onDismiss(dialog);
+        listener.onDismiss(notification);
     }
 }

@@ -19,10 +19,12 @@ import com.clsroom.dialogs.AddOrEditStaffDialogFragment;
 import com.clsroom.dialogs.ViewStaffAttendanceDialogFragment;
 import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
 import com.google.firebase.database.DataSnapshot;
@@ -42,7 +44,7 @@ import butterknife.OnClick;
 
 public class StaffListFragment extends Fragment implements EventsListener, DatePickerDialog.OnDateSetListener
 {
-    private static final String TAG = "StaffListFragment";
+    private static final String TAG = NavigationUtil.STAFF_LIST_FRAGMENT;
 
     @Bind(R.id.staffListRecyclerView)
     RecyclerView mStaffListRecyclerView;
@@ -130,7 +132,7 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.GONE);
                 }
-                else if (dy < 0 && !mFabContainer.isShown() && NavigationDrawerUtil.isAdmin)
+                else if (dy < 0 && !mFabContainer.isShown() && NavigationUtil.isAdmin)
                 {
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.VISIBLE);
@@ -188,24 +190,38 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
     @OnClick(R.id.attendanceFab)
     public void takeAttendance(View view)
     {
-        if (staffSet.size() > 0)
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
-            mAdapter.enableAttendance(staffSet);
-            mSaveAttendanceFab.setVisibility(View.VISIBLE);
-            mTakeAttendanceFab.setVisibility(View.GONE);
+            if (staffSet.size() > 0)
+            {
+                mAdapter.enableAttendance(staffSet);
+                mSaveAttendanceFab.setVisibility(View.VISIBLE);
+                mTakeAttendanceFab.setVisibility(View.GONE);
+            }
+            else
+            {
+                ToastMsg.show(R.string.staff_list_is_empty);
+            }
         }
         else
         {
-            ToastMsg.show(R.string.staff_list_is_empty);
+            Snack.show(R.string.noInternet);
         }
     }
 
     @OnClick(R.id.savefab)
     public void saveAttendance(View view)
     {
-        onBackPressed();
-        StaffAttendanceListFragment fragment = StaffAttendanceListFragment.getInstance(mAdapter.mUnSelectedStaff);
-        launcher.showFragment(fragment, true, StaffAttendanceListFragment.TAG);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            onBackPressed();
+            StaffAttendanceListFragment fragment = StaffAttendanceListFragment.getInstance(mAdapter.mUnSelectedStaff);
+            launcher.showFragment(fragment, true, StaffAttendanceListFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -232,7 +248,7 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.STAFF_LIST_FRAGMENT;
+        return NavigationUtil.STAFF_LIST_FRAGMENT;
     }
 
     @Subscribe
@@ -254,9 +270,16 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
 
     public void showDialogFragment()
     {
-        FragmentManager manager = getActivity().getSupportFragmentManager();
-        AddOrEditStaffDialogFragment fragment = AddOrEditStaffDialogFragment.getInstance(null);
-        fragment.show(manager, AddOrEditStaffDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            AddOrEditStaffDialogFragment fragment = AddOrEditStaffDialogFragment.getInstance(null);
+            fragment.show(manager, AddOrEditStaffDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override

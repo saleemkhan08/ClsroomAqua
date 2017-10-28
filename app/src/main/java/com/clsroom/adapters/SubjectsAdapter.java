@@ -11,11 +11,13 @@ import com.clsroom.R;
 import com.clsroom.dialogs.AddOrEditSubjectsDialogFragment;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Subjects;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
+import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.ImageUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.SubjectViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -76,7 +78,7 @@ public class SubjectsAdapter extends FirebaseRecyclerAdapter<Subjects, SubjectVi
             }
         });
 
-        if (NavigationDrawerUtil.isAdmin)
+        if (NavigationUtil.isAdmin)
         {
             viewHolder.mCheckBox.setVisibility(isSelectionEnabled ? View.VISIBLE : View.GONE);
             viewHolder.mOptionsIconContainer.setVisibility(isSelectionEnabled ? View.GONE : View.VISIBLE);
@@ -196,7 +198,14 @@ public class SubjectsAdapter extends FirebaseRecyclerAdapter<Subjects, SubjectVi
 
     private void editClasses(Subjects subject)
     {
-        AddOrEditSubjectsDialogFragment fragment = AddOrEditSubjectsDialogFragment.getInstance(subject);
-        fragment.show(launcher.getSupportFragmentManager(), AddOrEditSubjectsDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(launcher.getActivity()))
+        {
+            AddOrEditSubjectsDialogFragment fragment = AddOrEditSubjectsDialogFragment.getInstance(subject);
+            fragment.show(launcher.getSupportFragmentManager(), AddOrEditSubjectsDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 }

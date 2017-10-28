@@ -2,14 +2,11 @@ package com.clsroom.model;
 
 public class NotesClassifier
 {
-    public static final String RESULTS = "results";
     private String classId;
-    private String testId;
     private String subjectId;
     private String subjectName;
     private String className;
     private boolean edit;
-    private String teacherId;
     private boolean isReviewedNotesShown = true;
 
     public String getClassId()
@@ -20,16 +17,6 @@ public class NotesClassifier
     public void setClassId(String classId)
     {
         this.classId = classId;
-    }
-
-    public String getTestId()
-    {
-        return testId;
-    }
-
-    public void setTestId(String testId)
-    {
-        this.testId = testId;
     }
 
     public String getSubjectId()
@@ -60,16 +47,6 @@ public class NotesClassifier
     public void setSubjectName(String subjectName)
     {
         this.subjectName = subjectName;
-    }
-
-    public String getTeacherId()
-    {
-        return teacherId;
-    }
-
-    public void setTeacherId(String teacherId)
-    {
-        this.teacherId = teacherId;
     }
 
     public String getClassName()

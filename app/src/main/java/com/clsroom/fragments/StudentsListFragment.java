@@ -20,10 +20,12 @@ import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Students;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -45,7 +47,7 @@ import butterknife.OnClick;
 
 public class StudentsListFragment extends ClassTabFragment implements EventsListener, DatePickerDialog.OnDateSetListener
 {
-    private static final String TAG = "StudentsListFragment";
+    private static final String TAG = NavigationUtil.STUDENTS_LIST_FRAGMENT;
 
     @Bind(R.id.studentsListRecyclerView)
     RecyclerView mStudentsListRecyclerView;
@@ -66,7 +68,6 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
     View mSaveAttendanceFab;
 
     private DatabaseReference mRootRef;
-    private Classes mCurrentClass;
     private StudentsAdapter mAdapter;
     private DatePickerDialog mDatePickerDialog;
     private DatabaseReference mStudentsDbRef;
@@ -83,6 +84,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
     public void onCreateView(View parentView)
     {
         Log.d(TAG, "onCreateView2");
+        Log.d("ProfileRelaunchIssue", "StudentList : onCreateView");
         ButterKnife.bind(this, parentView);
         Otto.register(this);
         setLauncher();
@@ -103,7 +105,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
         if (launcher != null)
         {
             launcher.updateEventsListener(this);
-            if (NavigationDrawerUtil.isAdmin)
+            if (NavigationUtil.isAdmin)
             {
                 Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_ADMIN);
             }
@@ -143,7 +145,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
 
     private void setUpRecyclerView()
     {
-        Log.d(TAG, "setUpRecyclerView");
+        Log.d("TabSelectionIssue", "StudentListFragment > setUpRecyclerView > mCurrentClass : " + mCurrentClass);
         mStudentsDbRef = mRootRef.child(Students.STUDENTS).child(mCurrentClass.getCode());
         mClassesDbRef = mRootRef.child(Classes.CLASSES).child(mCurrentClass.getCode());
         mAdapter = StudentsAdapter.getInstance(mStudentsDbRef, launcher);
@@ -159,7 +161,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.GONE);
                 }
-                else if (dy < 0 && !mFabContainer.isShown() && !NavigationDrawerUtil.isStudent)
+                else if (dy < 0 && !mFabContainer.isShown() && !NavigationUtil.isStudent)
                 {
                     TransitionUtil.slideTransition(mFabContainer);
                     mFabContainer.setVisibility(View.VISIBLE);
@@ -218,25 +220,39 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
     @OnClick(R.id.attendanceFab)
     public void takeAttendance(View view)
     {
-        if (studentsSet.size() > 0)
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
-            mAdapter.enableAttendance(studentsSet);
-            mSaveAttendanceFab.setVisibility(View.VISIBLE);
-            mTakeAttendanceFab.setVisibility(View.GONE);
+            if (studentsSet.size() > 0)
+            {
+                mAdapter.enableAttendance(studentsSet);
+                mSaveAttendanceFab.setVisibility(View.VISIBLE);
+                mTakeAttendanceFab.setVisibility(View.GONE);
+            }
+            else
+            {
+                ToastMsg.show(R.string.student_list_is_empty);
+            }
         }
         else
         {
-            ToastMsg.show(R.string.student_list_is_empty);
+            Snack.show(R.string.noInternet);
         }
     }
 
     @OnClick(R.id.savefab)
     public void saveAttendance(View view)
     {
-        onBackPressed();
-        StudentAttendanceListFragment fragment = StudentAttendanceListFragment
-                .getInstance(mAdapter.mUnSelectedStudents, mCurrentClass.getCode());
-        launcher.showFragment(fragment, true, StudentAttendanceListFragment.TAG);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            onBackPressed();
+            StudentAttendanceListFragment fragment = StudentAttendanceListFragment
+                    .getInstance(mAdapter.mUnSelectedStudents, mCurrentClass.getCode());
+            launcher.showFragment(fragment, true, StudentAttendanceListFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -246,7 +262,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
         {
             StudentsAdapter.isSelectionEnabled = false;
             mAdapter.notifyDataSetChanged();
-            if (NavigationDrawerUtil.isAdmin)
+            if (NavigationUtil.isAdmin)
             {
                 Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_ADMIN);
             }
@@ -270,7 +286,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.STUDENTS_LIST_FRAGMENT;
+        return NavigationUtil.STUDENTS_LIST_FRAGMENT;
     }
 
     @Subscribe
@@ -333,9 +349,16 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
 
     public void showDialogFragment()
     {
-        FragmentManager manager = getActivity().getSupportFragmentManager();
-        AddStudentsDialogFragment fragment = AddStudentsDialogFragment.getInstance(mCurrentClass);
-        fragment.show(manager, AddStudentsDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            FragmentManager manager = getActivity().getSupportFragmentManager();
+            AddStudentsDialogFragment fragment = AddStudentsDialogFragment.getInstance(mCurrentClass);
+            fragment.show(manager, AddStudentsDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -349,9 +372,12 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
     @Override
     public void onTabSelected(TabLayout.Tab tab)
     {
-        Log.d(TAG, "onTabSelected");
-        mCurrentClass = (Classes) tab.getTag();
+        if (mTabSelected)
+        {
+            mCurrentClass = (Classes) tab.getTag();
+        }
         mProgress.setVisibility(View.VISIBLE);
+        Log.d("TabSelectionIssue", "StudentListFragment > onTabSelected > mCurrentClass : " + mCurrentClass);
         setUpRecyclerView();
     }
 
@@ -363,5 +389,13 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
             launcher = (FragmentLauncher) activity;
             launcher.setFragment(this);
         }
+    }
+
+    public static StudentsListFragment getInstance(Classes model)
+    {
+        StudentsListFragment fragment = new StudentsListFragment();
+        fragment.mCurrentClass = model;
+        Log.d("TabSelectionIssue", "StudentListFragment > getInstance > mCurrentClass : " + fragment.mCurrentClass);
+        return fragment;
     }
 }

@@ -22,10 +22,12 @@ import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.ClassAttendance;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.Students;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -46,7 +48,7 @@ import static com.clsroom.LoginActivity.LOGIN_USER_ID;
 
 public class StudentAttendanceListFragment extends Fragment implements EventsListener, DatePickerDialog.OnDateSetListener
 {
-    public static final String TAG = "StudentAttendanceList";
+    public static final String TAG = NavigationUtil.STUDENTS_ATTENDANCE_LIST_FRAGMENT;
 
     @Bind(R.id.attendanceListRecyclerView)
     RecyclerView mAttendanceListRecyclerView;
@@ -156,31 +158,46 @@ public class StudentAttendanceListFragment extends Fragment implements EventsLis
     @OnClick(R.id.editDate)
     public void editDate(View view)
     {
-        mDatePickerDialog.show();
+        if (ConnectivityUtil.isConnected(getActivity()))
+        {
+            mDatePickerDialog.show();
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
+
     }
 
     @OnClick(R.id.saveAttendance)
     public void saveAttendance(View view)
     {
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        ClassAttendance attendance = new ClassAttendance();
-        attendance.setListOfAbsentees(mStudentsList);
-        attendance.setStaffId(preferences.getString(LOGIN_USER_ID, ""));
-        attendance.setTakenDate(mTakenDate);
-        Progress.show(R.string.saving);
-        mAttendanceRef.child(mAttendanceDate).setValue(attendance).addOnCompleteListener(new OnCompleteListener<Void>()
+        if (ConnectivityUtil.isConnected(getActivity()))
         {
-            @Override
-            public void onComplete(@NonNull Task<Void> task)
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            ClassAttendance attendance = new ClassAttendance();
+            attendance.setListOfAbsentees(mStudentsList);
+            attendance.setStaffId(preferences.getString(LOGIN_USER_ID, ""));
+            attendance.setTakenDate(mTakenDate);
+            Progress.show(R.string.saving);
+            mAttendanceRef.child(mAttendanceDate).setValue(attendance).addOnCompleteListener(new OnCompleteListener<Void>()
             {
-                Progress.hide();
-                if (task.isSuccessful())
+                @Override
+                public void onComplete(@NonNull Task<Void> task)
                 {
-                    ToastMsg.show(R.string.saved);
-                    getActivity().onBackPressed();
+                    Progress.hide();
+                    if (task.isSuccessful())
+                    {
+                        ToastMsg.show(R.string.saved);
+                        getActivity().onBackPressed();
+                    }
                 }
-            }
-        });
+            });
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @Override
@@ -198,7 +215,7 @@ public class StudentAttendanceListFragment extends Fragment implements EventsLis
     @Override
     public String getTagName()
     {
-        return NavigationDrawerUtil.ATTENDANCE_FRAGMENT;
+        return NavigationUtil.ATTENDANCE_FRAGMENT;
     }
 
     @Subscribe
@@ -212,6 +229,7 @@ public class StudentAttendanceListFragment extends Fragment implements EventsLis
         mDateTextView.setText(getFormattedDate(year, month, day));
         mAttendanceDate = "" + year + month + day;
     }
+
     private void setLauncher()
     {
         Activity activity = getActivity();

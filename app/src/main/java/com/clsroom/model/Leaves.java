@@ -5,7 +5,7 @@ import android.util.Log;
 
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.clsroom.R;
-import com.clsroom.utils.NavigationDrawerUtil;
+import com.clsroom.utils.NavigationUtil;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -121,7 +121,7 @@ public class Leaves
             ToastMsg.show(R.string.please_select_an_approver);
             return false;
         }
-        else if (approverId.equals(NavigationDrawerUtil.mCurrentUser.getUserId()))
+        else if (approverId.equals(NavigationUtil.mCurrentUser.getUserId()))
         {
             ToastMsg.show(R.string.you_cannot_select_yourself_as_an_approver);
             return false;
@@ -129,7 +129,7 @@ public class Leaves
         else
         {
             long numOfDays = numDaysBetweenDates();
-            if (numOfDays < 0)
+            if (numOfDays < 0 || numOfDays >= 20)
             {
                 ToastMsg.show(R.string.pleaseEnterAToValidDate);
                 return false;

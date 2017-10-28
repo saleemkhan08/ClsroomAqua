@@ -8,10 +8,14 @@ import android.view.View;
 
 import com.clsroom.R;
 import com.clsroom.dialogs.AddOrEditClassDialogFragment;
+import com.clsroom.fragments.StudentsListFragment;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Snack;
 import com.clsroom.model.ToastMsg;
+import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.utils.NavigationUtil;
 import com.clsroom.viewholders.ClassesViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -50,7 +54,8 @@ public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesView
             @Override
             public void onClick(View view)
             {
-
+                launcher.showFragment(StudentsListFragment.getInstance(model),
+                        true, NavigationUtil.STUDENTS_LIST_FRAGMENT);
             }
         });
         configureOptions(viewHolder, model);
@@ -110,9 +115,16 @@ public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesView
 
     private void editClasses(Classes classes)
     {
-        FragmentManager manager = launcher.getSupportFragmentManager();
-        AddOrEditClassDialogFragment fragment = AddOrEditClassDialogFragment.getInstance(classes);
-        fragment.show(manager, AddOrEditClassDialogFragment.TAG);
+        if (ConnectivityUtil.isConnected(launcher.getActivity()))
+        {
+            FragmentManager manager = launcher.getSupportFragmentManager();
+            AddOrEditClassDialogFragment fragment = AddOrEditClassDialogFragment.getInstance(classes);
+            fragment.show(manager, AddOrEditClassDialogFragment.TAG);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     private String getString(int resId)

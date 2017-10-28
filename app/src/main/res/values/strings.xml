@@ -319,4 +319,11 @@
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="profileImageTransition">profileImageTransition</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="notes_uploaded">Notes Uploaded.</string>
+    <string name="sent">Sent</string>
+    <string name="has_re_submitted_following_notes_for_review">has re-submitted following notes for review</string>
+    <string name="notes_doesnt_exists">Notes doesn\'t exist</string>
 </resources>

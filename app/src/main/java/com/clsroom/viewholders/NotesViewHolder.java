@@ -7,6 +7,8 @@ import android.widget.TextView;
 
 import com.clsroom.R;
 import com.clsroom.listeners.ImageClickListener;
+import com.clsroom.model.Snack;
+import com.clsroom.utils.ConnectivityUtil;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -90,6 +92,9 @@ public class NotesViewHolder extends RecyclerView.ViewHolder
     @Bind(R.id.rejectionText)
     public View rejectionText;
 
+    @Bind(R.id.reviewComment)
+    public TextView reviewComment;
+
     public NotesViewHolder(View itemView)
     {
         super(itemView);
@@ -105,25 +110,54 @@ public class NotesViewHolder extends RecyclerView.ViewHolder
     @OnClick({R.id.singleImage, R.id.dualImage1, R.id.tripleImage1, R.id.quadImage1})
     public void onFirstImageClick()
     {
-        mListener.onImageClick(0);
+        if (ConnectivityUtil.isConnected(mItemView.getContext()))
+        {
+            mListener.onImageClick(0);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
+
     }
 
     @OnClick({R.id.dualImage2, R.id.tripleImage2, R.id.quadImage2})
     public void onSecondImageClick()
     {
-        mListener.onImageClick(1);
+        if (ConnectivityUtil.isConnected(mItemView.getContext()))
+        {
+            mListener.onImageClick(1);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @OnClick({R.id.tripleImage3, R.id.quadImage3})
     public void onThirdImageClick()
     {
-        mListener.onImageClick(2);
+        if (ConnectivityUtil.isConnected(mItemView.getContext()))
+        {
+            mListener.onImageClick(2);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
     @OnClick(R.id.quadImage4)
     public void onFourthImageClick()
     {
-        mListener.onImageClick(3);
+        if (ConnectivityUtil.isConnected(mItemView.getContext()))
+        {
+            mListener.onImageClick(3);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
     }
 
 }
