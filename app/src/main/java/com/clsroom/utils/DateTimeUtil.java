@@ -16,7 +16,7 @@ public class DateTimeUtil
                 + get2DigitNum(calendar.get(Calendar.SECOND));
     }
 
-    private static String get2DigitNum(int num)
+    public static String get2DigitNum(int num)
     {
         return (num < 10) ? "0" + num : "" + num;
     }

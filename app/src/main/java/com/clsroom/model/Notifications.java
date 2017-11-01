@@ -10,6 +10,7 @@ import java.util.Locale;
 
 import static com.clsroom.dialogs.MonthYearPickerDialog.MONTH_ARRAY;
 import static com.clsroom.model.Notes.AM_PM;
+import static com.clsroom.utils.DateTimeUtil.get2DigitNum;
 
 public class Notifications implements Parcelable
 {
@@ -91,8 +92,8 @@ public class Notifications implements Parcelable
             calendar.setTime(format.parse(((-1) * dateTime) + ""));
             return MONTH_ARRAY[calendar.get(Calendar.MONTH)] + "-" +
                     calendar.get(Calendar.DAY_OF_MONTH) + " "
-                    + Leaves.get2DigitNum(calendar.get(Calendar.HOUR))
-                    + ":" + Leaves.get2DigitNum(calendar.get(Calendar.MINUTE))
+                    + get2DigitNum(calendar.get(Calendar.HOUR))
+                    + ":" + get2DigitNum(calendar.get(Calendar.MINUTE))
                     + " " + AM_PM[calendar.get(Calendar.AM_PM)];
         }
         catch (ParseException e)

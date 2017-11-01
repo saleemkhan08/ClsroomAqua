@@ -44,7 +44,7 @@ public class LoginDialogFragment extends DialogFragment
     private static final int MIN_LENGTH_OF_PASSWORD = 6;
     private static final String PASSWORD_RESET_URL = "https://us-central1-clsroom-aqua.cloudfunctions.net/passwordResetHttp";
 
-    private static final String EMAIL_SUFFIX = "@clsroom.com";
+    public static final String EMAIL_SUFFIX = "@clsroom.com";
     private static final String EMAIL_SENT = "Email Sent";
     private static final String INVALID_EMAIL = "Invalid Email";
     private static final String PASSWORD_NOT_RESET = "Password not reset";
@@ -65,6 +65,7 @@ public class LoginDialogFragment extends DialogFragment
 
     private FirebaseAuth mAuth;
     public String mUserId;
+    public String mPassword;
     private OnDismissListener mOnDismissListener;
 
     public static LoginDialogFragment getInstance()
@@ -129,19 +130,19 @@ public class LoginDialogFragment extends DialogFragment
     private void login()
     {
         mUserId = mUserIdEditText.getText().toString().trim();
-        String password = mPasswordEditText.getText().toString().trim();
+        mPassword = mPasswordEditText.getText().toString().trim();
         if (mUserId.length() < MIN_LENGTH_OF_USER_ID)
         {
             ToastMsg.show(R.string.validUserIdErrMsg);
         }
-        else if (password.length() < MIN_LENGTH_OF_PASSWORD)
+        else if (mPassword.length() < MIN_LENGTH_OF_PASSWORD)
         {
             ToastMsg.show(R.string.validPasswordErrMsg);
         }
         else
         {
             Progress.show(R.string.signing_in);
-            mAuth.signInWithEmailAndPassword(mUserId + EMAIL_SUFFIX, password)
+            mAuth.signInWithEmailAndPassword(mUserId + EMAIL_SUFFIX, mPassword)
                     .addOnCompleteListener((OnCompleteListener<AuthResult>) getActivity());
             dismiss();
         }

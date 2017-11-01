@@ -16,6 +16,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import static com.clsroom.utils.DateTimeUtil.get2DigitNum;
+
 public class Leaves
 {
     public static final String LEAVES = "leaves";
@@ -223,11 +225,6 @@ public class Leaves
     {
         return "" + calendar.get(Calendar.YEAR) + get2DigitNum(calendar.get(Calendar.MONTH))
                 + get2DigitNum(calendar.get(Calendar.DAY_OF_MONTH));
-    }
-
-    public static String get2DigitNum(int num)
-    {
-        return (num < 10) ? "0" + num : "" + num;
     }
 
     public static String getDisplayDate(Calendar calendar)

@@ -49,6 +49,7 @@
 
                 <TextView
                     android:id="@+id/fullName"
+                    android:transitionName="profileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"

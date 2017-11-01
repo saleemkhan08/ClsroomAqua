@@ -37,17 +37,18 @@ public class TimeTableAdapter extends FirebaseRecyclerAdapter<TimeTable, TimeTab
     private FragmentLauncher launcher;
     public static boolean isSelectionEnabled;
     public ArrayList<String> mSelectedPeriods;
-    public Query mTimeTableRef;
-
+    private Query mTimeTableRef;
+    private boolean isStaffTimeTable;
     private boolean isSelectAll;
 
-    public static TimeTableAdapter getInstance(DatabaseReference reference, FragmentLauncher launcher)
+    public static TimeTableAdapter getInstance(DatabaseReference reference, FragmentLauncher launcher, boolean isStaffTimeTable)
     {
         Log.d(TAG, "TimeTableAdapter getInstance: reference : " + reference);
-        TimeTableAdapter fragment = new TimeTableAdapter(TimeTable.class,
-                R.layout.time_table_row, TimeTableViewHolder.class, reference, launcher);
-        fragment.mTimeTableRef = reference.orderByChild(TimeTable.START_TIME);
-        return fragment;
+        TimeTableAdapter adapter = new TimeTableAdapter(TimeTable.class,
+                R.layout.time_table_row, TimeTableViewHolder.class, getModifiedRef(reference, isStaffTimeTable), launcher);
+        adapter.mTimeTableRef = getModifiedRef(reference, isStaffTimeTable);
+        adapter.isStaffTimeTable = isStaffTimeTable;
+        return adapter;
     }
 
     private TimeTableAdapter(Class<TimeTable> modelClass, int modelLayout, Class<TimeTableViewHolder> viewHolderClass,
@@ -58,25 +59,46 @@ public class TimeTableAdapter extends FirebaseRecyclerAdapter<TimeTable, TimeTab
         this.launcher = launcher;
     }
 
+    private static Query getModifiedRef(Query ref, boolean isStaffTimeTable)
+    {
+        if (isStaffTimeTable)
+        {
+            return ref.orderByChild(TimeTable.TEACHER_CODE)
+                    .startAt(NavigationUtil.mCurrentUser.getUserId()).endAt(NavigationUtil.mCurrentUser.getUserId());
+        }
+        return ref.orderByChild(TimeTable.START_TIME);
+    }
+
     @Override
     protected void populateViewHolder(final TimeTableViewHolder viewHolder, final TimeTable model, int position)
     {
-        Log.d(TAG, "populateViewHolder : " + position);
-        String imageUrl = model.getTeacherPhotoUrl();
-        ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mTeacherImage);
-
-        viewHolder.mSubjectName.setText(model.getSubjectName());
-        viewHolder.mClassTeacherName.setText(model.getTeacherName());
-
-        viewHolder.mPeriodTime.setText(model.getStartTime() + " - " + model.getEndTime());
-        viewHolder.itemView.setOnClickListener(new View.OnClickListener()
+        if (model.isBreak())
         {
-            @Override
-            public void onClick(View view)
+            viewHolder.mItemView.setBackgroundResource(R.color.colorSelection);
+            viewHolder.mTeacherImage.setImageResource(R.mipmap.break_time);
+            viewHolder.mSubjectName.setText(R.string.breakTime);
+            viewHolder.mClassTeacherName.setVisibility(View.GONE);
+        }
+        else
+        {
+            viewHolder.mItemView.setBackgroundResource(R.color.white);
+            Log.d(TAG, "populateViewHolder : " + position);
+            String imageUrl = model.getTeacherPhotoUrl();
+
+            ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mTeacherImage);
+            viewHolder.mSubjectName.setText(model.getSubjectName());
+            viewHolder.mClassTeacherName.setText(model.getTeacherName());
+            viewHolder.mClassTeacherName.setVisibility(View.VISIBLE);
+            viewHolder.itemView.setOnClickListener(new View.OnClickListener()
             {
-                Log.d(TAG, "onClick");
-            }
-        });
+                @Override
+                public void onClick(View view)
+                {
+                    Log.d(TAG, "onClick");
+                }
+            });
+        }
+        viewHolder.mPeriodTime.setText(model.getStartTime() + " - " + model.getEndTime());
 
         if (NavigationUtil.isAdmin)
         {

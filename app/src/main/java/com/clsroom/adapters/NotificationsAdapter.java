@@ -77,7 +77,7 @@ public class NotificationsAdapter extends FirebaseRecyclerAdapter<Notifications,
                     String userId = model.getLeaveRefType().equals(REQUESTED_LEAVES) ?
                             model.getSenderId() : NavigationUtil.mCurrentUser.getUserId();
 
-                    launcher.showFragment(LeavesFragment
+                    launcher.replaceFragment(LeavesFragment
                                     .getInstance(leaveId, userId, leaveRefType),
                             true, NavigationUtil.LEAVES_LIST_FRAGMENT);
                 }
@@ -86,7 +86,7 @@ public class NotificationsAdapter extends FirebaseRecyclerAdapter<Notifications,
                     SingleNotesFragment fragment = SingleNotesFragment.getInstance(notesId);
                     if (fragment.mNotesDbRef != null)
                     {
-                        launcher.showFragment(fragment, true, NavigationUtil.SINGLE_NOTES_FRAGMENT);
+                        launcher.addFragment(fragment, true, NavigationUtil.SINGLE_NOTES_FRAGMENT);
                     }
                     else
                     {

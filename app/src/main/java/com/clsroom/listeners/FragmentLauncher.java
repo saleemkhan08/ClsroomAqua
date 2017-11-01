@@ -3,7 +3,7 @@ package com.clsroom.listeners;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
-import android.widget.ImageView;
+import android.view.View;
 
 public interface FragmentLauncher
 {
@@ -11,9 +11,11 @@ public interface FragmentLauncher
     void updateEventsListener(EventsListener listener);
     FragmentManager getSupportFragmentManager();
     AppCompatActivity getActivity();
-    void showFragment(Fragment instance, boolean addToBackStack, String tag);
+    void replaceFragment(Fragment instance, boolean addToBackStack, String tag);
+    void addFragment(Fragment instance, boolean addToBackStack, String tag);
     String getString(int resId);
     Fragment getFragment();
     void setFragment(Fragment fragment);
-    void showFragment(Fragment fragment, boolean addToBackStack, String tag, ImageView sharedImageView, String transitionName);
+    void replaceFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName);
+    void addFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName);
 }

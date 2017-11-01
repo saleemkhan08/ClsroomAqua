@@ -108,11 +108,11 @@ public class NotesViewHolder extends RecyclerView.ViewHolder
     }
 
     @OnClick({R.id.singleImage, R.id.dualImage1, R.id.tripleImage1, R.id.quadImage1})
-    public void onFirstImageClick()
+    void onFirstImageClick(View view)
     {
         if (ConnectivityUtil.isConnected(mItemView.getContext()))
         {
-            mListener.onImageClick(0);
+            mListener.onImageClick(0, view);
         }
         else
         {
@@ -122,11 +122,11 @@ public class NotesViewHolder extends RecyclerView.ViewHolder
     }
 
     @OnClick({R.id.dualImage2, R.id.tripleImage2, R.id.quadImage2})
-    public void onSecondImageClick()
+    void onSecondImageClick(View view)
     {
         if (ConnectivityUtil.isConnected(mItemView.getContext()))
         {
-            mListener.onImageClick(1);
+            mListener.onImageClick(1, view);
         }
         else
         {
@@ -135,11 +135,11 @@ public class NotesViewHolder extends RecyclerView.ViewHolder
     }
 
     @OnClick({R.id.tripleImage3, R.id.quadImage3})
-    public void onThirdImageClick()
+    void onThirdImageClick(View view)
     {
         if (ConnectivityUtil.isConnected(mItemView.getContext()))
         {
-            mListener.onImageClick(2);
+            mListener.onImageClick(2, view);
         }
         else
         {
@@ -148,11 +148,11 @@ public class NotesViewHolder extends RecyclerView.ViewHolder
     }
 
     @OnClick(R.id.quadImage4)
-    public void onFourthImageClick()
+    void onFourthImageClick(View view)
     {
         if (ConnectivityUtil.isConnected(mItemView.getContext()))
         {
-            mListener.onImageClick(3);
+            mListener.onImageClick(3, view);
         }
         else
         {

@@ -523,9 +523,12 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
             NotificationDialogFragment.getInstance(notes, new OnDismissListener()
             {
                 @Override
-                public void onDismiss(String notificationMessage)
+                public void onDismiss(String msg)
                 {
-                    showSuccessMessage();
+                    if (!TextUtils.isEmpty(msg))
+                    {
+                        showSuccessMessage();
+                    }
                 }
             }).show(getActivity().getSupportFragmentManager(),
                     NotificationDialogFragment.TAG);

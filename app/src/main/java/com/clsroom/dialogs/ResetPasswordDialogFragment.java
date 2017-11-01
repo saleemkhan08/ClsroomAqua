@@ -17,9 +17,9 @@ import com.google.firebase.database.DatabaseReference;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
-public class EditNameDialogFragment extends CustomDialogFragment
+public class ResetPasswordDialogFragment extends CustomDialogFragment
 {
-    public static final String TAG = "EditNameDialogFragment";
+    public static final String TAG = "ResetPasswordDialogFragment";
 
     @Bind(R.id.name)
     EditText name;
@@ -28,17 +28,15 @@ public class EditNameDialogFragment extends CustomDialogFragment
     TextInputLayout textInputLayout;
 
     DatabaseReference mUserNameDbRef;
-    String currentName;
 
-    public static EditNameDialogFragment getInstance(DatabaseReference userDbRef, String name)
+    public static ResetPasswordDialogFragment getInstance(DatabaseReference userDbRef)
     {
-        EditNameDialogFragment fragment = new EditNameDialogFragment();
-        fragment.mUserNameDbRef = userDbRef.child(User.FULL_NAME);
-        fragment.currentName = name;
+        ResetPasswordDialogFragment fragment = new ResetPasswordDialogFragment();
+        fragment.mUserNameDbRef = userDbRef.child(User.PASSWORD);
         return fragment;
     }
 
-    public EditNameDialogFragment()
+    public ResetPasswordDialogFragment()
     {
 
     }
@@ -47,9 +45,6 @@ public class EditNameDialogFragment extends CustomDialogFragment
     public void onCreateView(View parentView)
     {
         ButterKnife.bind(this, parentView);
-        name.setText(currentName);
-        name.setHint(R.string.name);
-        textInputLayout.setHint(getString(R.string.name));
     }
 
     @Override
@@ -62,24 +57,25 @@ public class EditNameDialogFragment extends CustomDialogFragment
     public void onStart()
     {
         super.onStart();
-        setDialogTitle(R.string.editName);
+        setDialogTitle(R.string.reset_password);
         setSubmitBtnTxt(R.string.save);
         setSubmitBtnImg(R.mipmap.save_button);
+        textInputLayout.setHint(getString(R.string.newPassword));
     }
 
     @Override
     public void submit(View view)
     {
         super.submit(view);
-        String fullName = name.getText().toString();
-        if (TextUtils.isEmpty(fullName))
+        String newPassword = name.getText().toString().trim();
+        if (TextUtils.isEmpty(newPassword) || newPassword.length() < 6)
         {
-            ToastMsg.show(R.string.please_enter_a_valid_name);
+            ToastMsg.show(R.string.please_enter_a_valid_password);
         }
         else
         {
             Progress.show(R.string.saving);
-            mUserNameDbRef.setValue(fullName).addOnCompleteListener(new OnCompleteListener<Void>()
+            mUserNameDbRef.setValue(newPassword).addOnCompleteListener(new OnCompleteListener<Void>()
             {
                 @Override
                 public void onComplete(@NonNull Task<Void> task)

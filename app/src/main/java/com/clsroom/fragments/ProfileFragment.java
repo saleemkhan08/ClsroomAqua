@@ -1,12 +1,14 @@
 package com.clsroom.fragments;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -58,6 +60,8 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
 {
     private static final int PICK_PROFILE_IMAGE = 55;
     public static final String TAG = NavigationUtil.PROFILE_FRAGMENT;
+    public static final String PROFILE_IMAGE = "profileImage";
+    public static final String PROFILE_NAME = "profileName";
 
     @Bind(R.id.editName)
     View editName;
@@ -101,9 +105,24 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
         return fragment;
     }
 
+
     public ProfileFragment()
     {
+        Log.d("LifeCycleCheck", "Constructor");
+    }
 
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        Log.d("LifeCycleCheck", "onAttach");
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        Log.d("LifeCycleCheck", "onCreate : savedInstanceState : " + savedInstanceState);
     }
 
     @Override
@@ -113,7 +132,7 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
         View parentView = inflater.inflate(R.layout.fragment_profile, container, false);
         ButterKnife.bind(this, parentView);
         Otto.register(this);
-        Log.d("ProfileRelaunchIssue", "ProfileFragment : onCreate");
+        Log.d("LifeCycleCheck", "onCreateView");
         setLauncher();
         if (mCurrentUser instanceof Students)
 
@@ -144,6 +163,63 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
             editName.setVisibility(View.GONE);
         }
         return parentView;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
+        Log.d("LifeCycleCheck", "onActivityCreated : savedInstanceState : " + savedInstanceState);
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        Log.d("LifeCycleCheck", "onResume");
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        Log.d("LifeCycleCheck", "onPause");
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        Log.d("LifeCycleCheck", "onStop");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        Log.d("LifeCycleCheck", "onSaveInstanceState");
+    }
+
+    @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+        Log.d("LifeCycleCheck", "onDestroyView");
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        Log.d("LifeCycleCheck", "onDestroy");
+        Otto.unregister(this);
+    }
+
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+        Log.d("LifeCycleCheck", "onDetach");
     }
 
     private void updateProfileInfo(Students student)
@@ -360,20 +436,12 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     public void onStart()
     {
         super.onStart();
-        Log.d("ProfileRelaunchIssue", "ProfileFragment : onStart");
+        Log.d("LifeCycleCheck", "onStart");
         if (launcher != null)
         {
             launcher.updateEventsListener(this);
             Otto.post(ActionBarUtil.SHOW_PROFILE_MENU);
         }
-    }
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        Log.d("ProfileRelaunchIssue", "ProfileFragment : onDestroy");
-        Otto.unregister(this);
     }
 
     private void setLauncher()

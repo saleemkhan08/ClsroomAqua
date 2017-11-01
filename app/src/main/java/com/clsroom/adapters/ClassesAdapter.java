@@ -54,7 +54,7 @@ public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesView
             @Override
             public void onClick(View view)
             {
-                launcher.showFragment(StudentsListFragment.getInstance(model),
+                launcher.replaceFragment(StudentsListFragment.getInstance(model),
                         true, NavigationUtil.STUDENTS_LIST_FRAGMENT);
             }
         });
@@ -83,6 +83,9 @@ public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesView
                             case R.id.action_delete:
                                 confirmDelete(classes);
                                 break;
+//                            case R.id.action_send_notification:
+//                                sendNotification(classes);
+//                                break;
                         }
                         return true;
                     }

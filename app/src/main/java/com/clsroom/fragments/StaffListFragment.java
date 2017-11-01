@@ -216,7 +216,7 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
         {
             onBackPressed();
             StaffAttendanceListFragment fragment = StaffAttendanceListFragment.getInstance(mAdapter.mUnSelectedStaff);
-            launcher.showFragment(fragment, true, StaffAttendanceListFragment.TAG);
+            launcher.replaceFragment(fragment, true, StaffAttendanceListFragment.TAG);
         }
         else
         {

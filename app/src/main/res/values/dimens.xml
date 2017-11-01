@@ -12,7 +12,7 @@
     <dimen name="price_text_size">16sp</dimen>
     <dimen name="dialog_title">22sp</dimen>
     <dimen name="dialogItemPadding">8dp</dimen>
-    <dimen name="switchMargin">15dp</dimen>
+    <dimen name="switchMargin">20dp</dimen>
     <dimen name="switchPadding">15dp</dimen>
     <dimen name="app_bar_height">240dp</dimen>
     <dimen name="text_margin">16dp</dimen>

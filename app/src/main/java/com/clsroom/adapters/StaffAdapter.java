@@ -4,6 +4,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.PopupMenu;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,9 +12,12 @@ import android.widget.CompoundButton;
 
 import com.clsroom.R;
 import com.clsroom.dialogs.AddOrEditStaffDialogFragment;
+import com.clsroom.dialogs.NotificationDialogFragment;
+import com.clsroom.dialogs.ResetPasswordDialogFragment;
 import com.clsroom.fragments.ProfileFragment;
 import com.clsroom.fragments.StaffListFragment;
 import com.clsroom.listeners.FragmentLauncher;
+import com.clsroom.listeners.OnDismissListener;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
@@ -100,19 +104,19 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
             @Override
             public void onClick(View view)
             {
-                ProfileFragment fragment2 = ProfileFragment.getInstance(model);
+                ProfileFragment fragment = ProfileFragment.getInstance(model);
                 StaffListFragment fragment1 = (StaffListFragment) launcher.getFragment();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                 {
-                    fragment2.setSharedElementEnterTransition(new DetailsTransition());
-                    fragment2.setSharedElementReturnTransition(new DetailsTransition());
+                    fragment.setSharedElementEnterTransition(new DetailsTransition());
+                    fragment.setSharedElementReturnTransition(new DetailsTransition());
 
                     viewHolder.mImageView.setTransitionName(model.getUserId());
-                    launcher.showFragment(fragment2, true, ProfileFragment.TAG, viewHolder.mImageView, "profileImage");
+                    launcher.addFragment(fragment, true, ProfileFragment.TAG, viewHolder.mImageView, ProfileFragment.PROFILE_IMAGE);
                 }
                 else
                 {
-                    launcher.showFragment(fragment2, true, ProfileFragment.TAG);
+                    launcher.addFragment(fragment, true, ProfileFragment.TAG);
                 }
             }
         });
@@ -140,7 +144,7 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
             {
                 PopupMenu popup = new PopupMenu(launcher.getActivity(), v);
                 popup.getMenuInflater()
-                        .inflate(R.menu.classes_options, popup.getMenu());
+                        .inflate(R.menu.staff_options, popup.getMenu());
                 popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
                 {
                     public boolean onMenuItemClick(MenuItem item)
@@ -153,6 +157,12 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
                             case R.id.action_delete:
                                 confirmDelete(staff);
                                 break;
+                            case R.id.reset_password:
+                                resetPassword(staff);
+                                break;
+                            case R.id.send_notification:
+                                sendNotification(staff);
+                                break;
                         }
                         return true;
                     }
@@ -160,6 +170,27 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
                 popup.show();
             }
         });
+    }
+
+    private void sendNotification(Staff staff)
+    {
+        NotificationDialogFragment.getInstance(staff, new OnDismissListener()
+        {
+            @Override
+            public void onDismiss(String msg)
+            {
+                if (!TextUtils.isEmpty(msg))
+                {
+                    ToastMsg.show(R.string.sent);
+                }
+            }
+        }).show(launcher.getSupportFragmentManager(), NotificationDialogFragment.TAG);
+    }
+
+    private void resetPassword(Staff staff)
+    {
+        ResetPasswordDialogFragment.getInstance(mStaffDbReference.child(staff.getUserId()))
+                .show(launcher.getSupportFragmentManager(), ResetPasswordDialogFragment.TAG);
     }
 
     private void confirmDelete(Staff staff)

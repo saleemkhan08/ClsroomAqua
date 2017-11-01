@@ -1,10 +1,13 @@
 package com.clsroom;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
@@ -16,7 +19,6 @@ import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -45,7 +47,13 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        //http://funretro.github.io/distributed/#f31a7f60-05de-4926-be80-0e6d735b2d5a
         super.onCreate(savedInstanceState);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        if (!preferences.getBoolean(LoginActivity.LOGIN_STATUS, false))
+        {
+            logout();
+        }
         setContentView(R.layout.activity_main);
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         IntentFilter filter = new IntentFilter();
@@ -67,6 +75,12 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
         Log.d("DualMainActivity", "OnCreate");
         mNavigationUtil = new NavigationUtil(this);
         Otto.register(this);
+    }
+
+    private void logout()
+    {
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
     }
 
     @Override
@@ -121,12 +135,26 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
     }
 
     @Override
-    public void showFragment(Fragment fragment, boolean addToBackStack, String tag)
+    public void replaceFragment(Fragment fragment, boolean addToBackStack, String tag)
     {
         Log.d("relaunchIssue", "MainAct : showFragment1");
         if (ConnectivityUtil.isConnected(this))
         {
-            mNavigationUtil.loadFragment(fragment, addToBackStack, tag);
+            mNavigationUtil.replaceFragment(fragment, addToBackStack, tag);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
+    }
+
+    @Override
+    public void addFragment(Fragment fragment, boolean addToBackStack, String tag)
+    {
+        Log.d("relaunchIssue", "MainAct : showFragment1");
+        if (ConnectivityUtil.isConnected(this))
+        {
+            mNavigationUtil.addFragment(fragment, addToBackStack, tag);
         }
         else
         {
@@ -147,12 +175,26 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
     }
 
     @Override
-    public void showFragment(Fragment fragment, boolean addToBackStack, String tag, ImageView sharedImageView, String transitionName)
+    public void replaceFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName)
     {
         Log.d("relaunchIssue", "MainAct : showFragment2");
         if (ConnectivityUtil.isConnected(this))
         {
-            mNavigationUtil.loadFragment(fragment, addToBackStack, tag, sharedImageView, transitionName);
+            mNavigationUtil.replaceFragment(fragment, addToBackStack, tag, sharedImageView, transitionName);
+        }
+        else
+        {
+            Snack.show(R.string.noInternet);
+        }
+    }
+
+    @Override
+    public void addFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName)
+    {
+        Log.d("relaunchIssue", "MainAct : showFragment2");
+        if (ConnectivityUtil.isConnected(this))
+        {
+            mNavigationUtil.addFragment(fragment, addToBackStack, tag, sharedImageView, transitionName);
         }
         else
         {
@@ -170,10 +212,7 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
         TextView textView = (TextView) layout.findViewById(android.support.design.R.id.snackbar_text);
         textView.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-        {
-            textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        }
+        textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         layout.setBackgroundResource(R.color.colorPrimary);
         snackbar.show();
     }

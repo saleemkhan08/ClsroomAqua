@@ -1,5 +1,6 @@
 package com.clsroom.dialogs;
 
+import android.app.TimePickerDialog;
 import android.content.Context;
 import android.os.Handler;
 import android.support.annotation.NonNull;
@@ -9,11 +10,13 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.SpinnerAdapter;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.TimePicker;
 
 import com.clsroom.R;
 import com.clsroom.adapters.StaffFirebaseListAdapter;
@@ -27,22 +30,36 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.Calendar;
+
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnTouch;
+
+import static com.clsroom.utils.DateTimeUtil.get2DigitNum;
 
 public class AddOrEditPeriodDialogFragment extends CustomDialogFragment implements AdapterView.OnItemSelectedListener,
-        View.OnTouchListener
+        View.OnTouchListener, CompoundButton.OnCheckedChangeListener
 {
     public static final String TAG = "AddOrEditPeriodDialogFragment";
 
     @Bind(R.id.addAnother)
     Switch mAddAnother;
 
+    @Bind(R.id.breakTime)
+    Switch breakTime;
+
     @Bind(R.id.subjectName)
     EditText mSubjectName;
 
     @Bind(R.id.teacher)
     EditText mTeacherName;
+
+    @Bind(R.id.subjectContainer)
+    View subjectContainer;
+
+    @Bind(R.id.teacherContainer)
+    View teacherContainer;
 
     @Bind(R.id.teacherSpinner)
     Spinner mTeacherSpinner;
@@ -79,6 +96,7 @@ public class AddOrEditPeriodDialogFragment extends CustomDialogFragment implemen
         setSubmitBtnImg(R.mipmap.plus);
         setDialogTitle(R.string.addPeriod);
         setSubmitBtnTxt(R.string.add);
+        breakTime.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -144,15 +162,15 @@ public class AddOrEditPeriodDialogFragment extends CustomDialogFragment implemen
         super.submit(view);
         mTimeTable.setStartTime(mStartTime.getText().toString());
         mTimeTable.setEndTime(mEndTime.getText().toString());
-        if (TextUtils.isEmpty(mTimeTable.getStartTime()))
+        if (mTimeTable.isBreak())
         {
-            ToastMsg.show(R.string.please_enter_a_valid_start_time);
+            mTimeTable.setSubjectCode("");
+            mTimeTable.setSubjectName("");
+            mTimeTable.setTeacherCode("");
+            mTimeTable.setTeacherName("");
+            mTimeTable.setTeacherPhotoUrl("");
         }
-        else if (TextUtils.isEmpty(mTimeTable.getEndTime()))
-        {
-            ToastMsg.show(R.string.please_enter_a_valid_end_time);
-        }
-        else
+        if (validateTimeTable())
         {
             Log.d("NullTest", mTimeTable.getClassCode() + ", " + mTimeTable.getStartTimeKey() + ", " + mTimeTable.getWeekdayCode());
             mRootRef.child(TimeTable.TIME_TABLE)
@@ -175,6 +193,67 @@ public class AddOrEditPeriodDialogFragment extends CustomDialogFragment implemen
                 }
             });
         }
+    }
+
+    private boolean validateTimeTable()
+    {
+        if (TextUtils.isEmpty(mTimeTable.getStartTime()))
+        {
+            ToastMsg.show(R.string.please_enter_a_valid_start_time);
+            return false;
+        }
+        else if (TextUtils.isEmpty(mTimeTable.getEndTime()))
+        {
+            ToastMsg.show(R.string.please_enter_a_valid_end_time);
+            return false;
+        }
+        else if (isStartTimeGreaterThanEndTime())
+        {
+            ToastMsg.show(R.string.start_time_is_greater_than_end_time);
+            return false;
+        }
+        else if (isDifferenceTooHigh())
+        {
+            ToastMsg.show(R.string.difference_between_start_and_end_time_is_high);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean isDifferenceTooHigh()
+    {
+        StartEndTime startTime = (StartEndTime) mStartTime.getTag();
+        StartEndTime endTime = (StartEndTime) mEndTime.getTag();
+        if (startTime != null && endTime != null)
+        {
+            return (endTime.hour - startTime.hour) >= 8;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private boolean isStartTimeGreaterThanEndTime()
+    {
+        StartEndTime startTime = (StartEndTime) mStartTime.getTag();
+        StartEndTime endTime = (StartEndTime) mEndTime.getTag();
+
+        if (startTime != null && endTime != null)
+        {
+            if (startTime.hour > endTime.hour)
+            {
+                return true;
+            }
+            else if (startTime.hour == endTime.hour)
+            {
+                if (startTime.min > endTime.min || startTime.min == endTime.min)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @Override
@@ -283,4 +362,98 @@ public class AddOrEditPeriodDialogFragment extends CustomDialogFragment implemen
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
+
+    @OnTouch(R.id.startTime)
+    public boolean selectStartTime(MotionEvent motionEvent)
+    {
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
+        {
+            closeTheKeyBoard();
+            Calendar currentTime = Calendar.getInstance();
+            int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+            int minute = currentTime.get(Calendar.MINUTE);
+            TimePickerDialog mTimePicker;
+            mTimePicker = new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener()
+            {
+                @Override
+                public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute)
+                {
+                    mStartTime.setText(getTime(selectedHour, selectedMinute));
+                    StartEndTime time = new StartEndTime();
+                    time.min = selectedMinute;
+                    time.hour = selectedHour;
+                    mStartTime.setTag(time);
+                }
+            }, hour, minute, false);
+            mTimePicker.setTitle("Select Start Time");
+            mTimePicker.show();
+        }
+        return true;
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
+    {
+        mTimeTable.setBreak(isChecked);
+        if (isChecked)
+        {
+            teacherContainer.setVisibility(View.GONE);
+            subjectContainer.setVisibility(View.GONE);
+
+        }
+        else
+        {
+            teacherContainer.setVisibility(View.VISIBLE);
+            subjectContainer.setVisibility(View.VISIBLE);
+        }
+
+    }
+
+    private class StartEndTime
+    {
+        int hour;
+        int min;
+    }
+
+    @OnTouch(R.id.endTime)
+    public boolean selectEndTime(MotionEvent motionEvent)
+    {
+        if (motionEvent.getAction() == MotionEvent.ACTION_DOWN)
+        {
+            closeTheKeyBoard();
+            Calendar currentTime = Calendar.getInstance();
+            int hour = currentTime.get(Calendar.HOUR_OF_DAY);
+            int minute = currentTime.get(Calendar.MINUTE);
+            TimePickerDialog mTimePicker;
+            mTimePicker = new TimePickerDialog(getActivity(), new TimePickerDialog.OnTimeSetListener()
+            {
+                @Override
+                public void onTimeSet(TimePicker timePicker, int selectedHour, int selectedMinute)
+                {
+                    mEndTime.setText(getTime(selectedHour, selectedMinute));
+                    StartEndTime time = new StartEndTime();
+                    time.min = selectedMinute;
+                    time.hour = selectedHour;
+                    mEndTime.setTag(time);
+                }
+            }, hour, minute, false);
+            mTimePicker.setTitle("Select Start Time");
+            mTimePicker.show();
+        }
+        return true;
+    }
+
+    private String getTime(int selectedHour, int selectedMinute)
+    {
+        if (selectedHour > 12)
+        {
+            return get2DigitNum(selectedHour - 12) + ":" + get2DigitNum(selectedMinute) + " PM";
+        }
+        else
+        {
+            return get2DigitNum(selectedHour) + ":" + get2DigitNum(selectedMinute) + " AM";
+        }
+    }
+
+
 }

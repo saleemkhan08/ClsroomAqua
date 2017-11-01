@@ -1,15 +1,23 @@
 package com.clsroom.adapters;
 
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.v7.widget.PopupMenu;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.CompoundButton;
 
 import com.clsroom.R;
+import com.clsroom.dialogs.NotificationDialogFragment;
+import com.clsroom.dialogs.ResetPasswordDialogFragment;
 import com.clsroom.fragments.ProfileFragment;
-import com.clsroom.fragments.StudentsListFragment;
 import com.clsroom.listeners.FragmentLauncher;
+import com.clsroom.listeners.OnDismissListener;
+import com.clsroom.model.Progress;
 import com.clsroom.model.Students;
+import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.NavigationUtil;
@@ -17,6 +25,8 @@ import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.StudentViewHolder;
 import com.clsroom.views.DetailsTransition;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
 import com.squareup.otto.Subscribe;
@@ -32,6 +42,7 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
     public LinkedHashSet<Students> mSelectedStudents;
     public LinkedHashSet<Students> mUnSelectedStudents;
     private FragmentLauncher launcher;
+    private DatabaseReference mStudentDbReference;
     private boolean isSelectAll;
 
     public static StudentsAdapter getInstance(DatabaseReference reference, FragmentLauncher launcher)
@@ -40,6 +51,7 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
         StudentsAdapter adapter = new StudentsAdapter(Students.class,
                 R.layout.student_list_row, StudentViewHolder.class, reference);
         adapter.launcher = launcher;
+        adapter.mStudentDbReference = reference;
         return adapter;
     }
 
@@ -59,7 +71,17 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
         viewHolder.mFullName.setText(model.getFullName());
         viewHolder.mUserId.setText(model.getUserId());
 
-        viewHolder.mCheckBox.setVisibility(isSelectionEnabled ? View.VISIBLE : View.GONE);
+        if (isSelectionEnabled)
+        {
+            viewHolder.mCheckBox.setVisibility(View.VISIBLE);
+            viewHolder.optionsIconContainer.setVisibility(View.GONE);
+        }
+        else
+        {
+            viewHolder.mCheckBox.setVisibility(View.GONE);
+            viewHolder.optionsIconContainer.setVisibility(View.VISIBLE);
+        }
+
         if (mSelectedStudents != null)
         {
             viewHolder.mCheckBox.setChecked(mSelectedStudents.contains(model));
@@ -83,18 +105,17 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
             {
                 Log.d("relaunchIssue", "studentAdapter : onClick");
                 ProfileFragment fragment2 = ProfileFragment.getInstance(model);
-                StudentsListFragment fragment1 = (StudentsListFragment) launcher.getFragment();
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
                 {
                     fragment2.setSharedElementEnterTransition(new DetailsTransition());
                     fragment2.setSharedElementReturnTransition(new DetailsTransition());
 
                     viewHolder.mImageView.setTransitionName(model.getUserId());
-                    launcher.showFragment(fragment2, true, ProfileFragment.TAG, viewHolder.mImageView, "profileImage");
+                    launcher.addFragment(fragment2, true, ProfileFragment.TAG, viewHolder.mImageView, ProfileFragment.PROFILE_IMAGE);
                 }
                 else
                 {
-                    launcher.showFragment(fragment2, true, ProfileFragment.TAG);
+                    launcher.addFragment(fragment2, true, ProfileFragment.TAG);
                 }
             }
         });
@@ -112,6 +133,83 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
                 }
             });
         }
+        configureOptions(viewHolder, model);
+    }
+
+    private void configureOptions(final StudentViewHolder holder, final Students students)
+    {
+        holder.optionsIconContainer.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                PopupMenu popup = new PopupMenu(launcher.getActivity(), v);
+                popup.getMenuInflater()
+                        .inflate(R.menu.student_options, popup.getMenu());
+                popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener()
+                {
+                    public boolean onMenuItemClick(MenuItem item)
+                    {
+                        switch (item.getItemId())
+                        {
+                            case R.id.action_delete:
+                                confirmDelete(students);
+                                break;
+                            case R.id.reset_password:
+                                resetPassword(students);
+                                break;
+                            case R.id.send_notification:
+                                sendNotification(students);
+                                break;
+                        }
+                        return true;
+                    }
+                });
+                popup.show();
+            }
+        });
+    }
+
+    private void confirmDelete(Students students)
+    {
+        Progress.show(R.string.deleting);
+        mStudentDbReference.child(students.getUserId()).removeValue().addOnCompleteListener(new OnCompleteListener<Void>()
+        {
+            @Override
+            public void onComplete(@NonNull Task<Void> task)
+            {
+                Progress.hide();
+                if (task.isSuccessful())
+                {
+                    ToastMsg.show(R.string.deleted);
+                }
+                else
+                {
+                    ToastMsg.show(R.string.please_try_again);
+                }
+            }
+        });
+    }
+
+    private void sendNotification(Students students)
+    {
+        NotificationDialogFragment.getInstance(students, new OnDismissListener()
+        {
+            @Override
+            public void onDismiss(String msg)
+            {
+                if (!TextUtils.isEmpty(msg))
+                {
+                    ToastMsg.show(R.string.sent);
+                }
+            }
+        }).show(launcher.getSupportFragmentManager(), NotificationDialogFragment.TAG);
+    }
+
+    private void resetPassword(Students students)
+    {
+        ResetPasswordDialogFragment.getInstance(mStudentDbReference.child(students.getUserId()))
+                .show(launcher.getSupportFragmentManager(), ResetPasswordDialogFragment.TAG);
     }
 
     private void updateSelection(boolean isChecked, Students model)

@@ -353,7 +353,7 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
 
     private void editNotes(Notes notes)
     {
-        launcher.showFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
+        launcher.replaceFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
                 true, AddOrEditNotesFragment.TAG);
     }
 
@@ -421,17 +421,20 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
             @Override
             public void onDismiss(String msg)
             {
-                FirebaseDatabase.getInstance().getReference().child(Notes.NOTES)
-                        .child(mNotesClassifier.getClassId()).child(mNotesClassifier.getSubjectId())
-                        .child(model.dateTime()).setValue(model).addOnCompleteListener(new OnCompleteListener<Void>()
+                if (!TextUtils.isEmpty(msg))
                 {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task)
+                    FirebaseDatabase.getInstance().getReference().child(Notes.NOTES)
+                            .child(mNotesClassifier.getClassId()).child(mNotesClassifier.getSubjectId())
+                            .child(model.dateTime()).setValue(model).addOnCompleteListener(new OnCompleteListener<Void>()
                     {
-                        mNotesDbRef.getRef().child(model.dateTime()).removeValue();
-                        getActivity().onBackPressed();
-                    }
-                });
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task)
+                        {
+                            mNotesDbRef.getRef().child(model.dateTime()).removeValue();
+                            getActivity().onBackPressed();
+                        }
+                    });
+                }
             }
         });
     }
@@ -475,5 +478,11 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
                 .setStartPosition(position)
                 .setCustomDraweeHierarchyBuilder(hierarchyBuilder)
                 .show();
+    }
+
+    public static SingleNotesFragment getInstance(Notes model, String notesStatus)
+    {
+        notesStatus += "_" + model.getClassSubId() + "_" + model.dateTime();
+        return getInstance(notesStatus);
     }
 }

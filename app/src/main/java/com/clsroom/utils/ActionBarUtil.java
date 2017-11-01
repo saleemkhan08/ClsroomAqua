@@ -26,6 +26,8 @@ public class ActionBarUtil
     public static final String SHOW_PROFILE_MENU = "showProfileMenu";
     public static final String SHOW_STUDENTS_MENU_FOR_TEACHERS = "showStudentsMenuForTeachers";
     public static final String SHOW_SINGLE_NOTES_MENU = "showSingleNotesMenu";
+    public static final String SHOW_STAFF_TIME_TABLE_OPTION = "showStaffTimeTableOptions";
+    public static final String SHOW_CLASS_TIME_TABLE_OPTION = "showClassTimeTableOptions";
     private MenuInflater mMenuInflater;
     private Menu mMenu;
     public static final String SHOW_MULTIPLE_STAFF_MENU = "showMultipleStaffMenu";
@@ -80,6 +82,12 @@ public class ActionBarUtil
                 break;
             case SHOW_SINGLE_NOTES_MENU:
                 loadNewMenu(R.menu.classes_options);
+                break;
+            case SHOW_CLASS_TIME_TABLE_OPTION:
+                loadNewMenu(R.menu.class_time_table_option);
+                break;
+            case SHOW_STAFF_TIME_TABLE_OPTION:
+                loadNewMenu(R.menu.staff_time_table_option);
                 break;
             case NO_MENU:
             case SHOW_INDEPENDENT_SUBJECT_MENU:

@@ -15,6 +15,7 @@ import com.clsroom.model.Notifications;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Snack;
 import com.clsroom.model.ToastMsg;
+import com.clsroom.model.User;
 import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.DateTimeUtil;
 import com.clsroom.utils.NavigationUtil;
@@ -41,11 +42,19 @@ public class NotificationDialogFragment extends CustomDialogFragment
     private DatabaseReference notificationsRootRef;
     private Context mContext;
     private String notification;
+    private User user;
 
     public static NotificationDialogFragment getInstance(Notes notes, OnDismissListener listener)
     {
         NotificationDialogFragment fragment = getInstance(listener);
         fragment.notes = notes;
+        return fragment;
+    }
+
+    public static NotificationDialogFragment getInstance(User user, OnDismissListener listener)
+    {
+        NotificationDialogFragment fragment = getInstance(listener);
+        fragment.user = user;
         return fragment;
     }
 
@@ -97,6 +106,17 @@ public class NotificationDialogFragment extends CustomDialogFragment
         {
             sendNotesRelatedNotifications();
         }
+        else
+        {
+            sendPersonalNotification();
+        }
+    }
+
+    private void sendPersonalNotification()
+    {
+        mCurrentNotification.setLeaveId(null);
+        mCurrentNotification.setNotesId(null);
+        mNotificationDbRef = notificationsRootRef.child(user.getUserId());
     }
 
     @Override
@@ -126,6 +146,10 @@ public class NotificationDialogFragment extends CustomDialogFragment
             if (!(notes != null && notes.getNotesStatus().equals(Notes.REJECTED)))
             {
                 mCurrentNotification.setMessage(notification);
+            }
+            else
+            {
+                notification = mCurrentNotification.getMessage();
             }
             sendNotification();
         }
@@ -223,7 +247,7 @@ public class NotificationDialogFragment extends CustomDialogFragment
                 break;
 
             case Notes.APPROVED:
-                notesId = "R";
+                notesId = Notes.REVIEWED;
                 setDialogTitle(R.string.notificationMessage);
                 mCurrentNotification.setMessage(getNotesApprovalMsg(notes));
                 mNotificationDbRef = notificationsRootRef.child(notes.getSubmitterId());
@@ -231,7 +255,7 @@ public class NotificationDialogFragment extends CustomDialogFragment
                 break;
 
             case Notes.REVIEW:
-                notesId = "P";
+                notesId = Notes.PENDING;
                 setDialogTitle(R.string.notificationMessage);
                 mCurrentNotification.setMessage(getNotesReviewMsg(notes));
                 mNotificationDbRef = notificationsRootRef.child(notes.getReviewerId());

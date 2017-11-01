@@ -17,6 +17,8 @@ public class Notes
     public static final String APPROVED = "approved";
     public static final String SUBMITTER_ID = "submitterId";
     public static final String RE_SUBMITTED = "reSubmitted";
+    public static final String PENDING = "P";
+    public static final String REVIEWED = "R";
     private String notesTitle;
     private String notesDescription;
     private ArrayList<NotesImage> notesImages;

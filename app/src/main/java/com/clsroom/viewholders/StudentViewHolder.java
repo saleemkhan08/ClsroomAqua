@@ -27,6 +27,9 @@ public class StudentViewHolder extends RecyclerView.ViewHolder
 
     public View mItemView;
 
+    @Bind(R.id.optionsIconContainer)
+    public View optionsIconContainer;
+
     public StudentViewHolder(View itemView)
     {
         super(itemView);

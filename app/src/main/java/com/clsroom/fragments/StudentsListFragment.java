@@ -247,7 +247,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
             onBackPressed();
             StudentAttendanceListFragment fragment = StudentAttendanceListFragment
                     .getInstance(mAdapter.mUnSelectedStudents, mCurrentClass.getCode());
-            launcher.showFragment(fragment, true, StudentAttendanceListFragment.TAG);
+            launcher.replaceFragment(fragment, true, StudentAttendanceListFragment.TAG);
         }
         else
         {

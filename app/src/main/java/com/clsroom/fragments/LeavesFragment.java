@@ -29,7 +29,6 @@ import com.clsroom.model.Progress;
 import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
 import com.clsroom.model.Students;
-import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ConnectivityUtil;
@@ -292,7 +291,6 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     @Override
     public void onDataChange(DataSnapshot dataSnapshot)
     {
-        ToastMsg.show(dataSnapshot.getChildrenCount() + "");
         mLeavesCalender.removeDecorators();
         Calendar calendar = Calendar.getInstance();
 

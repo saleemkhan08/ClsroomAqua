@@ -5,6 +5,7 @@ public class TimeTable
 
     public static final String TIME_TABLE = "timeTable";
     public static final String START_TIME = "startTime";
+    public static final String TEACHER_CODE = "teacherCode";
     private String classCode;
 
     private String subjectCode;
@@ -16,6 +17,8 @@ public class TimeTable
 
     private String startTime;
     private String endTime;
+
+    private boolean isBreak;
 
     private String weekdayCode;
 
@@ -112,5 +115,15 @@ public class TimeTable
     public void setWeekdayCode(String weekdayCode)
     {
         this.weekdayCode = weekdayCode;
+    }
+
+    public boolean isBreak()
+    {
+        return isBreak;
+    }
+
+    public void setBreak(boolean aBreak)
+    {
+        isBreak = aBreak;
     }
 }

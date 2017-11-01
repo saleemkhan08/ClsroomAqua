@@ -1,6 +1,9 @@
 package com.clsroom.fragments;
 
 import android.app.Activity;
+import android.content.Context;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -67,14 +70,28 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
 
     public NotesFragment()
     {
-        Log.d(TAG, "NotesFragment");
+        Log.d("LifeCycleCheck", "Constructor");
         mCurrentNotesClassifier = new NotesClassifier();
+    }
+
+    @Override
+    public void onAttach(Context context)
+    {
+        super.onAttach(context);
+        Log.d("LifeCycleCheck", "onAttach");
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState)
+    {
+        super.onCreate(savedInstanceState);
+        Log.d("LifeCycleCheck", "onCreate : savedInstanceState : " + savedInstanceState);
     }
 
     @Override
     public void onCreateView(View parentView)
     {
-        Log.d(TAG, "onCreateView2");
+        Log.d("LifeCycleCheck", "onCreateView");
         ButterKnife.bind(this, parentView);
         Otto.register(this);
         setLauncher();
@@ -83,6 +100,74 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
             launcher.setToolBarTitle(R.string.notes);
         }
         mRootRef = FirebaseDatabase.getInstance().getReference();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState)
+    {
+        super.onActivityCreated(savedInstanceState);
+        Log.d("LifeCycleCheck", "onActivityCreated : savedInstanceState : " + savedInstanceState);
+    }
+
+    @Override
+    public void onStart()
+    {
+        super.onStart();
+        Log.d("LifeCycleCheck", "onStart");
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+        }
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        Log.d("LifeCycleCheck", "onResume");
+    }
+
+    @Override
+    public void onPause()
+    {
+        super.onPause();
+        Log.d("LifeCycleCheck", "onPause");
+    }
+
+    @Override
+    public void onStop()
+    {
+        super.onStop();
+        Log.d("LifeCycleCheck", "onStop");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        super.onSaveInstanceState(outState);
+        Log.d("LifeCycleCheck", "onSaveInstanceState");
+    }
+
+    @Override
+    public void onDestroyView()
+    {
+        super.onDestroyView();
+        Log.d("LifeCycleCheck", "onDestroyView");
+    }
+
+    @Override
+    public void onDestroy()
+    {
+        super.onDestroy();
+        Log.d("LifeCycleCheck", "onDestroy");
+        Otto.unregister(this);
+    }
+
+    @Override
+    public void onDetach()
+    {
+        super.onDetach();
+        Log.d("LifeCycleCheck", "onDetach");
     }
 
     private void setUpSubjectsTabsListener()
@@ -116,30 +201,12 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
         });
     }
 
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        Log.d(TAG, "onStart");
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-        }
-    }
 
     @Override
     protected int getContentViewLayoutRes()
     {
         Log.d(TAG, "getContentViewLayoutRes");
         return R.layout.fragment_notes;
-    }
-
-    @Override
-    public void onDestroy()
-    {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-        Otto.unregister(this);
     }
 
     private void setUpRecyclerView()
@@ -215,7 +282,7 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
         {
             if (launcher != null)
             {
-                launcher.showFragment(AddOrEditNotesFragment.getInstance(mCurrentNotesClassifier),
+                launcher.replaceFragment(AddOrEditNotesFragment.getInstance(mCurrentNotesClassifier),
                         true, AddOrEditNotesFragment.TAG);
             }
         }
@@ -313,7 +380,6 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
                 mCurrentNotesClassifier.setReviewedNotesShown(false);
                 setUpRecyclerView();
                 break;
-
         }
     }
 

@@ -37,9 +37,11 @@ import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
 import com.clsroom.model.Students;
+import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -103,7 +105,7 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
             {
                 if (ConnectivityUtil.isConnected(launcher.getActivity()))
                 {
-                    loadFragment(PROFILE_FRAGMENT, true);
+                    replaceFragment(PROFILE_FRAGMENT, true);
                 }
                 else
                 {
@@ -119,7 +121,7 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
 
         String userId = mSharedPrefs.getString(LOGIN_USER_ID, "");
         String refreshedToken = mSharedPrefs.getString(User.TOKEN, "");
-        
+
         DatabaseReference ref = User.getRef(userId);
         ref.addValueEventListener(this);
         ref.child(User.TOKEN).setValue(refreshedToken).addOnCompleteListener(new OnCompleteListener<Void>()
@@ -154,6 +156,20 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
                     mCurrentFragment = "";
                 }
                 Log.d("relaunchIssue", "Check - mCurrentFragmentName : " + mCurrentFragment);
+            }
+        });
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+        auth.addAuthStateListener(new FirebaseAuth.AuthStateListener()
+        {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth)
+            {
+                if (firebaseAuth.getCurrentUser() == null)
+                {
+                    ToastMsg.show(R.string.please_login);
+                    logout();
+
+                }
             }
         });
     }
@@ -192,31 +208,31 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
         switch (itemId)
         {
             case R.id.admin_students:
-                loadFragment(STUDENTS_LIST_FRAGMENT, true);
+                replaceFragment(STUDENTS_LIST_FRAGMENT, true);
                 break;
             case R.id.admin_classes:
-                loadFragment(CLASSES_LIST_FRAGMENT, true);
+                replaceFragment(CLASSES_LIST_FRAGMENT, true);
                 break;
             case R.id.admin_staff:
-                loadFragment(STAFF_LIST_FRAGMENT, true);
+                replaceFragment(STAFF_LIST_FRAGMENT, true);
                 break;
             case R.id.launch_leaves_fragment:
-                loadFragment(LEAVES_LIST_FRAGMENT, true);
+                replaceFragment(LEAVES_LIST_FRAGMENT, true);
                 break;
             case R.id.launch_notes_fragment:
-                loadFragment(NOTES_FRAGMENT, true);
+                replaceFragment(NOTES_FRAGMENT, true);
                 break;
             case R.id.launch_subjects_fragment:
-                loadFragment(SUBJECTS_FRAGMENT, true);
+                replaceFragment(SUBJECTS_FRAGMENT, true);
                 break;
             case R.id.launch_time_table_fragment:
-                loadFragment(TIME_TABLE_FRAGMENT, true);
+                replaceFragment(TIME_TABLE_FRAGMENT, true);
                 break;
             case R.id.nav_notifications:
-                loadFragment(NOTIFICATIONS_FRAGMENT, true);
+                replaceFragment(NOTIFICATIONS_FRAGMENT, true);
                 break;
             case R.id.nav_settings:
-                loadFragment(PROFILE_FRAGMENT, true);
+                replaceFragment(PROFILE_FRAGMENT, true);
                 break;
             case R.id.nav_logout:
                 logout();
@@ -254,19 +270,34 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
         return fragment;
     }
 
-    private void loadFragment(String tag, boolean addToBackStack)
+    private void replaceFragment(String tag, boolean addToBackStack)
     {
         Log.d("relaunchIssue", "NavUtil : loadFragment3");
         if (isNewObjectRequired(tag))
         {
-            loadFragment(getFragment(tag), addToBackStack, tag);
+            replaceFragment(getFragment(tag), addToBackStack, tag);
         }
     }
 
-    public void loadFragment(Fragment fragment, boolean addToBackStack, String tag)
+    private void addFragment(String tag, boolean addToBackStack)
+    {
+        Log.d("relaunchIssue", "NavUtil : loadFragment3");
+        if (isNewObjectRequired(tag))
+        {
+            addFragment(getFragment(tag), addToBackStack, tag);
+        }
+    }
+
+    public void replaceFragment(Fragment fragment, boolean addToBackStack, String tag)
     {
         Log.d("relaunchIssue", "NavUtil : loadFragment2");
-        loadFragment(fragment, addToBackStack, tag, null, null);
+        replaceFragment(fragment, addToBackStack, tag, null, null);
+    }
+
+    public void addFragment(Fragment fragment, boolean addToBackStack, String tag)
+    {
+        Log.d("relaunchIssue", "NavUtil : loadFragment2");
+        addFragment(fragment, addToBackStack, tag, null, null);
     }
 
     public boolean isDrawerOpen()
@@ -392,7 +423,7 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
                     mMainPageFragmentTag = NOTES_FRAGMENT;
                     break;
             }
-            loadFragment(mMainPageFragmentTag, false);
+            replaceFragment(mMainPageFragmentTag, false);
             isMenuLoaded = true;
             loadCurrentMenu();
         }
@@ -409,13 +440,31 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
         return mCurrentUser.getUserId().substring(0, 3);
     }
 
-    public void loadFragment(Fragment fragment, boolean addToBackStack, String tag, ImageView sharedImageView, String transitionName)
+    public void replaceFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName)
     {
         Log.d("relaunchIssue", "NavUtil : loadFragment1");
         mListener = (EventsListener) fragment;
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
         transaction.replace(R.id.content_main, (Fragment) mListener, tag);
         //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        if (addToBackStack)
+        {
+            transaction.addToBackStack(tag);
+        }
+        if (transitionName != null && !TextUtils.isEmpty(transitionName) && sharedImageView != null
+                && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            transaction.addSharedElement(sharedImageView, transitionName);
+        }
+        transaction.commit();
+    }
+
+    public void addFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName)
+    {
+        Log.d("relaunchIssue", "NavUtil : loadFragment1");
+        mListener = (EventsListener) fragment;
+        FragmentTransaction transaction = mFragmentManager.beginTransaction();
+        transaction.add(R.id.content_main, (Fragment) mListener, tag);
         if (addToBackStack)
         {
             transaction.addToBackStack(tag);

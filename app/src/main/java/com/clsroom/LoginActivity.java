@@ -4,7 +4,6 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -41,6 +40,7 @@ import static com.clsroom.dialogs.LoginDialogFragment.FIREBASE_USER_ID;
 
 public class LoginActivity extends AppCompatActivity implements OnDismissListener, OnCompleteListener<AuthResult>
 {
+    //http://funretro.github.io/distributed/#f31a7f60-05de-4926-be80-0e6d735b2d5a
     public static final String LOGIN_STATUS = "loginStatus";
     public static final String LOGIN_USER_ID = "loginUserId";
     private static final String TAG = "LoginActivity";
@@ -124,10 +124,7 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
         TextView textView = (TextView) layout.findViewById(android.support.design.R.id.snackbar_text);
         textView.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.NORMAL));
         textView.setGravity(Gravity.CENTER_HORIZONTAL);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1)
-        {
-            textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
-        }
+        textView.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
         layout.setBackgroundResource(R.color.colorPrimary);
         snackbar.show();
     }

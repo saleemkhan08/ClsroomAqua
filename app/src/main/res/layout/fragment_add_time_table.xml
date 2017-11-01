@@ -16,6 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/startTime"
+            android:clickable="true"
             android:maxLines="1"
             android:inputType="time"
             android:imeOptions="actionNext"
@@ -30,6 +31,7 @@
 
         <EditText
             android:id="@+id/endTime"
+            android:clickable="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="@string/endTime"
@@ -100,6 +102,15 @@
             android:layout_marginTop="-16dp"
             />
     </RelativeLayout>
+
+    <Switch
+        android:id="@+id/breakTime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/switchMargin"
+        android:padding="@dimen/switchPadding"
+        android:text="@string/breakTime"
+        />
 
     <Switch
         android:id="@+id/addAnother"

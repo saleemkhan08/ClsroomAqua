@@ -31,12 +31,12 @@ public class TimeTableViewHolder extends RecyclerView.ViewHolder
     @Bind(R.id.periodTime)
     public TextView mPeriodTime;
 
+    @Bind(R.id.innerContainer)
     public View mItemView;
 
     public TimeTableViewHolder(View itemView)
     {
         super(itemView);
-        mItemView = itemView;
         ButterKnife.bind(this, itemView);
     }
 }

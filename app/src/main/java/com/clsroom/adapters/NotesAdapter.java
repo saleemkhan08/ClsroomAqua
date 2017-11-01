@@ -1,5 +1,6 @@
 package com.clsroom.adapters;
 
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
 import android.text.TextUtils;
@@ -10,6 +11,8 @@ import android.view.View;
 import com.clsroom.R;
 import com.clsroom.dialogs.NotificationDialogFragment;
 import com.clsroom.fragments.AddOrEditNotesFragment;
+import com.clsroom.fragments.ProfileFragment;
+import com.clsroom.fragments.SingleNotesFragment;
 import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.listeners.ImageClickListener;
 import com.clsroom.listeners.OnDismissListener;
@@ -17,39 +20,50 @@ import com.clsroom.model.Notes;
 import com.clsroom.model.NotesClassifier;
 import com.clsroom.model.NotesImage;
 import com.clsroom.model.Progress;
+import com.clsroom.model.Staff;
+import com.clsroom.model.Students;
 import com.clsroom.model.ToastMsg;
+import com.clsroom.model.User;
 import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.NotesViewHolder;
+import com.clsroom.views.DetailsTransition;
 import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.otto.Subscribe;
 import com.stfalcon.frescoimageviewer.ImageViewer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.clsroom.utils.ActionBarUtil.SHOW_INDEPENDENT_NOTES_MENU;
 
-public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder>
+public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder> implements View.OnClickListener, ImageClickListener
 {
     private static final String TAG = "NotesAdapter";
     private FragmentLauncher launcher;
     private Query mNotesDbRef;
     private NotesClassifier mNotesClassifier;
+    private String notesStatus;
 
     public static NotesAdapter getInstance(NotesClassifier classifier, DatabaseReference reference, FragmentLauncher launcher)
     {
         Query ref = reference.orderByKey();
+        String status;
         if (reference.toString().contains(Notes.REVIEW))
         {
+            status = Notes.PENDING;
             if (NavigationUtil.isStudent)
             {
                 ref = reference.orderByChild(Notes.SUBMITTER_ID).startAt(NavigationUtil.userId).endAt(NavigationUtil.userId);
@@ -58,10 +72,12 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
         else
         {
             ref = reference.getRef().orderByChild(Notes.DATE_TIME);
+            status = Notes.REVIEWED;
         }
         NotesAdapter fragment = new NotesAdapter(Notes.class,
                 R.layout.notes_row, NotesViewHolder.class, ref, launcher);
         fragment.mNotesDbRef = ref;
+        fragment.notesStatus = status;
         fragment.mNotesClassifier = classifier;
         return fragment;
     }
@@ -83,29 +99,54 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
             list.add(image.url);
         }
         handleReviewOptions(viewHolder, model);
-        viewHolder.setClickListener(new ImageClickListener()
-        {
-            @Override
-            public void onImageClick(int position)
-            {
-                GenericDraweeHierarchyBuilder hierarchyBuilder = GenericDraweeHierarchyBuilder
-                        .newInstance(launcher.getActivity().getResources())
-                        .setPlaceholderImage(R.mipmap.notes);
+        viewHolder.setClickListener(this);
+
+        viewHolder.itemView.setOnClickListener(this);
+        viewHolder.itemView.setClickable(true);
+        viewHolder.itemView.setTag(model);
 
 
-                new ImageViewer.Builder(launcher.getActivity(), list)
-                        .setStartPosition(position)
-                        .setCustomDraweeHierarchyBuilder(hierarchyBuilder)
-                        .show();
-            }
-        });
         viewHolder.dateTime.setText(model.displayDate());
         viewHolder.notesTitle.setText(model.getNotesTitle());
         viewHolder.notesDescription.setText(model.getNotesDescription());
-        viewHolder.createrName.setText(model.getSubmitterName());
-        ImageUtil.loadCircularImg(model.getSubmitterPhotoUrl(), viewHolder.createrImage);
-
         configureOptions(viewHolder, model);
+        User.getRef(model.getSubmitterId()).addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                User user;
+                if (dataSnapshot.hasChild(Staff.IS_ADMIN))
+                {
+                    user = dataSnapshot.getValue(Staff.class);
+                }
+                else
+                {
+                    user = dataSnapshot.getValue(Students.class);
+                }
+                if (user != null)
+                {
+                    viewHolder.createrName.setText(user.getFullName());
+                    ImageUtil.loadCircularImg(user.getPhotoUrl(), viewHolder.createrImage);
+
+                    viewHolder.createrImage.setOnClickListener(NotesAdapter.this);
+                    viewHolder.createrImage.setTag(user);
+
+                }
+                else
+                {
+                    viewHolder.createrName.setText(R.string.unknown_user);
+                    ImageUtil.loadCircularImg("", viewHolder.createrImage);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+                viewHolder.createrName.setText(R.string.unknown_user);
+                ImageUtil.loadCircularImg("", viewHolder.createrImage);
+            }
+        });
 
         ArrayList<NotesImage> images = model.getNotesImages();
         switch (images.size())
@@ -115,17 +156,23 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
             case 1:
                 viewHolder.singleImage.setVisibility(View.VISIBLE);
                 ImageUtil.loadSquareImg(images.get(0).url, viewHolder.singleImage);
+                viewHolder.singleImage.setTag(list);
                 break;
             case 2:
                 viewHolder.dualImageContainer.setVisibility(View.VISIBLE);
                 ImageUtil.loadSquareImg(images.get(0).url, viewHolder.dualImage1);
                 ImageUtil.loadSquareImg(images.get(1).url, viewHolder.dualImage2);
+                viewHolder.dualImage1.setTag(list);
+                viewHolder.dualImage2.setTag(list);
                 break;
             case 3:
                 viewHolder.tripleImageContainer.setVisibility(View.VISIBLE);
                 ImageUtil.loadSquareImg(images.get(0).url, viewHolder.tripleImage1);
                 ImageUtil.loadSquareImg(images.get(1).url, viewHolder.tripleImage2);
                 ImageUtil.loadSquareImg(images.get(2).url, viewHolder.tripleImage3);
+                viewHolder.tripleImage1.setTag(list);
+                viewHolder.tripleImage2.setTag(list);
+                viewHolder.tripleImage3.setTag(list);
                 break;
             default:
                 viewHolder.additionalImageCount.setVisibility(View.VISIBLE);
@@ -136,6 +183,10 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
                 ImageUtil.loadSquareImg(images.get(1).url, viewHolder.quadImage2);
                 ImageUtil.loadSquareImg(images.get(2).url, viewHolder.quadImage3);
                 ImageUtil.loadSquareImg(images.get(3).url, viewHolder.quadImage4);
+                viewHolder.quadImage1.setTag(list);
+                viewHolder.quadImage2.setTag(list);
+                viewHolder.quadImage3.setTag(list);
+                viewHolder.quadImage4.setTag(list);
                 break;
         }
     }
@@ -204,16 +255,19 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
             @Override
             public void onDismiss(String msg)
             {
-                FirebaseDatabase.getInstance().getReference().child(Notes.NOTES)
-                        .child(mNotesClassifier.getClassId()).child(mNotesClassifier.getSubjectId())
-                        .child(model.dateTime()).setValue(model).addOnCompleteListener(new OnCompleteListener<Void>()
+                if (!TextUtils.isEmpty(msg))
                 {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task)
+                    FirebaseDatabase.getInstance().getReference().child(Notes.NOTES)
+                            .child(mNotesClassifier.getClassId()).child(mNotesClassifier.getSubjectId())
+                            .child(model.dateTime()).setValue(model).addOnCompleteListener(new OnCompleteListener<Void>()
                     {
-                        mNotesDbRef.getRef().child(model.dateTime()).removeValue();
-                    }
-                });
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task)
+                        {
+                            mNotesDbRef.getRef().child(model.dateTime()).removeValue();
+                        }
+                    });
+                }
             }
         });
     }
@@ -324,7 +378,65 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
 
     private void editNotes(Notes notes)
     {
-        launcher.showFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
+        launcher.replaceFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
                 true, AddOrEditNotesFragment.TAG);
+    }
+
+    private void showProfile(User model, View view)
+    {
+        Log.d("relaunchIssue", "studentAdapter : onClick");
+        ProfileFragment fragment = ProfileFragment.getInstance(model);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
+        {
+            fragment.setSharedElementEnterTransition(new DetailsTransition());
+            fragment.setSharedElementReturnTransition(new DetailsTransition());
+
+            view.setTransitionName(model.getUserId());
+            launcher.addFragment(fragment, true, ProfileFragment.TAG, view,
+                    ProfileFragment.PROFILE_IMAGE);
+        }
+        else
+        {
+            launcher.addFragment(fragment, true, ProfileFragment.TAG);
+        }
+    }
+
+    @Override
+    public void onClick(View view)
+    {
+        Object tag = view.getTag();
+        if (view.getId() == R.id.createrImage)
+        {
+            if (tag instanceof User)
+            {
+                showProfile((User) tag, view);
+            }
+        }
+        else
+        {
+            if (tag instanceof Notes)
+            {
+                SingleNotesFragment fragment = SingleNotesFragment.getInstance((Notes) tag, notesStatus);
+                launcher.addFragment(fragment, true, NavigationUtil.SINGLE_NOTES_FRAGMENT);
+            }
+        }
+    }
+
+    @Override
+    public void onImageClick(int position, View view)
+    {
+        Object tag = view.getTag();
+        if (tag instanceof List)
+        {
+            GenericDraweeHierarchyBuilder hierarchyBuilder = GenericDraweeHierarchyBuilder
+                    .newInstance(launcher.getActivity().getResources())
+                    .setPlaceholderImage(R.mipmap.notes);
+
+
+            new ImageViewer.Builder(launcher.getActivity(), (List) tag)
+                    .setStartPosition(position)
+                    .setCustomDraweeHierarchyBuilder(hierarchyBuilder)
+                    .show();
+        }
     }
 }
