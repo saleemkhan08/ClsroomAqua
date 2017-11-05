@@ -30,7 +30,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
@@ -39,16 +39,16 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
     private static final String TAG = NavigationUtil.CLASSES_LIST_FRAGMENT;
     private FragmentLauncher launcher;
 
-    @Bind(R.id.classesListRecyclerView)
+    @BindView(R.id.classesListRecyclerView)
     RecyclerView mClassesListRecyclerView;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
-    @Bind(R.id.fabContainer)
+    @BindView(R.id.fabContainer)
     RelativeLayout mFabContainer;
 
     private DatabaseReference mRootRef;
@@ -66,25 +66,9 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
         setLauncher();
         mRootRef = FirebaseDatabase.getInstance().getReference();
         mFabContainer.setOnClickListener(this);
-
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.classes);
-        }
         setUpRecyclerView();
-
+        refreshActionBar();
         return parentView;
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.NO_MENU);
-        }
     }
 
     private void setUpRecyclerView()
@@ -92,6 +76,8 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
         DatabaseReference classesDbRef = mRootRef.child(Classes.CLASSES);
         ClassesAdapter adapter = ClassesAdapter.getInstance(classesDbRef, launcher);
         Log.d(TAG, "mAdapter : " + adapter);
+        mProgress.setVisibility(View.VISIBLE);
+        mErrorMsg.setVisibility(View.GONE);
         mClassesListRecyclerView.setAdapter(adapter);
         mClassesListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mClassesListRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
@@ -188,6 +174,17 @@ public class ClassesListFragment extends Fragment implements View.OnClickListene
         if (activity instanceof FragmentLauncher)
         {
             launcher = (FragmentLauncher) activity;
+        }
+        launcher.hideInitialProgressBar();
+    }
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.NO_MENU);
+            launcher.setToolBarTitle(R.string.classes);
         }
     }
 }

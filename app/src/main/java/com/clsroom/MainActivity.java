@@ -2,7 +2,6 @@ package com.clsroom;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
 import android.os.Build;
@@ -44,6 +43,8 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
     private ActionBarUtil mActionBarUtil;
     private Fragment mCurrentFragment;
 
+    private View initialProgressBar;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -55,9 +56,8 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
             logout();
         }
         setContentView(R.layout.activity_main);
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
-        IntentFilter filter = new IntentFilter();
-        filter.addAction("android.net.conn.CONNECTIVITY_CHANGE");
+        mToolbar = findViewById(R.id.toolbar);
+        initialProgressBar = findViewById(R.id.initialProgressBar);
         setSupportActionBar(mToolbar);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
         {
@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
             view.setSystemUiVisibility(flags);
         }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, mToolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -200,6 +200,12 @@ public class MainActivity extends AppCompatActivity implements FragmentLauncher
         {
             Snack.show(R.string.noInternet);
         }
+    }
+
+    @Override
+    public void hideInitialProgressBar()
+    {
+        initialProgressBar.setVisibility(View.GONE);
     }
 
     @Subscribe

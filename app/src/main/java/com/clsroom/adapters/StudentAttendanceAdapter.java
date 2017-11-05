@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 
 import com.clsroom.R;
 import com.clsroom.model.Students;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.viewholders.StudentViewHolder;
 
 import java.util.ArrayList;
@@ -36,9 +35,7 @@ public class StudentAttendanceAdapter extends RecyclerView.Adapter<StudentViewHo
     {
         Students model = mAbsentees.get(position);
                 Log.d(TAG, "populateViewHolder : " + position);
-        String imageUrl = model.getPhotoUrl();
-        ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mImageView);
-
+        viewHolder.mImageView.setImageURI(model.getPhotoUrl());
         viewHolder.mFullName.setText(model.getFullName());
         viewHolder.mUserId.setText(model.getUserId());
         viewHolder.mCheckBox.setVisibility(View.GONE);

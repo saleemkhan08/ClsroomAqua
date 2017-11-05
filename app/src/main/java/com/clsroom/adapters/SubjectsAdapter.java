@@ -16,7 +16,6 @@ import com.clsroom.model.Subjects;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ConnectivityUtil;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.SubjectViewHolder;
@@ -62,9 +61,7 @@ public class SubjectsAdapter extends FirebaseRecyclerAdapter<Subjects, SubjectVi
     protected void populateViewHolder(final SubjectViewHolder viewHolder, final Subjects model, int position)
     {
         Log.d(TAG, "populateViewHolder : " + position);
-        String imageUrl = model.getTeacherImgUrl();
-        ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mTeacherImage);
-
+        viewHolder.mTeacherImage.setImageURI(model.getTeacherImgUrl());
         viewHolder.mSubjectName.setText(model.getSubjectName());
         viewHolder.mClassTeacherName.setText(model.getTeacherName());
         Log.d(TAG, this + " : isSelectionEnabled : " + isSelectionEnabled);

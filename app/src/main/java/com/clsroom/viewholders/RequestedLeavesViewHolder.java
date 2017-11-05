@@ -6,30 +6,31 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clsroom.R;
+import com.clsroom.views.SquareImageView;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class RequestedLeavesViewHolder extends RecyclerView.ViewHolder
 {
-    @Bind(R.id.userImage)
-    public ImageView mImageView;
+    @BindView(R.id.userImage)
+    public SquareImageView mImageView;
 
-    @Bind(R.id.fullName)
+    @BindView(R.id.fullName)
     public TextView mFullName;
 
-    @Bind(R.id.userId)
+    @BindView(R.id.userId)
     public TextView requestMessage;
 
-    @Bind(R.id.designation)
+    @BindView(R.id.designation)
     public TextView mDesignation;
 
     public View mItemView;
 
-    @Bind(R.id.optionsIconContainer)
+    @BindView(R.id.optionsIconContainer)
     public View optionsIconContainer;
 
-    @Bind(R.id.statusIcon)
+    @BindView(R.id.statusIcon)
     public ImageView statusIcon;
 
     public RequestedLeavesViewHolder(View itemView)

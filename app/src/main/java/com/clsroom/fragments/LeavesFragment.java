@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -32,11 +31,11 @@ import com.clsroom.model.Students;
 import com.clsroom.model.User;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ConnectivityUtil;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.LeavesDecorator;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
+import com.clsroom.views.SquareImageView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -55,7 +54,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -67,22 +66,22 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
 {
     public static final String TAG = NavigationUtil.LEAVES_LIST_FRAGMENT;
 
-    @Bind(R.id.leavesList)
+    @BindView(R.id.leavesList)
     MaterialCalendarView mLeavesCalender;
 
-    @Bind(R.id.userDetails)
+    @BindView(R.id.userDetails)
     View userDetails;
 
-    @Bind(R.id.profileName)
+    @BindView(R.id.profileName)
     TextView mProfileName;
 
-    @Bind(R.id.profileId)
+    @BindView(R.id.profileId)
     TextView mDesignation;
 
-    @Bind(R.id.profileImg)
-    ImageView mProfileImg;
+    @BindView(R.id.profileImg)
+    SquareImageView mProfileImg;
 
-    @Bind(R.id.leavesProgress)
+    @BindView(R.id.leavesProgress)
     View mProgress;
 
     ViewGroup calenderPager;
@@ -173,6 +172,7 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
             notificationFlow();
         }
         showCurrentUserDetails();
+        refreshActionBar();
         return parentView;
     }
 
@@ -221,11 +221,6 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
         mLeavesCalender.setOnDateChangedListener(this);
         mLeavesCalender.setPagingEnabled(false);
         mLeavesCalender.setAllowClickDaysOutsideCurrentMonth(false);
-
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.leaves);
-        }
 
         return parentView;
     }
@@ -383,22 +378,6 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
     }
 
     @Override
-    public void onStart()
-    {
-        super.onStart();
-        launcher.updateEventsListener(this);
-        if (NavigationUtil.isStudent)
-        {
-            Otto.post(ActionBarUtil.NO_MENU);
-            userDetails.setVisibility(View.GONE);
-        }
-        else
-        {
-            Otto.post(ActionBarUtil.SHOW_ADMIN_LEAVES_MENU);
-        }
-    }
-
-    @Override
     public void onDestroy()
     {
         super.onDestroy();
@@ -419,7 +398,7 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
 
     private void showUserDetails(User user)
     {
-        ImageUtil.loadCircularImg(getActivity(), user.getPhotoUrl(), mProfileImg);
+        mProfileImg.setImageURI(user.getPhotoUrl());
         mProfileName.setText(user.getFullName());
         mCurrentUserId = user.getUserId();
         showCurrentUserLeaves();
@@ -511,6 +490,24 @@ public class LeavesFragment extends Fragment implements EventsListener, ValueEve
         if (activity instanceof FragmentLauncher)
         {
             launcher = (FragmentLauncher) activity;
+        }
+    }
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            if (NavigationUtil.isStudent)
+            {
+                Otto.post(ActionBarUtil.NO_MENU);
+                userDetails.setVisibility(View.GONE);
+            }
+            else
+            {
+                Otto.post(ActionBarUtil.SHOW_ADMIN_LEAVES_MENU);
+            }
+            launcher.setToolBarTitle(R.string.leaves);
         }
     }
 }

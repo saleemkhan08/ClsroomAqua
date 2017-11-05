@@ -63,7 +63,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -75,22 +75,22 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
     public static final int PICK_IMAGE_MULTIPLE_GALLERY = 125;
     private FragmentLauncher launcher;
 
-    @Bind(R.id.notesApproverSpinner)
+    @BindView(R.id.notesApproverSpinner)
     Spinner mNotesApproverSpinner;
 
-    @Bind(R.id.notesReviewer)
+    @BindView(R.id.notesReviewer)
     EditText mNotesApprover;
 
-    @Bind(R.id.imagesRecyclerView)
+    @BindView(R.id.imagesRecyclerView)
     RecyclerView mImagesRecyclerView;
 
-    @Bind(R.id.notesTitle)
+    @BindView(R.id.notesTitle)
     EditText mNotesTitle;
 
-    @Bind(R.id.notesDescription)
+    @BindView(R.id.notesDescription)
     EditText mNotesDescription;
 
-    @Bind(R.id.subjectName)
+    @BindView(R.id.subjectName)
     TextView mSubjectName;
 
     private DatabaseReference mRootRef;
@@ -143,21 +143,9 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
                 .child(mCurrentNotesClassifier.getSubjectId());
 
         sharedPref = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        if (launcher != null)
-        {
-            if (mCurrentNotesClassifier.isEdit())
-            {
-                launcher.setToolBarTitle(R.string.editNotes);
-                mNotesTitle.setText(notes.getNotesTitle());
-                mNotesDescription.setText(notes.getNotesDescription());
-            }
-            else
-            {
-                launcher.setToolBarTitle(R.string.addNotes);
-            }
-        }
         setUpStaffSpinner();
         mSubjectName.setText(mCurrentNotesClassifier.getClassName() + " - " + mCurrentNotesClassifier.getSubjectName());
+        refreshActionBar();
         return parentView;
     }
 
@@ -169,15 +157,6 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
             launcher = (FragmentLauncher) activity;
         }
         Log.d("ClosingIssue", "setLauncher : " + launcher);
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        Log.d("ClosingIssue", "onStart");
-        launcher.updateEventsListener(this);
-        Otto.post(ActionBarUtil.NO_MENU);
     }
 
     private void setUpStaffSpinner()
@@ -270,6 +249,26 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
         return NavigationUtil.NOTES_FRAGMENT;
     }
 
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            if (mCurrentNotesClassifier.isEdit())
+            {
+                launcher.setToolBarTitle(R.string.editNotes);
+                mNotesTitle.setText(notes.getNotesTitle());
+                mNotesDescription.setText(notes.getNotesDescription());
+            }
+            else
+            {
+                launcher.setToolBarTitle(R.string.addNotes);
+            }
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.NO_MENU);
+        }
+    }
+
     public static AddOrEditNotesFragment getInstance(NotesClassifier resultClassifier)
     {
         AddOrEditNotesFragment fragment = new AddOrEditNotesFragment();
@@ -318,7 +317,7 @@ public class AddOrEditNotesFragment extends Fragment implements EventsListener, 
                 {
                     mNotesApproverSpinner.performClick();
                 }
-            }, 100);
+            }, 300);
         }
         return true;
     }

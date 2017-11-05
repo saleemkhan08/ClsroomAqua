@@ -5,4 +5,5 @@ public interface EventsListener
     boolean onBackPressed();
     int getMenuItemId();
     String getTagName();
+    void refreshActionBar();
 }

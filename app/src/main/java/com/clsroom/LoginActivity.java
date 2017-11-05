@@ -32,7 +32,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.squareup.otto.Subscribe;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -48,10 +48,10 @@ public class LoginActivity extends AppCompatActivity implements OnDismissListene
     private ProgressDialog mProgressDialog;
     public boolean mIsRunning;
 
-    @Bind(R.id.loginContainer)
+    @BindView(R.id.loginContainer)
     View mLoginButtonContainer;
 
-    @Bind(R.id.pageIndicatorView)
+    @BindView(R.id.pageIndicatorView)
     View mPageIndicatorView;
 
     private SharedPreferences mSharedPreferences;

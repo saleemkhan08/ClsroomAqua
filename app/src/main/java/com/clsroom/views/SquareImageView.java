@@ -3,7 +3,9 @@ package com.clsroom.views;
 import android.content.Context;
 import android.util.AttributeSet;
 
-public class SquareImageView extends android.support.v7.widget.AppCompatImageView
+import com.facebook.drawee.view.SimpleDraweeView;
+
+public class SquareImageView extends SimpleDraweeView
 {
 
     public SquareImageView(Context context)

@@ -7,6 +7,11 @@
         <!--android:title="@string/sendNotification"-->
         <!--app:showAsAction="never"/>-->
     <item
+        android:id="@+id/generate_credential"
+        android:orderInCategory="100"
+        android:title="@string/credentials"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/action_edit"
         android:orderInCategory="100"
         android:title="@string/edit"

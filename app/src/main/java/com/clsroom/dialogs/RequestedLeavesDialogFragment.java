@@ -6,32 +6,32 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.clsroom.R;
 import com.clsroom.adapters.RequestedLeavesAdapter;
 import com.clsroom.model.Leaves;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class RequestedLeavesDialogFragment extends CustomDialogFragment implements ValueEventListener
 {
     public static final String TAG = "RequestedLeavesDialogFragment";
 
-    @Bind(R.id.recyclerView)
+    @BindView(R.id.recyclerView)
     RecyclerView mRequestedLeavesRecyclerView;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     TextView mErrorMsg;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
     private DatabaseReference mRequestedLeavesDbRef;

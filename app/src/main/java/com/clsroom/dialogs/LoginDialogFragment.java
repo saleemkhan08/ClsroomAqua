@@ -29,12 +29,20 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.clsroom.model.User.EMAIL_NOT_SENT;
+import static com.clsroom.model.User.EMAIL_SENT;
+import static com.clsroom.model.User.EMAIL_SUFFIX;
+import static com.clsroom.model.User.INVALID_EMAIL;
+import static com.clsroom.model.User.PASSWORD_NOT_RESET;
+import static com.clsroom.model.User.UID;
 
 public class LoginDialogFragment extends DialogFragment
 {
@@ -44,23 +52,16 @@ public class LoginDialogFragment extends DialogFragment
     private static final int MIN_LENGTH_OF_PASSWORD = 6;
     private static final String PASSWORD_RESET_URL = "https://us-central1-clsroom-aqua.cloudfunctions.net/passwordResetHttp";
 
-    public static final String EMAIL_SUFFIX = "@clsroom.com";
-    private static final String EMAIL_SENT = "Email Sent";
-    private static final String INVALID_EMAIL = "Invalid Email";
-    private static final String PASSWORD_NOT_RESET = "Password not reset";
-    private static final String EMAIL_NOT_SENT = "Email Not Sent";
-    private static final String UID = "uid";
-
-    @Bind(R.id.userId)
+    @BindView(R.id.userId)
     EditText mUserIdEditText;
 
-    @Bind(R.id.password)
+    @BindView(R.id.password)
     EditText mPasswordEditText;
 
-    @Bind(R.id.passwordResetErrorMessage)
+    @BindView(R.id.passwordResetErrorMessage)
     TextView passwordResetErrorMessage;
 
-    @Bind(R.id.loginCredentials)
+    @BindView(R.id.loginCredentials)
     ViewGroup loginCredentials;
 
     private FirebaseAuth mAuth;
@@ -150,11 +151,11 @@ public class LoginDialogFragment extends DialogFragment
 
     private void closeTheKeyBoard()
     {
-        View view = getActivity().getCurrentFocus();
+        View view = getView();
         if (view != null)
         {
-            InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 
@@ -190,34 +191,41 @@ public class LoginDialogFragment extends DialogFragment
             Progress.show(R.string.please_wait);
             Map<String, String> data = new HashMap<>();
             data.put(UID, userId);
-            VolleyUtil.sendGetData(getActivity(), PASSWORD_RESET_URL, data, new ResultListener<String>()
+            try
             {
-                @Override
-                public void onSuccess(String result)
+                VolleyUtil.sendGetData(getActivity(), PASSWORD_RESET_URL, data, new ResultListener<String>()
                 {
-                    Log.d("UnknownLogin", "result : " + result);
-                    switch (result)
+                    @Override
+                    public void onSuccess(String result)
                     {
-                        case EMAIL_SENT:
-                            showPasswordResetResult(R.string.password_has_been_reset_and_sent_to_your_registered_mail_id);
-                            break;
-                        case EMAIL_NOT_SENT:
-                        case PASSWORD_NOT_RESET:
-                            showPasswordResetResult(R.string.please_contact_your_admin_to_reset_the_password);
-                            break;
-                        case INVALID_EMAIL:
-                            showPasswordResetResult(R.string.you_have_not_updated_your_mail_id_or_your_mail_id_is_invalid);
-                            break;
+                        Log.d("UnknownLogin", "result : " + result);
+                        switch (result)
+                        {
+                            case EMAIL_SENT:
+                                showPasswordResetResult(R.string.password_has_been_reset_and_sent_to_your_registered_mail_id);
+                                break;
+                            case EMAIL_NOT_SENT:
+                            case PASSWORD_NOT_RESET:
+                                showPasswordResetResult(R.string.please_contact_your_admin_to_reset_the_password);
+                                break;
+                            case INVALID_EMAIL:
+                                showPasswordResetResult(R.string.you_have_not_updated_your_mail_id_or_your_mail_id_is_invalid);
+                                break;
+                        }
                     }
-                }
 
-                @Override
-                public void onError(VolleyError error)
-                {
-                    Log.d("UnknownLogin", "error : " + error.getMessage());
-                    showPasswordResetResult(R.string.please_contact_your_admin_to_reset_the_password);
-                }
-            });
+                    @Override
+                    public void onError(VolleyError error)
+                    {
+                        Log.d("UnknownLogin", "error : " + error.getMessage());
+                        showPasswordResetResult(R.string.please_contact_your_admin_to_reset_the_password);
+                    }
+                });
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+            }
         }
     }
 

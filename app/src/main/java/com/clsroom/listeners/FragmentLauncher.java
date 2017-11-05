@@ -18,4 +18,5 @@ public interface FragmentLauncher
     void setFragment(Fragment fragment);
     void replaceFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName);
     void addFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName);
+    void hideInitialProgressBar();
 }

@@ -4,6 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/subjetcsListRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/grey"
+        />
+
     <ProgressBar
         android:id="@+id/recyclerProgress"
         android:layout_width="match_parent"
@@ -20,13 +27,6 @@
         android:textAppearance="?android:textAppearanceLarge"
         android:textColor="@android:color/darker_gray"
         android:visibility="gone"/>
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/subjetcsListRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/grey"
-        />
 
     <RelativeLayout
         android:id="@+id/fabContainer"

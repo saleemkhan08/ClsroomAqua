@@ -12,7 +12,6 @@ import com.clsroom.R;
 import com.clsroom.listeners.IOnItemMovedListener;
 import com.clsroom.model.Notes;
 import com.clsroom.model.NotesImage;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.viewholders.GalleryEditorItemViewHolder;
 
 import java.util.ArrayList;
@@ -71,7 +70,7 @@ public class EditGalleryAdapter extends RecyclerView.Adapter<GalleryEditorItemVi
             {
                 notifyDataSetChanged();
             }
-        }, 500);
+        }, 300);
     }
 
     @Override
@@ -88,11 +87,11 @@ public class EditGalleryAdapter extends RecyclerView.Adapter<GalleryEditorItemVi
         if (url instanceof NotesImage)
         {
             String urlTxt = ((NotesImage) url).url;
-            ImageUtil.loadImg(viewHolder.itemView.getContext(), urlTxt, viewHolder.mImageView);
+            viewHolder.mImageView.setImageURI(urlTxt);
         }
         else
         {
-            ImageUtil.loadImg(viewHolder.itemView.getContext(), (Uri) url, viewHolder.mImageView);
+            viewHolder.mImageView.setImageURI((Uri) url);
         }
 
         viewHolder.mImageNumber.setText("" + (position + 1));

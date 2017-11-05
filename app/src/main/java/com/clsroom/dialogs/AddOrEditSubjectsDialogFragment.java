@@ -25,26 +25,26 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class AddOrEditSubjectsDialogFragment extends CustomDialogFragment implements AdapterView.OnItemSelectedListener, View.OnTouchListener
 {
     public static final String TAG = "AddSubjectsDialogFragment";
 
-    @Bind(R.id.addAnother)
+    @BindView(R.id.addAnother)
     Switch mAddAnother;
 
-    @Bind(R.id.subjectName)
+    @BindView(R.id.subjectName)
     EditText mSubjectName;
 
-    @Bind(R.id.subjectCode)
+    @BindView(R.id.subjectCode)
     EditText mSubjectCode;
 
-    @Bind(R.id.teacher)
+    @BindView(R.id.teacher)
     EditText mTeacherName;
 
-    @Bind(R.id.teacherSpinner)
+    @BindView(R.id.teacherSpinner)
     Spinner mTeacherSpinner;
 
     Subjects mCurrentSubject;
@@ -196,7 +196,7 @@ public class AddOrEditSubjectsDialogFragment extends CustomDialogFragment implem
                 {
                     mTeacherSpinner.performClick();
                 }
-            }, 100);
+            }, 300);
         }
         return true;
     }

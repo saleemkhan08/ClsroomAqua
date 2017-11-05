@@ -14,17 +14,17 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ResetPasswordDialogFragment extends CustomDialogFragment
 {
     public static final String TAG = "ResetPasswordDialogFragment";
 
-    @Bind(R.id.name)
+    @BindView(R.id.name)
     EditText name;
 
-    @Bind(R.id.textInputLayout)
+    @BindView(R.id.textInputLayout)
     TextInputLayout textInputLayout;
 
     DatabaseReference mUserNameDbRef;

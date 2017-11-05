@@ -8,7 +8,7 @@ import com.clsroom.R;
 
 import java.util.Calendar;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class MonthYearPickerDialog extends CustomDialogFragment
@@ -38,10 +38,10 @@ public class MonthYearPickerDialog extends CustomDialogFragment
         this.listener = listener;
     }
 
-    @Bind(R.id.picker_month)
+    @BindView(R.id.picker_month)
     NumberPicker monthPicker;
 
-    @Bind(R.id.picker_year)
+    @BindView(R.id.picker_year)
     NumberPicker yearPicker;
 
     @Override

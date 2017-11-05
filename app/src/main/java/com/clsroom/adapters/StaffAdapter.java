@@ -24,7 +24,6 @@ import com.clsroom.model.Staff;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ConnectivityUtil;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.StaffViewHolder;
 import com.clsroom.views.DetailsTransition;
@@ -67,9 +66,7 @@ public class StaffAdapter extends FirebaseRecyclerAdapter<Staff, StaffViewHolder
     @Override
     protected void populateViewHolder(final StaffViewHolder viewHolder, final Staff model, int position)
     {
-        String imageUrl = model.getPhotoUrl();
-        ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mImageView);
-
+        viewHolder.mImageView.setImageURI(model.getPhotoUrl());
         viewHolder.mFullName.setText(model.getFullName());
         viewHolder.mUserId.setText(model.getUserId());
         viewHolder.mDesignation.setText(model.getDesignation());

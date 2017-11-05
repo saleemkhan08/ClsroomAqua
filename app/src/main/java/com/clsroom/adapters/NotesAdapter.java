@@ -24,7 +24,6 @@ import com.clsroom.model.Staff;
 import com.clsroom.model.Students;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.NotesViewHolder;
@@ -127,8 +126,7 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
                 if (user != null)
                 {
                     viewHolder.createrName.setText(user.getFullName());
-                    ImageUtil.loadCircularImg(user.getPhotoUrl(), viewHolder.createrImage);
-
+                    viewHolder.createrImage.setImageURI(user.getPhotoUrl());
                     viewHolder.createrImage.setOnClickListener(NotesAdapter.this);
                     viewHolder.createrImage.setTag(user);
 
@@ -136,7 +134,6 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
                 else
                 {
                     viewHolder.createrName.setText(R.string.unknown_user);
-                    ImageUtil.loadCircularImg("", viewHolder.createrImage);
                 }
             }
 
@@ -144,7 +141,6 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
             public void onCancelled(DatabaseError databaseError)
             {
                 viewHolder.createrName.setText(R.string.unknown_user);
-                ImageUtil.loadCircularImg("", viewHolder.createrImage);
             }
         });
 
@@ -155,21 +151,22 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
                 break;
             case 1:
                 viewHolder.singleImage.setVisibility(View.VISIBLE);
-                ImageUtil.loadSquareImg(images.get(0).url, viewHolder.singleImage);
+                viewHolder.singleImage.setImageURI(images.get(0).url);
                 viewHolder.singleImage.setTag(list);
                 break;
             case 2:
                 viewHolder.dualImageContainer.setVisibility(View.VISIBLE);
-                ImageUtil.loadSquareImg(images.get(0).url, viewHolder.dualImage1);
-                ImageUtil.loadSquareImg(images.get(1).url, viewHolder.dualImage2);
+                viewHolder.dualImage1.setImageURI(images.get(0).url);
+                viewHolder.dualImage2.setImageURI(images.get(1).url);
                 viewHolder.dualImage1.setTag(list);
                 viewHolder.dualImage2.setTag(list);
                 break;
             case 3:
                 viewHolder.tripleImageContainer.setVisibility(View.VISIBLE);
-                ImageUtil.loadSquareImg(images.get(0).url, viewHolder.tripleImage1);
-                ImageUtil.loadSquareImg(images.get(1).url, viewHolder.tripleImage2);
-                ImageUtil.loadSquareImg(images.get(2).url, viewHolder.tripleImage3);
+                viewHolder.tripleImage1.setImageURI(images.get(0).url);
+                viewHolder.tripleImage2.setImageURI(images.get(1).url);
+                viewHolder.tripleImage3.setImageURI(images.get(2).url);
+
                 viewHolder.tripleImage1.setTag(list);
                 viewHolder.tripleImage2.setTag(list);
                 viewHolder.tripleImage3.setTag(list);
@@ -179,10 +176,12 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
                 viewHolder.additionalImageCount.setText("+" + (images.size() - 4));
             case 4:
                 viewHolder.quadImageContainer.setVisibility(View.VISIBLE);
-                ImageUtil.loadSquareImg(images.get(0).url, viewHolder.quadImage1);
-                ImageUtil.loadSquareImg(images.get(1).url, viewHolder.quadImage2);
-                ImageUtil.loadSquareImg(images.get(2).url, viewHolder.quadImage3);
-                ImageUtil.loadSquareImg(images.get(3).url, viewHolder.quadImage4);
+
+                viewHolder.quadImage1.setImageURI(images.get(0).url);
+                viewHolder.quadImage2.setImageURI(images.get(1).url);
+                viewHolder.quadImage3.setImageURI(images.get(2).url);
+                viewHolder.quadImage4.setImageURI(images.get(3).url);
+
                 viewHolder.quadImage1.setTag(list);
                 viewHolder.quadImage2.setTag(list);
                 viewHolder.quadImage3.setTag(list);
@@ -378,7 +377,7 @@ public class NotesAdapter extends FirebaseRecyclerAdapter<Notes, NotesViewHolder
 
     private void editNotes(Notes notes)
     {
-        launcher.replaceFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
+        launcher.addFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
                 true, AddOrEditNotesFragment.TAG);
     }
 

@@ -24,23 +24,23 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class AddOrEditClassDialogFragment extends CustomDialogFragment implements AdapterView.OnItemSelectedListener, View.OnTouchListener
 {
     public static final String TAG = "AddOrEditClassDialogFragment";
 
-    @Bind(R.id.classCode)
+    @BindView(R.id.classCode)
     EditText mClassCode;
 
-    @Bind(R.id.className)
+    @BindView(R.id.className)
     EditText mClassName;
 
-    @Bind(R.id.classTeacherSpinner)
+    @BindView(R.id.classTeacherSpinner)
     Spinner mClassTeacherSpinner;
 
-    @Bind(R.id.classTeacher)
+    @BindView(R.id.classTeacher)
     EditText mClassTeacher;
 
     Classes mCurrentClass;
@@ -170,7 +170,7 @@ public class AddOrEditClassDialogFragment extends CustomDialogFragment implement
                 {
                     mClassTeacherSpinner.performClick();
                 }
-            }, 100);
+            }, 300);
         }
         return true;
     }

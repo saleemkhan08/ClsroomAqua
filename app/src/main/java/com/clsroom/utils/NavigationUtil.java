@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clsroom.LoginActivity;
@@ -39,6 +38,7 @@ import com.clsroom.model.Staff;
 import com.clsroom.model.Students;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
+import com.clsroom.views.SquareImageView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -81,21 +81,20 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
     private EventsListener mListener;
     private TextView mUserFullName;
     private TextView mUserDesignation;
-    private ImageView mProfileImgView;
+    private SquareImageView mProfileImgView;
     public static User mCurrentUser;
     private boolean isMenuLoaded;
-    private Handler mHandler;
     private int itemId;
     private String mMainPageFragmentTag;
+    private EventsListener mTempListener;
 
     public NavigationUtil(final FragmentLauncher launcher)
     {
         this.launcher = launcher;
-        mHandler = new Handler();
         mFragmentManager = this.launcher.getSupportFragmentManager();
         mSharedPrefs = PreferenceManager.getDefaultSharedPreferences(launcher.getActivity());
-        mDrawer = (DrawerLayout) launcher.getActivity().findViewById(R.id.drawer_layout);
-        mNavigationView = (NavigationView) launcher.getActivity().findViewById(R.id.nav_view);
+        mDrawer = launcher.getActivity().findViewById(R.id.drawer_layout);
+        mNavigationView = launcher.getActivity().findViewById(R.id.nav_view);
         mNavigationView.setNavigationItemSelectedListener(this);
         View headerView = mNavigationView.getHeaderView(0);
         headerView.setOnClickListener(new View.OnClickListener()
@@ -103,9 +102,10 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
             @Override
             public void onClick(View view)
             {
+                itemId = view.getId();
                 if (ConnectivityUtil.isConnected(launcher.getActivity()))
                 {
-                    replaceFragment(PROFILE_FRAGMENT, true);
+                    addFragment(PROFILE_FRAGMENT);
                 }
                 else
                 {
@@ -155,7 +155,7 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
                 {
                     mCurrentFragment = "";
                 }
-                Log.d("relaunchIssue", "Check - mCurrentFragmentName : " + mCurrentFragment);
+                Log.d("relaunchIssue", "mCurrentFragmentName : " + mCurrentFragment);
             }
         });
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -180,6 +180,7 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
         {
             if (!tag.equals(mMainPageFragmentTag))
             {
+                Log.d("LifeCycleCheck", "isNewObjectRequired : " + tag);
                 boolean popped = mFragmentManager.popBackStackImmediate(tag, 0);
                 if (!popped)
                 {
@@ -205,6 +206,7 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
 
     private void handleNavigationItemClick()
     {
+        Log.d("relaunchIssue", "NavUtil : handleNavigationItemClick : itemId : " + itemId);
         switch (itemId)
         {
             case R.id.admin_students:
@@ -272,31 +274,31 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
 
     private void replaceFragment(String tag, boolean addToBackStack)
     {
-        Log.d("relaunchIssue", "NavUtil : loadFragment3");
+        Log.d("relaunchIssue", "NavUtil : replaceFragment3");
         if (isNewObjectRequired(tag))
         {
             replaceFragment(getFragment(tag), addToBackStack, tag);
         }
     }
 
-    private void addFragment(String tag, boolean addToBackStack)
+    private void addFragment(String tag)
     {
-        Log.d("relaunchIssue", "NavUtil : loadFragment3");
+        Log.d("relaunchIssue", "NavUtil : addFragment3");
         if (isNewObjectRequired(tag))
         {
-            addFragment(getFragment(tag), addToBackStack, tag);
+            addFragment(getFragment(tag), true, tag);
         }
     }
 
     public void replaceFragment(Fragment fragment, boolean addToBackStack, String tag)
     {
-        Log.d("relaunchIssue", "NavUtil : loadFragment2");
+        Log.d("relaunchIssue", "NavUtil : replaceFragment2");
         replaceFragment(fragment, addToBackStack, tag, null, null);
     }
 
     public void addFragment(Fragment fragment, boolean addToBackStack, String tag)
     {
-        Log.d("relaunchIssue", "NavUtil : loadFragment2");
+        Log.d("relaunchIssue", "NavUtil : addFragment2");
         addFragment(fragment, addToBackStack, tag, null, null);
     }
 
@@ -353,7 +355,13 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
 
     public boolean onBackPressed()
     {
-        Log.d("ProfileRelaunchIssue", "NavigationUtil : onBackPressed");
+        Log.d("relaunchIssue", "NavigationUtil : onBackPressed");
+        if (mTempListener != null)
+        {
+            mListener = mTempListener;
+            mListener.refreshActionBar();
+            mTempListener = null;
+        }
         if (isDrawerOpen())
         {
             closeDrawer();
@@ -397,7 +405,7 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
         }
 
         mUserFullName.setText(mCurrentUser.getFullName());
-        ImageUtil.loadCircularImg(launcher.getActivity(), mCurrentUser.getPhotoUrl(), mProfileImgView);
+        mProfileImgView.setImageURI(mCurrentUser.getPhotoUrl());
         userId = mCurrentUser.getUserId();
         if (!isMenuLoaded)
         {
@@ -406,7 +414,6 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
                 case User.ADMIN:
                     mCurrentMenu = R.menu.admin_drawer;
                     mMainPageFragmentTag = CLASSES_LIST_FRAGMENT;
-
                     isStudent = false;
                     isAdmin = true;
                     break;
@@ -423,6 +430,7 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
                     mMainPageFragmentTag = NOTES_FRAGMENT;
                     break;
             }
+            Log.d("relaunchIssue", "NavUtil : mMainPageFragmentTag");
             replaceFragment(mMainPageFragmentTag, false);
             isMenuLoaded = true;
             loadCurrentMenu();
@@ -442,10 +450,10 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
 
     public void replaceFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName)
     {
-        Log.d("relaunchIssue", "NavUtil : loadFragment1");
-        mListener = (EventsListener) fragment;
+        Log.d("relaunchIssue", "NavUtil : replaceFragment1");
+        mTempListener = null;
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
-        transaction.replace(R.id.content_main, (Fragment) mListener, tag);
+        transaction.replace(R.id.content_main, fragment, tag);
         //transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         if (addToBackStack)
         {
@@ -461,10 +469,10 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
 
     public void addFragment(Fragment fragment, boolean addToBackStack, String tag, View sharedImageView, String transitionName)
     {
-        Log.d("relaunchIssue", "NavUtil : loadFragment1");
-        mListener = (EventsListener) fragment;
+        Log.d("relaunchIssue", "NavUtil : addFragment1");
+        mTempListener = mListener;
         FragmentTransaction transaction = mFragmentManager.beginTransaction();
-        transaction.add(R.id.content_main, (Fragment) mListener, tag);
+        transaction.add(R.id.content_main, fragment, tag);
         if (addToBackStack)
         {
             transaction.addToBackStack(tag);
@@ -492,6 +500,7 @@ public class NavigationUtil implements NavigationView.OnNavigationItemSelectedLi
     @Override
     public void onDrawerClosed(View drawerView)
     {
+        Log.d("relaunchIssue", "NavUtil : onDrawerClosed");
         if (ConnectivityUtil.isConnected(launcher.getActivity()))
         {
             handleNavigationItemClick();

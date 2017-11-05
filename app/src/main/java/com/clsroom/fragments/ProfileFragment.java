@@ -10,11 +10,11 @@ import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clsroom.R;
@@ -31,9 +31,9 @@ import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ConnectivityUtil;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
+import com.clsroom.views.SquareImageView;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -49,7 +49,7 @@ import com.squareup.otto.Subscribe;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -63,34 +63,34 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     public static final String PROFILE_IMAGE = "profileImage";
     public static final String PROFILE_NAME = "profileName";
 
-    @Bind(R.id.editName)
+    @BindView(R.id.editName)
     View editName;
 
-    @Bind(R.id.uploadProfileImg)
+    @BindView(R.id.uploadProfileImg)
     View editImage;
 
-    @Bind(R.id.fabContainer)
+    @BindView(R.id.fabContainer)
     View editDetails;
 
-    @Bind(R.id.profilePicture)
-    ImageView mProfileImgView;
+    @BindView(R.id.profilePicture)
+    SquareImageView mProfileImgView;
 
-    @Bind(R.id.fullName)
+    @BindView(R.id.fullName)
     TextView mUserFullName;
 
-    @Bind(R.id.designation)
+    @BindView(R.id.designation)
     TextView mDesignation;
 
-    @Bind(R.id.dobValue)
+    @BindView(R.id.dobValue)
     TextView dobValue;
 
-    @Bind(R.id.emailVlaue)
+    @BindView(R.id.emailVlaue)
     TextView emailValue;
 
-    @Bind(R.id.phoneNoVlaue)
+    @BindView(R.id.phoneNoVlaue)
     TextView phoneNoValue;
 
-    @Bind(R.id.addressValue)
+    @BindView(R.id.addressValue)
     TextView addressValue;
 
     private User mCurrentUser;
@@ -151,17 +151,13 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
 
         mUserDbRef.addValueEventListener(this);
 
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.profile);
-        }
-
         if (!mCurrentUser.equals(NavigationUtil.mCurrentUser))
         {
             editDetails.setVisibility(View.GONE);
             editImage.setVisibility(View.GONE);
             editName.setVisibility(View.GONE);
         }
+        refreshActionBar();
         return parentView;
     }
 
@@ -232,7 +228,15 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
     private void updateCommonInfo(User user)
     {
         mUserFullName.setText(user.getFullName());
-        ImageUtil.loadCircularImg(getActivity(), user.getPhotoUrl(), mProfileImgView);
+        String url = user.getPhotoUrl();
+        if (url != null && !TextUtils.isEmpty(url.trim()))
+        {
+            mProfileImgView.setImageURI(user.getPhotoUrl());
+        }
+        else
+        {
+            mProfileImgView.setImageResource(R.mipmap.user_icon_accent);
+        }
         phoneNoValue.setText(user.getPhone());
         addressValue.setText(user.getAddress());
         emailValue.setText(user.getEmail());
@@ -290,7 +294,6 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
         {
             updateProfileInfo(dataSnapshot.getValue(Students.class));
         }
-
     }
 
     @Override
@@ -432,24 +435,23 @@ public class ProfileFragment extends Fragment implements EventsListener, ValueEv
         }
     }
 
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        Log.d("LifeCycleCheck", "onStart");
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.SHOW_PROFILE_MENU);
-        }
-    }
-
     private void setLauncher()
     {
         Activity activity = getActivity();
         if (activity instanceof FragmentLauncher)
         {
             launcher = (FragmentLauncher) activity;
+        }
+    }
+
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.profile);
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.SHOW_PROFILE_MENU);
         }
     }
 }

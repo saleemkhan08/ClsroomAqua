@@ -6,19 +6,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clsroom.R;
+import com.clsroom.views.SquareImageView;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class GalleryEditorItemViewHolder extends RecyclerView.ViewHolder
 {
-    @Bind(R.id.image)
-    public ImageView mImageView;
+    @BindView(R.id.image)
+    public SquareImageView mImageView;
 
-    @Bind(R.id.imageNumber)
+    @BindView(R.id.imageNumber)
     public TextView mImageNumber;
 
-    @Bind(R.id.deleteImage)
+    @BindView(R.id.deleteImage)
     public ImageView mDeleteImage;
 
     public GalleryEditorItemViewHolder(View itemView)

@@ -11,7 +11,6 @@ import com.clsroom.model.Leaves;
 import com.clsroom.model.Staff;
 import com.clsroom.model.Students;
 import com.clsroom.model.User;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.viewholders.RequestedLeavesViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DataSnapshot;
@@ -96,8 +95,7 @@ public class RequestedLeavesAdapter extends FirebaseRecyclerAdapter<Leaves, Requ
                 {
                     user = dataSnapshot.getValue(Students.class);
                 }
-                String imageUrl = user.getPhotoUrl();
-                ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mImageView);
+                viewHolder.mImageView.setImageURI(user.getPhotoUrl());
                 viewHolder.mFullName.setText(user.getFullName());
 
                 Context context = viewHolder.itemView.getContext();

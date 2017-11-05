@@ -2,29 +2,29 @@ package com.clsroom.viewholders;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clsroom.R;
+import com.clsroom.views.SquareImageView;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class NotificationViewHolder extends RecyclerView.ViewHolder
 {
-    @Bind(R.id.senderImage)
-    public ImageView senderImage;
+    @BindView(R.id.senderImage)
+    public SquareImageView senderImage;
 
-    @Bind(R.id.senderName)
+    @BindView(R.id.senderName)
     public TextView senderName;
 
-    @Bind(R.id.message)
+    @BindView(R.id.message)
     public TextView message;
 
-    @Bind(R.id.dateTime)
+    @BindView(R.id.dateTime)
     public TextView dateTime;
 
-    @Bind(R.id.deleteNotification)
+    @BindView(R.id.deleteNotification)
     public View deleteNotification;
 
     public View mItemView;

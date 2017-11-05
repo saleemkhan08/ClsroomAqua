@@ -336,4 +336,10 @@
     <string name="unknown_user">Unknown User</string>
     <string name="reset_password">Reset Password</string>
     <string name="please_enter_a_valid_password">Please enter a valid password</string>
+    <string name="credentials">Credentials List</string>
+    <string name="there_was_some_issue_in_generating_user_credentials">There was some issue in generating user credentials</string>
+    <string name="list_has_been_mailed_to_your_registered_mail_id">List has been mailed to your registered mail id.</string>
+    <string name="your_registered_mail_id_is_invalid">Your registered mail id is invalid!</string>
+    <string name="you_are_not_authorized_to_generate_the_list">You are not authorized to generate the list!</string>
+    <string name="generating">Generating...</string>
 </resources>

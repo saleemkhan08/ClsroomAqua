@@ -18,14 +18,14 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class AddStudentsDialogFragment extends CustomDialogFragment
 {
     public static final String TAG = "AddStudentsDF";
 
-    @Bind(R.id.studentCount)
+    @BindView(R.id.studentCount)
     EditText mStudentCount;
 
     DatabaseReference mClassesDbRef;

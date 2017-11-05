@@ -32,7 +32,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.otto.Subscribe;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -43,21 +43,20 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     private String[] weekDays;
     private String[] weekDaysKey;
 
-    @Bind(R.id.timeTableRecyclerView)
+    @BindView(R.id.timeTableRecyclerView)
     RecyclerView mTimeTableRecyclerView;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
-    @Bind(R.id.fabContainer)
+    @BindView(R.id.fabContainer)
     ViewGroup mFabContainer;
 
-    @Bind(R.id.weekdaysTab)
+    @BindView(R.id.weekdaysTab)
     TabLayout mWeekDaysTab;
-
 
     private DatabaseReference mRootRef;
     private TimeTable mCurrentTimeTable;
@@ -89,11 +88,8 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
         mCurrentWeekDayCode = weekDaysKey[0];
         mCurrentTimeTable = new TimeTable();
         addWeekDays();
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.timeTable);
-        }
         mRootRef = FirebaseDatabase.getInstance().getReference();
+        refreshActionBar();
     }
 
     private void addWeekDays()
@@ -133,18 +129,6 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     }
 
     @Override
-    public void onStart()
-    {
-        super.onStart();
-        Log.d(TAG, "onStart");
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_TIME_TABLE_MENU);
-        }
-    }
-
-    @Override
     protected int getContentViewLayoutRes()
     {
         Log.d(TAG, "getContentViewLayoutRes");
@@ -163,6 +147,8 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
     private void setUpRecyclerView()
     {
         Log.d(TAG, "setUpRecyclerView");
+        mProgress.setVisibility(View.VISIBLE);
+        mErrorMsg.setVisibility(View.GONE);
         mTimeTableDbRef = mRootRef.child(TimeTable.TIME_TABLE).child(mCurrentClass.getCode()).child(mCurrentWeekDayCode);
         if (NavigationUtil.isStudent)
         {
@@ -182,11 +168,8 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
             }
         }
         mTimeTableRecyclerView.setAdapter(mAdapter);
-        mTimeTableRecyclerView.setLayoutManager(new
-
-                LinearLayoutManager(getActivity()));
+        mTimeTableRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mTimeTableRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener()
-
         {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy)
@@ -209,33 +192,31 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
                 super.onScrollStateChanged(recyclerView, newState);
             }
         });
-        mTimeTableDbRef.addValueEventListener(new
+        mTimeTableDbRef.addValueEventListener(new ValueEventListener()
+        {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot)
+            {
+                Log.d(TAG, "Data : " + dataSnapshot);
+                mProgress.setVisibility(View.GONE);
+                if (dataSnapshot.getChildrenCount() <= 0)
+                {
+                    mErrorMsg.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    mErrorMsg.setVisibility(View.GONE);
+                }
+            }
 
-                                                      ValueEventListener()
-                                                      {
-                                                          @Override
-                                                          public void onDataChange(DataSnapshot dataSnapshot)
-                                                          {
-                                                              Log.d(TAG, "Data : " + dataSnapshot);
-                                                              mProgress.setVisibility(View.GONE);
-                                                              if (dataSnapshot.getChildrenCount() <= 0)
-                                                              {
-                                                                  mErrorMsg.setVisibility(View.VISIBLE);
-                                                              }
-                                                              else
-                                                              {
-                                                                  mErrorMsg.setVisibility(View.GONE);
-                                                              }
-                                                          }
-
-                                                          @Override
-                                                          public void onCancelled(DatabaseError databaseError)
-                                                          {
-                                                              Log.d(TAG, "databaseError : " + databaseError);
-                                                              mProgress.setVisibility(View.GONE);
-                                                              mErrorMsg.setVisibility(View.VISIBLE);
-                                                          }
-                                                      });
+            @Override
+            public void onCancelled(DatabaseError databaseError)
+            {
+                Log.d(TAG, "databaseError : " + databaseError);
+                mProgress.setVisibility(View.GONE);
+                mErrorMsg.setVisibility(View.VISIBLE);
+            }
+        });
     }
 
     @OnClick(R.id.addPeriod)
@@ -313,7 +294,7 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
                         Progress.hide();
                         ToastMsg.show(R.string.deleted);
                     }
-                }, 500);
+                }, 300);
                 break;
             case R.id.staff_time_table:
                 isStaffTimeTableShown = false;
@@ -379,6 +360,17 @@ public class TimeTableFragment extends ClassTabFragment implements EventsListene
         if (activity instanceof FragmentLauncher)
         {
             launcher = (FragmentLauncher) activity;
+        }
+    }
+
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            launcher.setToolBarTitle(R.string.timeTable);
+            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_TIME_TABLE_MENU);
         }
     }
 }

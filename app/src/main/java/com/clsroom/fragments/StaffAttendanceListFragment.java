@@ -40,7 +40,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -51,13 +51,13 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
 {
     public static final String TAG = NavigationUtil.STAFF_ATTENDANCE_LIST_FRAGMENT;
 
-    @Bind(R.id.attendanceListRecyclerView)
+    @BindView(R.id.attendanceListRecyclerView)
     RecyclerView mAttendanceListRecyclerView;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
-    @Bind(R.id.dateTextView)
+    @BindView(R.id.dateTextView)
     TextView mDateTextView;
 
     private ArrayList<Staff> mStaffList;
@@ -95,27 +95,13 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
                 .child(ClassAttendance.ATTENDANCE)
                 .child(Staff.STAFF);
         setUpRecyclerView();
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.attendance);
-        }
+        refreshActionBar();
         return parentView;
     }
 
     private String getFormattedDate(int currentYear, int currentMonth, int currentDay)
     {
         return currentDay + "/" + (currentMonth + 1) + "/" + currentYear;
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.NO_MENU);
-        }
     }
 
     @Override
@@ -232,6 +218,17 @@ public class StaffAttendanceListFragment extends Fragment implements EventsListe
         if (activity instanceof FragmentLauncher)
         {
             launcher = (FragmentLauncher) activity;
+        }
+    }
+
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.NO_MENU);
+            launcher.setToolBarTitle(R.string.attendance);
         }
     }
 }

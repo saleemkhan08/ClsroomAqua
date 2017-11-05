@@ -33,7 +33,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.otto.Subscribe;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -42,19 +42,19 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
 {
     private static final String TAG = NavigationUtil.NOTES_FRAGMENT;
 
-    @Bind(R.id.notesRecyclerView)
+    @BindView(R.id.notesRecyclerView)
     RecyclerView mNotesRecyclerView;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
-    @Bind(R.id.fabContainer)
+    @BindView(R.id.fabContainer)
     ViewGroup mFabContainer;
 
-    @Bind(R.id.subjectsTab)
+    @BindView(R.id.subjectsTab)
     TabLayout mSubjectsTab;
 
 
@@ -95,11 +95,8 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
         ButterKnife.bind(this, parentView);
         Otto.register(this);
         setLauncher();
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.notes);
-        }
         mRootRef = FirebaseDatabase.getInstance().getReference();
+        refreshActionBar();
     }
 
     @Override
@@ -107,17 +104,6 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
     {
         super.onActivityCreated(savedInstanceState);
         Log.d("LifeCycleCheck", "onActivityCreated : savedInstanceState : " + savedInstanceState);
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        Log.d("LifeCycleCheck", "onStart");
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-        }
     }
 
     @Override
@@ -222,6 +208,8 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
             Otto.post(ActionBarUtil.SHOW_NOTES_FRAGMENT_MENU);
             mNotesDbRef = mRootRef.child(Notes.NOTES).child(Notes.REVIEW).child(mCurrentClass.getCode()).child(mCurrentSubjectCode);
         }
+        mProgress.setVisibility(View.VISIBLE);
+        mErrorMsg.setVisibility(View.GONE);
 
         mAdapter = NotesAdapter.getInstance(mCurrentNotesClassifier, mNotesDbRef, launcher);
         mNotesRecyclerView.setAdapter(mAdapter);
@@ -282,7 +270,7 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
         {
             if (launcher != null)
             {
-                launcher.replaceFragment(AddOrEditNotesFragment.getInstance(mCurrentNotesClassifier),
+                launcher.addFragment(AddOrEditNotesFragment.getInstance(mCurrentNotesClassifier),
                         true, AddOrEditNotesFragment.TAG);
             }
         }
@@ -390,6 +378,7 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
         {
             launcher = (FragmentLauncher) activity;
         }
+        launcher.hideInitialProgressBar();
     }
 
     public static NotesFragment getInstance(String notesId)
@@ -397,5 +386,15 @@ public class NotesFragment extends ClassTabFragment implements EventsListener
         NotesFragment fragment = new NotesFragment();
         fragment.notesId = notesId;
         return fragment;
+    }
+
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.notes);
+            launcher.updateEventsListener(this);
+        }
     }
 }

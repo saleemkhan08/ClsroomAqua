@@ -40,12 +40,12 @@ public abstract class ClassTabFragment extends Fragment implements ValueEventLis
         mContent.removeAllViews();
         mContent.addView(inflater.inflate(getContentViewLayoutRes(), null));
         DatabaseReference classesRef = FirebaseDatabase.getInstance().getReference().child(Classes.CLASSES);
-        handleUser();
         Log.d("TabSelectionIssue", "ClassTabFragment > onCreateView > mCurrentClass : " + mCurrentClass);
         classesRef.addListenerForSingleValueEvent(this);
         mTabSelected = mCurrentClass == null;
         mTabLayout.addOnTabSelectedListener(this);
         onCreateView(mContent);
+        handleUser();
         return parentView;
     }
 

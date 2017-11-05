@@ -5,31 +5,31 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
 import com.clsroom.R;
 import com.clsroom.model.Progress;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class EditUserDetailsDialogFragment extends CustomDialogFragment
 {
     public static final String TAG = "EditUserDetailsDialogFragment";
 
-    @Bind(R.id.dob)
+    @BindView(R.id.dob)
     EditText dob;
 
-    @Bind(R.id.phoneNo)
+    @BindView(R.id.phoneNo)
     EditText phoneNo;
 
-    @Bind(R.id.email)
+    @BindView(R.id.email)
     EditText email;
 
-    @Bind(R.id.address)
+    @BindView(R.id.address)
     EditText address;
 
     DatabaseReference mUserDbRef;

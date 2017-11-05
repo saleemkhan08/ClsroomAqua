@@ -25,7 +25,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.clsroom.model.Leaves.getDbKeyDate;
@@ -34,20 +34,19 @@ public class AddLeavesDialogFragment extends CustomDialogFragment implements Ada
 {
     public static final String TAG = "AddLeavesDialogFragment";
 
-
-    @Bind(R.id.approverSpinner)
+    @BindView(R.id.approverSpinner)
     Spinner mApproverSpinner;
 
-    @Bind(R.id.reason)
+    @BindView(R.id.reason)
     EditText mReason;
 
-    @Bind(R.id.fromDate)
+    @BindView(R.id.fromDate)
     EditText mFromDate;
 
-    @Bind(R.id.toDate)
+    @BindView(R.id.toDate)
     EditText mToDate;
 
-    @Bind(R.id.approver)
+    @BindView(R.id.approver)
     EditText mApprover;
 
     public static AddLeavesDialogFragment getInstance()
@@ -167,7 +166,7 @@ public class AddLeavesDialogFragment extends CustomDialogFragment implements Ada
                 {
                     mApproverSpinner.performClick();
                 }
-            }, 100);
+            }, 300);
         }
         return true;
     }

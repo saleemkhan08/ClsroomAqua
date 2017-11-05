@@ -32,7 +32,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Calendar;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnTouch;
 
@@ -43,34 +43,34 @@ public class AddOrEditPeriodDialogFragment extends CustomDialogFragment implemen
 {
     public static final String TAG = "AddOrEditPeriodDialogFragment";
 
-    @Bind(R.id.addAnother)
+    @BindView(R.id.addAnother)
     Switch mAddAnother;
 
-    @Bind(R.id.breakTime)
+    @BindView(R.id.breakTime)
     Switch breakTime;
 
-    @Bind(R.id.subjectName)
+    @BindView(R.id.subjectName)
     EditText mSubjectName;
 
-    @Bind(R.id.teacher)
+    @BindView(R.id.teacher)
     EditText mTeacherName;
 
-    @Bind(R.id.subjectContainer)
+    @BindView(R.id.subjectContainer)
     View subjectContainer;
 
-    @Bind(R.id.teacherContainer)
+    @BindView(R.id.teacherContainer)
     View teacherContainer;
 
-    @Bind(R.id.teacherSpinner)
+    @BindView(R.id.teacherSpinner)
     Spinner mTeacherSpinner;
 
-    @Bind(R.id.subjectSpinner)
+    @BindView(R.id.subjectSpinner)
     Spinner mSubjectSpinner;
 
-    @Bind(R.id.startTime)
+    @BindView(R.id.startTime)
     EditText mStartTime;
 
-    @Bind(R.id.endTime)
+    @BindView(R.id.endTime)
     EditText mEndTime;
 
     TimeTable mTimeTable;
@@ -302,7 +302,7 @@ public class AddOrEditPeriodDialogFragment extends CustomDialogFragment implemen
                     {
                         mSubjectSpinner.performClick();
                     }
-                }, 100);
+                }, 300);
             }
             else
             {
@@ -335,7 +335,7 @@ public class AddOrEditPeriodDialogFragment extends CustomDialogFragment implemen
                     {
                         mTeacherSpinner.performClick();
                     }
-                }, 100);
+                }, 300);
             }
         }
         return true;

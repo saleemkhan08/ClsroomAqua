@@ -7,21 +7,21 @@ import android.widget.TextView;
 
 import com.clsroom.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ClassesViewHolder extends RecyclerView.ViewHolder
 {
-    @Bind(R.id.className)
+    @BindView(R.id.className)
     public TextView mClassName;
 
-    @Bind(R.id.classTeacher)
+    @BindView(R.id.classTeacher)
     public TextView mClassTeacher;
 
-    @Bind(R.id.studentCount)
+    @BindView(R.id.studentCount)
     public TextView mStudentCount;
 
-    @Bind(R.id.optionsIconContainer)
+    @BindView(R.id.optionsIconContainer)
     public ImageView optionsIconContainer;
 
     public View mItemView;

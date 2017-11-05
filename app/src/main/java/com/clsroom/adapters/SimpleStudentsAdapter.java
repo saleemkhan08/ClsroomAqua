@@ -5,7 +5,6 @@ import android.view.View;
 
 import com.clsroom.R;
 import com.clsroom.model.Students;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.StudentViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -33,9 +32,7 @@ public class SimpleStudentsAdapter extends FirebaseRecyclerAdapter<Students, Stu
     protected void populateViewHolder(final StudentViewHolder viewHolder, final Students model, int position)
     {
         Log.d(TAG, "populateViewHolder : " + position);
-        String imageUrl = model.getPhotoUrl();
-        ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mImageView);
-
+        viewHolder.mImageView.setImageURI(model.getPhotoUrl());
         viewHolder.mFullName.setText(model.getFullName());
         viewHolder.mUserId.setText(model.getUserId());
         viewHolder.itemView.setOnClickListener(new View.OnClickListener()

@@ -17,7 +17,7 @@
         android:textAlignment="center"
         android:visibility="gone"
         android:textAppearance="?android:textAppearanceLarge"
-        android:textColor="@color/com_facebook_button_background_color_focused_disabled"
+        android:textColor="@color/grey"
         />
 
     <ProgressBar

@@ -4,18 +4,18 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.clsroom.R;
 import com.clsroom.adapters.AttendanceFbAdapter;
 import com.clsroom.model.ClassAttendance;
 import com.clsroom.model.Staff;
 import com.clsroom.model.ToastMsg;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ViewStaffAttendanceDialogFragment extends CustomDialogFragment implements ValueEventListener
@@ -26,13 +26,13 @@ public class ViewStaffAttendanceDialogFragment extends CustomDialogFragment impl
     int mDay;
     private DatabaseReference mAttendanceRef;
 
-    @Bind(R.id.recyclerView)
+    @BindView(R.id.recyclerView)
     RecyclerView mAttendanceListRecyclerView;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
     public static ViewStaffAttendanceDialogFragment getInstance(int year, int month, int day)

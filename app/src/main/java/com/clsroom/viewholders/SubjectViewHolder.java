@@ -7,25 +7,26 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clsroom.R;
+import com.clsroom.views.SquareImageView;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class SubjectViewHolder extends RecyclerView.ViewHolder
 {
-    @Bind(R.id.teacherImage)
-    public ImageView mTeacherImage;
+    @BindView(R.id.teacherImage)
+    public SquareImageView mTeacherImage;
 
-    @Bind(R.id.subjectName)
+    @BindView(R.id.subjectName)
     public TextView mSubjectName;
 
-    @Bind(R.id.teacherName)
+    @BindView(R.id.teacherName)
     public TextView mClassTeacherName;
 
-    @Bind(R.id.checkbox)
+    @BindView(R.id.checkbox)
     public CheckBox mCheckBox;
 
-    @Bind(R.id.optionsIconContainer)
+    @BindView(R.id.optionsIconContainer)
     public ImageView mOptionsIconContainer;
 
     public View mItemView;

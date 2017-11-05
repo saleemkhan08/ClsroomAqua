@@ -28,7 +28,6 @@ import com.clsroom.model.Progress;
 import com.clsroom.model.Subjects;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.views.SquareImageView;
@@ -46,7 +45,7 @@ import com.stfalcon.frescoimageviewer.ImageViewer;
 
 import java.util.ArrayList;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.clsroom.utils.NavigationUtil.PROFILE_FRAGMENT;
@@ -57,43 +56,43 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
     public DatabaseReference mNotesDbRef;
     private FragmentLauncher launcher;
 
-    @Bind(R.id.imagesContainer)
+    @BindView(R.id.imagesContainer)
     LinearLayout imagesContainer;
 
-    @Bind(R.id.rejectionText)
+    @BindView(R.id.rejectionText)
     public View rejectionText;
 
-    @Bind(R.id.reviewComment)
+    @BindView(R.id.reviewComment)
     public TextView reviewComment;
 
-    @Bind(R.id.createrImage)
-    public ImageView createrImage;
+    @BindView(R.id.createrImage)
+    public SquareImageView createrImage;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     TextView errorMsgTextView;
 
-    @Bind(R.id.notesTitle)
+    @BindView(R.id.notesTitle)
     public TextView notesTitle;
 
-    @Bind(R.id.createrName)
+    @BindView(R.id.createrName)
     public TextView createrName;
 
-    @Bind(R.id.optionsIconContainer)
+    @BindView(R.id.optionsIconContainer)
     public ImageView optionsIconContainer;
 
-    @Bind(R.id.notesDescription)
+    @BindView(R.id.notesDescription)
     public TextView notesDescription;
 
-    @Bind(R.id.dateTime)
+    @BindView(R.id.dateTime)
     public TextView dateTime;
 
-    @Bind(R.id.reviewButtonsContainer)
+    @BindView(R.id.reviewButtonsContainer)
     public View reviewButtonsContainer;
 
-    @Bind(R.id.approveBtn)
+    @BindView(R.id.approveBtn)
     public View approveBtn;
 
-    @Bind(R.id.rejectButton)
+    @BindView(R.id.rejectButton)
     public View rejectButton;
 
     ArrayList<String> imageList;
@@ -180,11 +179,8 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
         ButterKnife.bind(this, parentView);
         Otto.register(this);
         setLauncher();
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.notes);
-        }
         mNotesDbRef.addValueEventListener(this);
+        refreshActionBar();
         return parentView;
     }
 
@@ -228,7 +224,7 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
                         ViewGroup.LayoutParams.WRAP_CONTENT);
                 imageView.setPadding(0, 0, 0, 25);
                 imageView.setLayoutParams(layoutParams);
-                ImageUtil.loadImg(getActivity(), image.url, imageView);
+                imageView.setImageURI(image.url);
                 imageView.setId(index);
                 imageView.setOnClickListener(new View.OnClickListener()
                 {
@@ -246,9 +242,7 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
             notesTitle.setText(model.getNotesTitle());
             notesDescription.setText(model.getNotesDescription());
             createrName.setText(model.getSubmitterName());
-
-            ImageUtil.loadCircularImg(model.getSubmitterPhotoUrl(), createrImage);
-
+            createrImage.setImageURI(model.getSubmitterPhotoUrl());
             configureOptions(model);
         }
 
@@ -258,17 +252,6 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
     public void onCancelled(DatabaseError databaseError)
     {
 
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.SHOW_SINGLE_NOTES_MENU);
-        }
     }
 
     @Override
@@ -353,7 +336,7 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
 
     private void editNotes(Notes notes)
     {
-        launcher.replaceFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
+        launcher.addFragment(AddOrEditNotesFragment.getInstance(notes, mNotesClassifier),
                 true, AddOrEditNotesFragment.TAG);
     }
 
@@ -484,5 +467,16 @@ public class SingleNotesFragment extends Fragment implements EventsListener, Val
     {
         notesStatus += "_" + model.getClassSubId() + "_" + model.dateTime();
         return getInstance(notesStatus);
+    }
+
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.SHOW_SINGLE_NOTES_MENU);
+            launcher.setToolBarTitle(R.string.notes);
+        }
     }
 }

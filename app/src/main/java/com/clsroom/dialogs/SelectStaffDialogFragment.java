@@ -6,32 +6,32 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
+import com.clsroom.R;
+import com.clsroom.adapters.SimpleStaffAdapter;
+import com.clsroom.model.Staff;
+import com.clsroom.model.ToastMsg;
+import com.clsroom.utils.Otto;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.otto.Subscribe;
-import com.clsroom.R;
-import com.clsroom.adapters.SimpleStaffAdapter;
-import com.clsroom.model.Staff;
-import com.clsroom.model.ToastMsg;
-import com.clsroom.utils.Otto;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class SelectStaffDialogFragment extends CustomDialogFragment implements ValueEventListener
 {
     public static final String TAG = "SelectStaffDialogFragment";
 
-    @Bind(R.id.recyclerView)
+    @BindView(R.id.recyclerView)
     RecyclerView mStaffListRecyclerView;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     TextView mErrorMsg;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
     private DatabaseReference mStaffDbRef;

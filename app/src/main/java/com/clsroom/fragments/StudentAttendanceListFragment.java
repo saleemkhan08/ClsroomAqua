@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -50,13 +50,13 @@ public class StudentAttendanceListFragment extends Fragment implements EventsLis
 {
     public static final String TAG = NavigationUtil.STUDENTS_ATTENDANCE_LIST_FRAGMENT;
 
-    @Bind(R.id.attendanceListRecyclerView)
+    @BindView(R.id.attendanceListRecyclerView)
     RecyclerView mAttendanceListRecyclerView;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
-    @Bind(R.id.dateTextView)
+    @BindView(R.id.dateTextView)
     TextView mDateTextView;
 
     private ArrayList<Students> mStudentsList;
@@ -95,11 +95,7 @@ public class StudentAttendanceListFragment extends Fragment implements EventsLis
                 .child(ClassAttendance.ATTENDANCE)
                 .child(mClassCode);
         setUpRecyclerView();
-
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.attendance);
-        }
+        refreshActionBar();
         return parentView;
     }
 
@@ -108,18 +104,6 @@ public class StudentAttendanceListFragment extends Fragment implements EventsLis
 
         return currentDay + "/" + (currentMonth + 1) + "/" + currentYear;
     }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.NO_MENU);
-        }
-    }
-
 
     @Override
     public void onDestroy()
@@ -236,6 +220,17 @@ public class StudentAttendanceListFragment extends Fragment implements EventsLis
         if (activity instanceof FragmentLauncher)
         {
             launcher = (FragmentLauncher) activity;
+        }
+    }
+
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            launcher.setToolBarTitle(R.string.attendance);
+            Otto.post(ActionBarUtil.NO_MENU);
         }
     }
 }

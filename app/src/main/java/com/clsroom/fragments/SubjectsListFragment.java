@@ -31,7 +31,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.otto.Subscribe;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -40,19 +40,19 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
 {
     private static final String TAG = NavigationUtil.SUBJECTS_FRAGMENT;
 
-    @Bind(R.id.subjetcsListRecyclerView)
+    @BindView(R.id.subjetcsListRecyclerView)
     RecyclerView mSubjectsListRecyclerView;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
-    @Bind(R.id.fabContainer)
+    @BindView(R.id.fabContainer)
     ViewGroup mFabContainer;
 
-    @Bind(R.id.addSubjects)
+    @BindView(R.id.addSubjects)
     View mAddSubjectsFab;
 
     private DatabaseReference mRootRef;
@@ -74,26 +74,10 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
         Otto.register(this);
         setLauncher();
         mHandler = new Handler();
-
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.subjects);
-        }
         mRootRef = FirebaseDatabase.getInstance().getReference();
+        refreshActionBar();
     }
 
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        Log.d(TAG, "onStart");
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_SUBJECT_MENU);
-        }
-    }
 
     @Override
     protected int getContentViewLayoutRes()
@@ -113,6 +97,9 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
     private void setUpRecyclerView()
     {
         Log.d(TAG, "setUpRecyclerView");
+        mProgress.setVisibility(View.VISIBLE);
+        mErrorMsg.setVisibility(View.GONE);
+
         mSubjectsDbRef = mRootRef.child(Subjects.SUBJECTS).child(mCurrentClass.getCode());
         mAdapter = SubjectsAdapter.getInstance(mSubjectsDbRef, launcher);
         mSubjectsListRecyclerView.setAdapter(mAdapter);
@@ -228,7 +215,7 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
                         Progress.hide();
                         ToastMsg.show(R.string.deleted);
                     }
-                }, 500);
+                }, 300);
                 break;
         }
     }
@@ -264,6 +251,16 @@ public class SubjectsListFragment extends ClassTabFragment implements EventsList
         if (activity instanceof FragmentLauncher)
         {
             launcher = (FragmentLauncher) activity;
+        }
+    }
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            launcher.setToolBarTitle(R.string.subjects);
+            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_SUBJECT_MENU);
         }
     }
 }

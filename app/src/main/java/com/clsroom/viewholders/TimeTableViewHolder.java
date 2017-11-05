@@ -7,31 +7,32 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.clsroom.R;
+import com.clsroom.views.SquareImageView;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class TimeTableViewHolder extends RecyclerView.ViewHolder
 {
-    @Bind(R.id.teacherImage)
-    public ImageView mTeacherImage;
+    @BindView(R.id.teacherImage)
+    public SquareImageView mTeacherImage;
 
-    @Bind(R.id.subjectName)
+    @BindView(R.id.subjectName)
     public TextView mSubjectName;
 
-    @Bind(R.id.teacherName)
+    @BindView(R.id.teacherName)
     public TextView mClassTeacherName;
 
-    @Bind(R.id.checkbox)
+    @BindView(R.id.checkbox)
     public CheckBox mCheckBox;
 
-    @Bind(R.id.optionsIconContainer)
+    @BindView(R.id.optionsIconContainer)
     public ImageView mOptionsIconContainer;
 
-    @Bind(R.id.periodTime)
+    @BindView(R.id.periodTime)
     public TextView mPeriodTime;
 
-    @Bind(R.id.innerContainer)
+    @BindView(R.id.innerContainer)
     public View mItemView;
 
     public TimeTableViewHolder(View itemView)

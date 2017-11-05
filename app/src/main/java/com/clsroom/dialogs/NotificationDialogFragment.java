@@ -24,14 +24,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class NotificationDialogFragment extends CustomDialogFragment
 {
     public static final String TAG = "NotificationDialogFragment";
 
-    @Bind(R.id.message)
+    @BindView(R.id.message)
     EditText mMessage;
 
     DatabaseReference mNotificationDbRef;

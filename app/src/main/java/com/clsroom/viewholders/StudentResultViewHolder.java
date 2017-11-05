@@ -7,15 +7,15 @@ import android.widget.TextView;
 
 import com.clsroom.R;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class StudentResultViewHolder extends RecyclerView.ViewHolder
 {
-    @Bind(R.id.userImage)
+    @BindView(R.id.userImage)
     public ImageView mImageView;
 
-    @Bind(R.id.fullName)
+    @BindView(R.id.fullName)
     public TextView mFullName;
 
 

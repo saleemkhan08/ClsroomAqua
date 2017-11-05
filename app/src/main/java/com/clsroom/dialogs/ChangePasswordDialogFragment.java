@@ -5,28 +5,28 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
 import com.clsroom.R;
 import com.clsroom.model.Progress;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.model.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class ChangePasswordDialogFragment extends CustomDialogFragment
 {
     public static final String TAG = "EditNameDialogFragment";
 
-    @Bind(R.id.currentPassword)
+    @BindView(R.id.currentPassword)
     EditText currentPassword;
 
-    @Bind(R.id.newPassword)
+    @BindView(R.id.newPassword)
     EditText newPassword;
 
-    @Bind(R.id.confirmPassword)
+    @BindView(R.id.confirmPassword)
     EditText confirmPassword;
 
     DatabaseReference mUserPasswordDbRef;

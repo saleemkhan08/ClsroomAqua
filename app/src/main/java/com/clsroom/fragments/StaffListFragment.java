@@ -13,20 +13,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
 
+import com.android.volley.VolleyError;
 import com.clsroom.R;
 import com.clsroom.adapters.StaffAdapter;
 import com.clsroom.dialogs.AddOrEditStaffDialogFragment;
 import com.clsroom.dialogs.ViewStaffAttendanceDialogFragment;
 import com.clsroom.listeners.EventsListener;
 import com.clsroom.listeners.FragmentLauncher;
+import com.clsroom.listeners.ResultListener;
+import com.clsroom.model.Progress;
 import com.clsroom.model.Snack;
 import com.clsroom.model.Staff;
 import com.clsroom.model.ToastMsg;
+import com.clsroom.model.User;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.utils.TransitionUtil;
+import com.clsroom.utils.VolleyUtil;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,34 +39,43 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.squareup.otto.Subscribe;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import static com.clsroom.model.User.EMAIL_NOT_SENT;
+import static com.clsroom.model.User.EMAIL_SENT;
+import static com.clsroom.model.User.GENERATE_USER_LIST_URL;
+import static com.clsroom.model.User.INVALID_EMAIL;
+import static com.clsroom.model.User.INVALID_TOKEN;
 
 
 public class StaffListFragment extends Fragment implements EventsListener, DatePickerDialog.OnDateSetListener
 {
     private static final String TAG = NavigationUtil.STAFF_LIST_FRAGMENT;
 
-    @Bind(R.id.staffListRecyclerView)
+    @BindView(R.id.staffListRecyclerView)
     RecyclerView mStaffListRecyclerView;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
-    @Bind(R.id.fabContainer)
+    @BindView(R.id.fabContainer)
     ViewGroup mFabContainer;
 
-    @Bind(R.id.attendanceFab)
+    @BindView(R.id.attendanceFab)
     View mTakeAttendanceFab;
 
-    @Bind(R.id.savefab)
+    @BindView(R.id.savefab)
     View mSaveAttendanceFab;
 
     private DatabaseReference mRootRef;
@@ -84,29 +98,14 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
         ButterKnife.bind(this, parentView);
 
         mRootRef = FirebaseDatabase.getInstance().getReference();
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.staff);
-        }
         setUpRecyclerView();
         mDatePickerDialog = new DatePickerDialog(getActivity(), this,
                 Calendar.getInstance().get(Calendar.YEAR),
                 Calendar.getInstance().get(Calendar.MONTH),
                 Calendar.getInstance().get(Calendar.DAY_OF_MONTH));
 
-
+        refreshActionBar();
         return parentView;
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_STAFF_MENU);
-        }
     }
 
     @Override
@@ -118,6 +117,8 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
 
     private void setUpRecyclerView()
     {
+        mProgress.setVisibility(View.VISIBLE);
+        mErrorMsg.setVisibility(View.GONE);
         DatabaseReference staffDbRef = mRootRef.child(Staff.STAFF);
         mAdapter = StaffAdapter.getInstance(staffDbRef, launcher);
         mStaffListRecyclerView.setAdapter(mAdapter);
@@ -216,7 +217,7 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
         {
             onBackPressed();
             StaffAttendanceListFragment fragment = StaffAttendanceListFragment.getInstance(mAdapter.mUnSelectedStaff);
-            launcher.replaceFragment(fragment, true, StaffAttendanceListFragment.TAG);
+            launcher.addFragment(fragment, true, StaffAttendanceListFragment.TAG);
         }
         else
         {
@@ -265,6 +266,64 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
             case R.id.selectAll:
                 mAdapter.setSelectAll(staffSet);
                 break;
+            case R.id.generate_credential:
+                generateCredentialList();
+                break;
+        }
+    }
+
+    private void generateCredentialList()
+    {
+        if (NavigationUtil.isAdmin)
+        {
+            Progress.show(R.string.generating);
+            Map<String, String> data = new HashMap<>();
+            data.put(User.UID, NavigationUtil.mCurrentUser.getUserId());
+            data.put(User.CLASS_ID, "s");
+            data.put(User.CLASS_NAME, "");
+            data.put(User.TOKEN, NavigationUtil.mCurrentUser.getToken());
+
+            try
+            {
+                VolleyUtil.sendGetData(getActivity(), GENERATE_USER_LIST_URL, data, new ResultListener<String>()
+                {
+                    @Override
+                    public void onSuccess(String result)
+                    {
+                        Progress.hide();
+                        switch (result.trim())
+                        {
+                            case EMAIL_NOT_SENT:
+                                ToastMsg.show(R.string.there_was_some_issue_in_generating_user_credentials);
+                                break;
+                            case EMAIL_SENT:
+                                ToastMsg.show(R.string.list_has_been_mailed_to_your_registered_mail_id);
+                                break;
+                            case INVALID_EMAIL:
+                                ToastMsg.show(R.string.your_registered_mail_id_is_invalid);
+                                break;
+                            case INVALID_TOKEN:
+                                ToastMsg.show(R.string.you_are_not_authorized_to_generate_the_list);
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onError(VolleyError error)
+                    {
+                        Progress.hide();
+                        ToastMsg.show(R.string.you_are_not_authorized_to_generate_the_list);
+                    }
+                });
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            ToastMsg.show(R.string.you_are_not_authorized_to_generate_the_list);
         }
     }
 
@@ -297,6 +356,17 @@ public class StaffListFragment extends Fragment implements EventsListener, DateP
         {
             launcher = (FragmentLauncher) activity;
             launcher.setFragment(this);
+        }
+    }
+
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.setToolBarTitle(R.string.staff);
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.SHOW_INDEPENDENT_STAFF_MENU);
         }
     }
 }

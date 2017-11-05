@@ -1,6 +1,7 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#eee">
@@ -22,22 +23,24 @@
                 <com.clsroom.views.SquareImageView
                     android:id="@+id/profilePicture"
                     android:layout_width="250dp"
-                    android:transitionName="profileImage"
                     android:layout_height="250dp"
                     android:layout_gravity="center"
                     android:layout_marginTop="30dp"
+                    android:scaleType="centerCrop"
+                    fresco:roundAsCircle="true"
                     />
 
                 <ImageView
                     android:id="@+id/uploadProfileImg"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:clickable="true"
                     android:layout_alignParentBottom="true"
                     android:layout_centerHorizontal="true"
-                    android:padding="5dp"
                     android:background="@drawable/bg_circle_drawable"
-                    android:src="@drawable/ic_camera_alt_white_48dp"/>
+                    android:clickable="true"
+                    android:padding="5dp"
+                    android:src="@drawable/ic_camera_alt_white_48dp"
+                    android:focusable="true"/>
             </RelativeLayout>
 
             <RelativeLayout
@@ -49,26 +52,26 @@
 
                 <TextView
                     android:id="@+id/fullName"
-                    android:transitionName="profileName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignParentBottom="true"
                     android:layout_centerInParent="true"
                     android:textAppearance="?android:textAppearanceLarge"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold"
+                    android:transitionName="profileName"/>
 
                 <ImageView
+                    android:id="@+id/editName"
                     android:layout_width="40dp"
                     android:layout_height="40dp"
-                    android:paddingRight="5dp"
-                    android:paddingLeft="5dp"
-                    android:clickable="true"
-                    android:id="@+id/editName"
-                    android:layout_marginLeft="10dp"
-                    android:background="@drawable/bg_circle_drawable"
-                    android:src="@drawable/ic_edit_black_48dp"
                     android:layout_centerVertical="true"
-                    android:layout_toRightOf="@+id/fullName"/>
+                    android:layout_marginLeft="10dp"
+                    android:layout_toRightOf="@+id/fullName"
+                    android:background="@drawable/bg_circle_drawable"
+                    android:clickable="true"
+                    android:paddingLeft="5dp"
+                    android:paddingRight="5dp"
+                    android:src="@drawable/ic_edit_black_48dp"/>
             </RelativeLayout>
 
             <TextView
@@ -199,14 +202,15 @@
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
                         android:text="@string/address"/>
+
                     <TextView
                         android:id="@+id/addressValue"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:paddingLeft="30dp"
                         android:layout_marginBottom="10dp"
                         android:layout_marginLeft="10dp"
                         android:layout_marginRight="10dp"
+                        android:paddingLeft="30dp"
                         android:text="@string/address"/>
                 </LinearLayout>
 

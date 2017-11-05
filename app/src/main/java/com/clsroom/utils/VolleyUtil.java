@@ -11,18 +11,20 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.clsroom.listeners.ResultListener;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.Map;
 
 public class VolleyUtil
 {
     private static final int MY_SOCKET_TIMEOUT_MS = 10000;
 
-    public static void sendGetData(Context context, final String url, final Map<String, String> getData, final ResultListener<String> listener)
+    public static void sendGetData(Context context, final String url, final Map<String, String> getData, final ResultListener<String> listener) throws UnsupportedEncodingException
     {
         String customURL = url + "?";
         for (String key : getData.keySet())
         {
-            customURL += key + "=" + getData.get(key) + "&";
+            customURL += key + "=" + URLEncoder.encode(getData.get(key), "utf-8") + "&";
         }
         customURL = customURL.substring(0, customURL.length() - 1);
         Log.d("sendGetData", customURL);

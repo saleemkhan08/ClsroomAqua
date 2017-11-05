@@ -11,7 +11,6 @@ import com.clsroom.listeners.FragmentLauncher;
 import com.clsroom.model.Notifications;
 import com.clsroom.model.Progress;
 import com.clsroom.model.ToastMsg;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.viewholders.NotificationViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -51,8 +50,7 @@ public class NotificationsAdapter extends FirebaseRecyclerAdapter<Notifications,
     {
         Log.d("NotificationListIssue", "NotificationsAdapter populateViewHolder : " + position);
         String imageUrl = model.getSenderPhotoUrl();
-        ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.senderImage);
-
+        viewHolder.senderImage.setImageURI(imageUrl);
         viewHolder.senderName.setText(model.getSenderName());
         viewHolder.message.setText(model.getMessage());
         viewHolder.dateTime.setText(model.displayDate());
@@ -77,7 +75,7 @@ public class NotificationsAdapter extends FirebaseRecyclerAdapter<Notifications,
                     String userId = model.getLeaveRefType().equals(REQUESTED_LEAVES) ?
                             model.getSenderId() : NavigationUtil.mCurrentUser.getUserId();
 
-                    launcher.replaceFragment(LeavesFragment
+                    launcher.addFragment(LeavesFragment
                                     .getInstance(leaveId, userId, leaveRefType),
                             true, NavigationUtil.LEAVES_LIST_FRAGMENT);
                 }

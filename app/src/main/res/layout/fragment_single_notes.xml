@@ -2,7 +2,8 @@
 <RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -28,7 +29,8 @@
                     android:layout_gravity="center_vertical"
                     android:layout_margin="10dp"
                     android:scaleType="centerCrop"
-                    android:src="@mipmap/user_icon_accent"/>
+                    fresco:placeholderImage="@mipmap/user_icon_accent"
+                    fresco:roundAsCircle="true"/>
 
                 <LinearLayout
                     android:id="@+id/userInfo"

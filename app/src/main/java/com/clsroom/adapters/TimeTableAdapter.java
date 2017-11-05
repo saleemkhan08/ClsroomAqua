@@ -16,7 +16,6 @@ import com.clsroom.model.TimeTable;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
 import com.clsroom.utils.ConnectivityUtil;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.TimeTableViewHolder;
@@ -83,9 +82,7 @@ public class TimeTableAdapter extends FirebaseRecyclerAdapter<TimeTable, TimeTab
         {
             viewHolder.mItemView.setBackgroundResource(R.color.white);
             Log.d(TAG, "populateViewHolder : " + position);
-            String imageUrl = model.getTeacherPhotoUrl();
-
-            ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mTeacherImage);
+            viewHolder.mTeacherImage.setImageURI(model.getTeacherPhotoUrl());
             viewHolder.mSubjectName.setText(model.getSubjectName());
             viewHolder.mClassTeacherName.setText(model.getTeacherName());
             viewHolder.mClassTeacherName.setVisibility(View.VISIBLE);

@@ -9,8 +9,10 @@ import com.clsroom.R;
 import com.clsroom.listeners.ImageClickListener;
 import com.clsroom.model.Snack;
 import com.clsroom.utils.ConnectivityUtil;
+import com.clsroom.views.RectangleImageView;
+import com.clsroom.views.SquareImageView;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -18,81 +20,81 @@ public class NotesViewHolder extends RecyclerView.ViewHolder
 {
     private ImageClickListener mListener;
 
-    @Bind(R.id.singleImage)
-    public ImageView singleImage;
+    @BindView(R.id.singleImage)
+    public SquareImageView singleImage;
 
-    @Bind(R.id.dualImageContainer)
+    @BindView(R.id.dualImageContainer)
     public View dualImageContainer;
 
-    @Bind(R.id.dualImage1)
-    public ImageView dualImage1;
+    @BindView(R.id.dualImage1)
+    public RectangleImageView dualImage1;
 
-    @Bind(R.id.dualImage2)
-    public ImageView dualImage2;
+    @BindView(R.id.dualImage2)
+    public RectangleImageView dualImage2;
 
-    @Bind(R.id.tripleImageContainer)
+    @BindView(R.id.tripleImageContainer)
     public View tripleImageContainer;
 
-    @Bind(R.id.tripleImage1)
-    public ImageView tripleImage1;
+    @BindView(R.id.tripleImage1)
+    public SquareImageView tripleImage1;
 
-    @Bind(R.id.tripleImage2)
-    public ImageView tripleImage2;
+    @BindView(R.id.tripleImage2)
+    public SquareImageView tripleImage2;
 
-    @Bind(R.id.tripleImage3)
-    public ImageView tripleImage3;
+    @BindView(R.id.tripleImage3)
+    public RectangleImageView tripleImage3;
 
-    @Bind(R.id.quadImageContainer)
+    @BindView(R.id.quadImageContainer)
     public View quadImageContainer;
 
-    @Bind(R.id.quadImage1)
-    public ImageView quadImage1;
+    @BindView(R.id.quadImage1)
+    public SquareImageView quadImage1;
 
-    @Bind(R.id.quadImage2)
-    public ImageView quadImage2;
+    @BindView(R.id.quadImage2)
+    public SquareImageView quadImage2;
 
-    @Bind(R.id.quadImage3)
-    public ImageView quadImage3;
+    @BindView(R.id.quadImage3)
+    public SquareImageView quadImage3;
 
-    @Bind(R.id.quadImage4)
-    public ImageView quadImage4;
+    @BindView(R.id.quadImage4)
+    public SquareImageView quadImage4;
 
-    @Bind(R.id.createrImage)
-    public ImageView createrImage;
+    @BindView(R.id.createrImage)
+    public SquareImageView createrImage;
 
-    @Bind(R.id.notesTitle)
+    @BindView(R.id.notesTitle)
     public TextView notesTitle;
 
-    @Bind(R.id.createrName)
+    @BindView(R.id.createrName)
     public TextView createrName;
 
-    @Bind(R.id.optionsIconContainer)
+    @BindView(R.id.optionsIconContainer)
     public ImageView optionsIconContainer;
 
-    @Bind(R.id.additionalImageCount)
+    @BindView(R.id.additionalImageCount)
     public TextView additionalImageCount;
 
-    @Bind(R.id.notesDescription)
+    @BindView(R.id.notesDescription)
     public TextView notesDescription;
 
-    @Bind(R.id.dateTime)
+    @BindView(R.id.dateTime)
     public TextView dateTime;
 
-    @Bind(R.id.reviewButtonsContainer)
+    @BindView(R.id.reviewButtonsContainer)
     public View reviewButtonsContainer;
 
-    @Bind(R.id.approveBtn)
+    @BindView(R.id.approveBtn)
     public View approveBtn;
 
-    @Bind(R.id.rejectButton)
+    @BindView(R.id.rejectButton)
     public View rejectButton;
 
     public View mItemView;
 
-    @Bind(R.id.rejectionText)
+    @BindView(R.id.rejectionText)
     public View rejectionText;
 
-    @Bind(R.id.reviewComment)
+    @BindView(R.id.reviewComment)
     public TextView reviewComment;
 
     public NotesViewHolder(View itemView)

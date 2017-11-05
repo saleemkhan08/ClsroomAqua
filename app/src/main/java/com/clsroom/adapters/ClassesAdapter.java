@@ -6,22 +6,36 @@ import android.support.v7.widget.PopupMenu;
 import android.view.MenuItem;
 import android.view.View;
 
+import com.android.volley.VolleyError;
 import com.clsroom.R;
 import com.clsroom.dialogs.AddOrEditClassDialogFragment;
 import com.clsroom.fragments.StudentsListFragment;
 import com.clsroom.listeners.FragmentLauncher;
+import com.clsroom.listeners.ResultListener;
 import com.clsroom.model.Classes;
 import com.clsroom.model.Progress;
 import com.clsroom.model.Snack;
 import com.clsroom.model.ToastMsg;
+import com.clsroom.model.User;
 import com.clsroom.utils.ConnectivityUtil;
 import com.clsroom.utils.NavigationUtil;
+import com.clsroom.utils.VolleyUtil;
 import com.clsroom.viewholders.ClassesViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.Query;
+
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.clsroom.model.User.EMAIL_NOT_SENT;
+import static com.clsroom.model.User.EMAIL_SENT;
+import static com.clsroom.model.User.GENERATE_USER_LIST_URL;
+import static com.clsroom.model.User.INVALID_EMAIL;
+import static com.clsroom.model.User.INVALID_TOKEN;
 
 public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesViewHolder>
 {
@@ -54,7 +68,7 @@ public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesView
             @Override
             public void onClick(View view)
             {
-                launcher.replaceFragment(StudentsListFragment.getInstance(model),
+                launcher.addFragment(StudentsListFragment.getInstance(model),
                         true, NavigationUtil.STUDENTS_LIST_FRAGMENT);
             }
         });
@@ -83,6 +97,9 @@ public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesView
                             case R.id.action_delete:
                                 confirmDelete(classes);
                                 break;
+                            case R.id.generate_credential:
+                                generateCredentialList(classes);
+                                break;
 //                            case R.id.action_send_notification:
 //                                sendNotification(classes);
 //                                break;
@@ -93,6 +110,61 @@ public class ClassesAdapter extends FirebaseRecyclerAdapter<Classes, ClassesView
                 popup.show();
             }
         });
+    }
+
+    private void generateCredentialList(Classes classes)
+    {
+        if (NavigationUtil.isAdmin)
+        {
+            Progress.show(R.string.generating);
+            Map<String, String> data = new HashMap<>();
+            data.put(User.UID, NavigationUtil.mCurrentUser.getUserId());
+            data.put(User.CLASS_ID, classes.getCode());
+            data.put(User.CLASS_NAME, classes.getName());
+            data.put(User.TOKEN, NavigationUtil.mCurrentUser.getToken());
+
+            try
+            {
+                VolleyUtil.sendGetData(launcher.getActivity(), GENERATE_USER_LIST_URL, data, new ResultListener<String>()
+                {
+                    @Override
+                    public void onSuccess(String result)
+                    {
+                        Progress.hide();
+                        switch (result.trim())
+                        {
+                            case EMAIL_NOT_SENT:
+                                ToastMsg.show(R.string.there_was_some_issue_in_generating_user_credentials);
+                                break;
+                            case EMAIL_SENT:
+                                ToastMsg.show(R.string.list_has_been_mailed_to_your_registered_mail_id);
+                                break;
+                            case INVALID_EMAIL:
+                                ToastMsg.show(R.string.your_registered_mail_id_is_invalid);
+                                break;
+                            case INVALID_TOKEN:
+                                ToastMsg.show(R.string.you_are_not_authorized_to_generate_the_list);
+                                break;
+                        }
+                    }
+
+                    @Override
+                    public void onError(VolleyError error)
+                    {
+                        Progress.hide();
+                        ToastMsg.show(R.string.you_are_not_authorized_to_generate_the_list);
+                    }
+                });
+            }
+            catch (UnsupportedEncodingException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        else
+        {
+            ToastMsg.show(R.string.you_are_not_authorized_to_generate_the_list);
+        }
     }
 
     private void confirmDelete(Classes classes)

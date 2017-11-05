@@ -40,7 +40,7 @@ import com.squareup.otto.Subscribe;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
@@ -49,22 +49,22 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
 {
     private static final String TAG = NavigationUtil.STUDENTS_LIST_FRAGMENT;
 
-    @Bind(R.id.studentsListRecyclerView)
+    @BindView(R.id.studentsListRecyclerView)
     RecyclerView mStudentsListRecyclerView;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
-    @Bind(R.id.fabContainer)
+    @BindView(R.id.fabContainer)
     ViewGroup mFabContainer;
 
-    @Bind(R.id.attendanceFab)
+    @BindView(R.id.attendanceFab)
     View mTakeAttendanceFab;
 
-    @Bind(R.id.savefab)
+    @BindView(R.id.savefab)
     View mSaveAttendanceFab;
 
     private DatabaseReference mRootRef;
@@ -90,30 +90,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
         setLauncher();
 
         mRootRef = FirebaseDatabase.getInstance().getReference();
-
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.students);
-        }
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        Log.d(TAG, "onStart");
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            if (NavigationUtil.isAdmin)
-            {
-                Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_ADMIN);
-            }
-            else
-            {
-                Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_TEACHERS);
-            }
-        }
+        refreshActionBar();
     }
 
     @Override
@@ -146,6 +123,8 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
     private void setUpRecyclerView()
     {
         Log.d("TabSelectionIssue", "StudentListFragment > setUpRecyclerView > mCurrentClass : " + mCurrentClass);
+        mProgress.setVisibility(View.VISIBLE);
+        mErrorMsg.setVisibility(View.GONE);
         mStudentsDbRef = mRootRef.child(Students.STUDENTS).child(mCurrentClass.getCode());
         mClassesDbRef = mRootRef.child(Classes.CLASSES).child(mCurrentClass.getCode());
         mAdapter = StudentsAdapter.getInstance(mStudentsDbRef, launcher);
@@ -247,7 +226,7 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
             onBackPressed();
             StudentAttendanceListFragment fragment = StudentAttendanceListFragment
                     .getInstance(mAdapter.mUnSelectedStudents, mCurrentClass.getCode());
-            launcher.replaceFragment(fragment, true, StudentAttendanceListFragment.TAG);
+            launcher.addFragment(fragment, true, StudentAttendanceListFragment.TAG);
         }
         else
         {
@@ -397,5 +376,23 @@ public class StudentsListFragment extends ClassTabFragment implements EventsList
         fragment.mCurrentClass = model;
         Log.d("TabSelectionIssue", "StudentListFragment > getInstance > mCurrentClass : " + fragment.mCurrentClass);
         return fragment;
+    }
+
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            launcher.setToolBarTitle(R.string.students);
+            if (NavigationUtil.isAdmin)
+            {
+                Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_ADMIN);
+            }
+            else
+            {
+                Otto.post(ActionBarUtil.SHOW_STUDENTS_MENU_FOR_TEACHERS);
+            }
+        }
     }
 }

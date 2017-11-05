@@ -5,7 +5,6 @@ import android.view.View;
 
 import com.clsroom.R;
 import com.clsroom.model.Students;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.viewholders.StudentViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.database.DatabaseReference;
@@ -34,7 +33,7 @@ public class AttendanceFbAdapter extends FirebaseRecyclerAdapter<Students, Stude
     {
         Log.d(TAG, "populateViewHolder : " + position);
         String imageUrl = model.getPhotoUrl();
-        ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mImageView);
+        viewHolder.mImageView.setImageURI(imageUrl);
         viewHolder.mFullName.setText(model.getFullName());
         viewHolder.mUserId.setText(model.getUserId());
         viewHolder.mCheckBox.setVisibility(View.GONE);

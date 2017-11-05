@@ -24,7 +24,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 
@@ -32,13 +32,13 @@ public class NotificationListFragment extends Fragment implements EventsListener
 {
     private static final String TAG = NavigationUtil.NOTIFICATIONS_FRAGMENT;
 
-    @Bind(R.id.notificationListRecyclerView)
+    @BindView(R.id.notificationListRecyclerView)
     RecyclerView notificationListRecyclerView;
 
-    @Bind(R.id.recyclerProgress)
+    @BindView(R.id.recyclerProgress)
     View mProgress;
 
-    @Bind(R.id.errorMsg)
+    @BindView(R.id.errorMsg)
     View mErrorMsg;
 
     private DatabaseReference mRootRef;
@@ -57,23 +57,9 @@ public class NotificationListFragment extends Fragment implements EventsListener
         setLauncher();
         Log.d("NotificationListIssue", "onCreateView");
         mRootRef = FirebaseDatabase.getInstance().getReference();
-        if (launcher != null)
-        {
-            launcher.setToolBarTitle(R.string.notifications);
-        }
         setUpRecyclerView();
+        refreshActionBar();
         return parentView;
-    }
-
-    @Override
-    public void onStart()
-    {
-        super.onStart();
-        if (launcher != null)
-        {
-            launcher.updateEventsListener(this);
-            Otto.post(ActionBarUtil.NO_MENU);
-        }
     }
 
     private void setUpRecyclerView()
@@ -85,7 +71,8 @@ public class NotificationListFragment extends Fragment implements EventsListener
         notificationListRecyclerView.setAdapter(adapter);
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         notificationListRecyclerView.setLayoutManager(manager);
-
+        mProgress.setVisibility(View.VISIBLE);
+        mErrorMsg.setVisibility(View.GONE);
         notificationsDbRef.addValueEventListener(new ValueEventListener()
         {
             @Override
@@ -138,5 +125,17 @@ public class NotificationListFragment extends Fragment implements EventsListener
         {
             launcher = (FragmentLauncher) activity;
         }
+    }
+
+    @Override
+    public void refreshActionBar()
+    {
+        if (launcher != null)
+        {
+            launcher.updateEventsListener(this);
+            Otto.post(ActionBarUtil.NO_MENU);
+            launcher.setToolBarTitle(R.string.notifications);
+        }
+
     }
 }

@@ -8,7 +8,6 @@ import android.widget.CompoundButton;
 import com.clsroom.R;
 import com.clsroom.model.Students;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.StudentViewHolder;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -51,9 +50,7 @@ public class StudentsResultsAdapter extends FirebaseRecyclerAdapter<Students, St
     protected void populateViewHolder(final StudentViewHolder viewHolder, final Students model, int position)
     {
         Log.d(TAG, "populateViewHolder : " + position);
-        String imageUrl = model.getPhotoUrl();
-        ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mImageView);
-
+        viewHolder.mImageView.setImageURI(model.getPhotoUrl());
         viewHolder.mFullName.setText(model.getFullName());
         viewHolder.mUserId.setText(model.getUserId());
         Log.d(TAG, this + " : isSelectionEnabled : " + isSelectionEnabled);

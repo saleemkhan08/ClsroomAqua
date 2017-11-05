@@ -4,6 +4,10 @@ import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.TextView;
 
+import com.clsroom.R;
+import com.clsroom.model.Leaves;
+import com.clsroom.model.Progress;
+import com.clsroom.utils.NavigationUtil;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -11,12 +15,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.clsroom.R;
-import com.clsroom.model.Leaves;
-import com.clsroom.model.Progress;
-import com.clsroom.utils.NavigationUtil;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.clsroom.model.Leaves.MY_LEAVES;
@@ -27,19 +27,19 @@ public class LeavesDetailDialogFragment extends CustomDialogFragment implements 
     public static final String TAG = "LeavesDetailDialogFragment";
 
 
-    @Bind(R.id.reason)
+    @BindView(R.id.reason)
     TextView mReason;
 
-    @Bind(R.id.fromDate)
+    @BindView(R.id.fromDate)
     TextView mFromDate;
 
-    @Bind(R.id.toDate)
+    @BindView(R.id.toDate)
     TextView mToDate;
 
-    @Bind(R.id.approver)
+    @BindView(R.id.approver)
     TextView mApprover;
 
-    @Bind(R.id.status)
+    @BindView(R.id.status)
     TextView mStatus;
 
     String mUserId;

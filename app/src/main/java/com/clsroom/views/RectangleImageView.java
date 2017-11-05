@@ -2,9 +2,10 @@ package com.clsroom.views;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.widget.ImageView;
 
-public class RectangleImageView extends ImageView
+import com.facebook.drawee.view.SimpleDraweeView;
+
+public class RectangleImageView extends SimpleDraweeView
 {
 
     public RectangleImageView(Context context)

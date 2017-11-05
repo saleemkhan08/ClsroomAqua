@@ -16,26 +16,26 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class AddOrEditStaffDialogFragment extends CustomDialogFragment
 {
     public static final String TAG = "AddOrEditStaffDialogFragment";
 
-    @Bind(R.id.staffName)
+    @BindView(R.id.staffName)
     EditText mStaffName;
 
-    @Bind(R.id.staffCode)
+    @BindView(R.id.staffCode)
     EditText mStaffUserId;
 
-    @Bind(R.id.designation)
+    @BindView(R.id.designation)
     EditText mDesignation;
 
-    @Bind(R.id.qualification)
+    @BindView(R.id.qualification)
     EditText mQualification;
 
-    @Bind(R.id.isAdmin)
+    @BindView(R.id.isAdmin)
     Switch mIsAdmin;
 
     Staff mCurrentStaff;

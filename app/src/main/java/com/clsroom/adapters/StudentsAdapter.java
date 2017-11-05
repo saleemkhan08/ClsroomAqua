@@ -19,7 +19,6 @@ import com.clsroom.model.Progress;
 import com.clsroom.model.Students;
 import com.clsroom.model.ToastMsg;
 import com.clsroom.utils.ActionBarUtil;
-import com.clsroom.utils.ImageUtil;
 import com.clsroom.utils.NavigationUtil;
 import com.clsroom.utils.Otto;
 import com.clsroom.viewholders.StudentViewHolder;
@@ -65,9 +64,7 @@ public class StudentsAdapter extends FirebaseRecyclerAdapter<Students, StudentVi
     @Override
     protected void populateViewHolder(final StudentViewHolder viewHolder, final Students model, int position)
     {
-        String imageUrl = model.getPhotoUrl();
-        ImageUtil.loadCircularImg(viewHolder.itemView.getContext(), imageUrl, viewHolder.mImageView);
-
+        viewHolder.mImageView.setImageURI(model.getPhotoUrl());
         viewHolder.mFullName.setText(model.getFullName());
         viewHolder.mUserId.setText(model.getUserId());
 
